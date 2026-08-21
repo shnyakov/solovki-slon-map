@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none"
+     stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+  <title>Церковь-маяк на Секирной горе</title>
+  <!-- Самый узнаваемый силуэт лагерной Голгофы -->
+  <path d="M32 6v6"/>
+  <path d="M28 9h8"/>
+  <path d="M32 14l10 12H22z"/>
+  <path d="M24 26v18h16V26"/>
+  <path d="M8 52c8-6 14-8 24-8s16 2 24 8"/>
+</svg>

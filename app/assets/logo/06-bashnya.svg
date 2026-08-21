@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none"
+     stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+  <title>Башня Соловецкого кремля</title>
+  <path d="M32 6l14 14H18z"/>
+  <path d="M20 20v34h24V20"/>
+  <path d="M28 34h8"/>
+  <path d="M12 54h40"/>
+</svg>

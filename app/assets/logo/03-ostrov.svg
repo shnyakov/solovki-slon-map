@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Остров и метка</title>
+  <!-- Карта как способ подачи: остров в круге, на нём точка.
+       Остров именно залит — незамкнутая дуга читалась как улыбка. -->
+  <circle cx="32" cy="32" r="25" fill="none" stroke="currentColor" stroke-width="3"/>
+  <path fill="currentColor"
+        d="M20 40c-1-6 2-11 7-13 4-2 9-2 13 1 4 3 5 8 3 12-2 3-6 4-11 4s-11 0-12-4z"/>
+  <circle cx="30" cy="33" r="4.5" fill="none" stroke="currentColor"
+          stroke-width="3" stroke-linecap="round"/>
+</svg>
