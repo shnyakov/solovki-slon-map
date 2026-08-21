@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none"
+     stroke="currentColor" stroke-width="3" stroke-linecap="round">
+  <title>Крест над Белым морем</title>
+  <!-- Море, которым везли на острова, и вера над ним -->
+  <path d="M32 8v26"/>
+  <path d="M20 18h24"/>
+  <path d="M8 44c6-4 10-4 16 0s10 4 16 0 10-4 16 0"/>
+  <path d="M8 55c6-4 10-4 16 0s10 4 16 0 10-4 16 0"/>
+</svg>
