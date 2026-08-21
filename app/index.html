@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Соловки. Испытание веры. Век ХХ — места заключения священнослужителей</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ЭКРАН ПОКОЯ. Показывается при запуске и через 90 секунд бездействия -->
+<section id="idle" class="idle">
+  <p class="idle__over">Соловецкий лагерь особого назначения · 1923–1933</p>
+  <h1 class="idle__title">Испытание веры</h1>
+  <p class="idle__count"><b id="idle-total">—</b> имён священнослужителей,<br>прошедших через соловецкие лагеря</p>
+  <div class="idle__stage">
+    <p class="idle__name" id="idle-a"></p>
+    <p class="idle__name" id="idle-b"></p>
+  </div>
+  <p class="idle__hint">Коснитесь экрана</p>
+</section>
+
+<header class="top">
+  <div class="top__title">Испытание веры. Век ХХ</div>
+  <nav class="tabs">
+    <button class="tab" data-view="map">Карта</button>
+    <button class="tab" data-view="registry">Все имена</button>
+    <button class="tab" data-view="glossary">Словарь</button>
+    <button class="tab tab--staff" data-view="data" hidden>Данные</button>
+  </nav>
+</header>
+
+<main class="main">
+
+  <!-- КАРТА -->
+  <section id="view-map" class="view">
+    <div class="map">
+      <div class="map__frame" id="map-frame">
+        <div class="legend" id="legend"></div>
+        <div class="map__inner" id="map-inner">
+          <img class="map__base" id="map-base" src="assets/map-base.svg" alt="Схема Соловецкого архипелага">
+          <div class="map__points" id="map-points"></div>
+        </div>
+        <div class="zoom">
+          <button class="zoom__b" id="z-in" aria-label="Приблизить">+</button>
+          <button class="zoom__b" id="z-out" aria-label="Отдалить">&minus;</button>
+          <button class="zoom__b zoom__b--r" id="z-reset" aria-label="Сбросить масштаб">&#8634;</button>
+        </div>
+      </div>
+      <p class="map__note">Берег — <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, ODbL · метки ориентировочны</p>
+    </div>
+  </section>
+
+  <!-- РЕЕСТР -->
+  <section id="view-registry" class="view" hidden>
+    <div class="filters">
+      <input type="search" id="q" class="search" placeholder="Имя или фамилия" autocomplete="off">
+      <select id="f-rank" class="select"><option value="">Любой сан</option></select>
+      <select id="f-place" class="select"><option value="">Любое место</option></select>
+      <span class="found" id="found"></span>
+    </div>
+    <button class="unplaced" id="btn-unplaced">
+      <span class="unplaced__n">—</span>
+      <span class="unplaced__t">человек: место пребывания не установлено</span>
+    </button>
+    <ul class="list" id="list"></ul>
+  </section>
+
+  <!-- ПАНЕЛЬ МУЗЕЯ. Видна только в режиме редактора -->
+  <section id="view-data" class="view" hidden>
+    <nav class="sub" id="dt-sub">
+      <button class="sub__b" data-sub="over">Обзор</button>
+      <button class="sub__b" data-sub="pers">Персоналии</button>
+      <button class="sub__b" data-sub="plcs">Места</button>
+      <button class="sub__b" data-sub="typs">Вид меток</button>
+      <span class="sub__sp"></span>
+      <button class="edit__btn" id="dt-apply">Сохранить всё</button>
+      <button class="edit__btn" id="dt-help">Как это работает</button>
+    </nav>
+
+    <div class="sub__p" id="sub-over">
+      <div class="dt" id="dt-sum"></div>
+      <h3 class="dt__h">Требует внимания</h3>
+      <div id="dt-issues"></div>
+      <div class="dt__acts">
+        <button class="edit__btn" id="dt-save">Выгрузить places.csv</button>
+        <button class="edit__btn" id="dt-savep">Выгрузить persons.csv</button>
+        <button class="edit__btn" id="dt-report">Отчёт о полноте</button>
+      </div>
+    </div>
+
+    <div class="sub__p" id="sub-pers" hidden>
+      <div class="ed">
+        <div class="ed__list">
+          <input type="search" class="search" id="ed-q" placeholder="Поиск по имени" autocomplete="off">
+          <div class="ed__rows" id="ed-rows"></div>
+          <button class="edit__btn" id="ed-add">+ Добавить человека</button>
+        </div>
+        <div class="ed__form" id="ed-form"></div>
+      </div>
+    </div>
+
+    <div class="sub__p" id="sub-plcs" hidden>
+      <div class="ed">
+        <div class="ed__list">
+          <div class="ed__rows" id="pl-rows"></div>
+          <button class="edit__btn" id="pl-add">+ Добавить место</button>
+        </div>
+        <div class="ed__form" id="pl-form"></div>
+      </div>
+    </div>
+
+    <div class="sub__p" id="sub-typs" hidden>
+      <p class="dt__hint">Цвет и значок метки на карте. Действует на все места этого типа.</p>
+      <div id="ty-rows"></div>
+    </div>
+  </section>
+
+  <!-- СЛОВАРЬ -->
+  <section id="view-glossary" class="view" hidden>
+    <dl class="glossary" id="glossary"></dl>
+  </section>
+
+</main>
+
+<!-- РЕЖИМ РАЗМЕТКИ. Включается Ctrl+E или адресом ...index.html#edit -->
+<aside class="edit" id="edit" hidden>
+  <p class="edit__t">Режим разметки. Перетаскивайте метки по карте, затем скопируйте столбцы <code>x,y</code> в <code>data/places.csv</code> и запустите <code>build.py</code>.</p>
+  <textarea class="edit__out" id="edit-out" readonly rows="6"></textarea>
+  <div class="edit__row">
+    <button class="edit__btn" id="edit-copy">Скопировать</button>
+    <button class="edit__btn" id="edit-off">Выйти</button>
+  </div>
+</aside>
+
+<!-- ПРОСМОТР ИЗОБРАЖЕНИЯ ВО ВЕСЬ ЭКРАН -->
+<div class="lb" id="lb" hidden>
+  <button class="lb__nav lb__nav--prev" id="lb-prev" aria-label="Предыдущее">&#8249;</button>
+  <img class="lb__img" id="lb-img" alt="">
+  <button class="lb__nav lb__nav--next" id="lb-next" aria-label="Следующее">&#8250;</button>
+  <p class="lb__cap" id="lb-cap"></p>
+  <button class="lb__close" id="lb-close" aria-label="Закрыть">&times;</button>
+</div>
+
+<!-- ПАНЕЛЬ КАРТОЧКИ -->
+<aside class="panel" id="panel" hidden>
+  <button class="panel__close" id="panel-close" aria-label="Закрыть">×</button>
+  <div class="panel__body" id="panel-body"></div>
+</aside>
+<div class="scrim" id="scrim" hidden></div>
+
+<script src="data/data.js"></script>
+<script src="assets/icons.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
