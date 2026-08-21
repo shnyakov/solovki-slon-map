@@ -1117,44 +1117,101 @@
     var t = TYPES[(z.type || "").trim()];
     return t && t.color ? t.color : "#888";
   }
+  function zoneCenter(z) {
+    if (z.shape !== "poly" || !z.points.length) return { x: z.x, y: z.y, ry: z.ry };
+    var sx = 0, sy = 0, my = 0;
+    z.points.forEach(function (p) { sx += p[0]; sy += p[1]; if (p[1] > my) my = p[1]; });
+    var cx = sx / z.points.length, cy = sy / z.points.length;
+    return { x: cx, y: cy, ry: my - cy };
+  }
 
   function renderZones() {
     $("#zones").innerHTML = D.zones.map(function (z) {
+      var sel = edZone === z.id ? ' class="is-on"' : "";
+      var col = ' fill="' + esc(zoneColor(z)) + '"';
+      if (z.shape === "poly") {
+        if (z.points.length < 3) return "";
+        return '<polygon data-zone="' + z.id + '" points="' +
+          z.points.map(function (p) { return p[0] + "," + p[1]; }).join(" ") + '"' + col + sel + "/>";
+      }
       return '<ellipse data-zone="' + z.id + '" cx="' + z.x + '" cy="' + z.y +
-        '" rx="' + z.rx + '" ry="' + z.ry + '" fill="' + esc(zoneColor(z)) + '"' +
-        (edZone === z.id ? ' class="is-on"' : "") + "/>";
+        '" rx="' + z.rx + '" ry="' + z.ry + '"' + col + sel + "/>";
     }).join("");
-    // Подписи отдельным слоем: SVG растянут неравномерно, текст в нём поехал бы
-    $("#zlabels").innerHTML = D.zones.filter(function (z) { return z.label; })
-      .map(function (z) {
-        // Под эллипсом, а не в центре: в центре стоят метки мест
-        return '<span class="zlab" style="left:' + z.x + '%;top:' + (z.y + z.ry) + '%">' +
-          esc(z.label) + "</span>";
+
+    // Подписи и вершины — обычным HTML: слой SVG растянут неравномерно,
+    // текст в нём деформируется, а кружки вершин стали бы эллипсами.
+    var html = D.zones.filter(function (z) { return z.label; }).map(function (z) {
+      var c = zoneCenter(z);
+      return '<span class="zlab" style="left:' + c.x + '%;top:' + (c.y + c.ry) + '%">' +
+        esc(z.label) + "</span>";
+    }).join("");
+
+    var sel = D.zones.filter(function (z) { return z.id === edZone; })[0];
+    if (editing && sel && sel.shape === "poly") {
+      html += sel.points.map(function (p, i) {
+        return '<span class="zdot" data-vx="' + i + '" style="left:' + p[0] +
+          "%;top:" + p[1] + '%"></span>';
       }).join("");
+    }
+    $("#zlabels").innerHTML = html;
+    $("#zlabels").style.pointerEvents = (editing && sel && sel.shape === "poly") ? "auto" : "none";
   }
 
-  // Перетаскивание зоны прямо по карте — размеры задаются в форме
-  var dragZone = null;
+  /* ---- работа с геометрией на карте ---- */
+
+  var dragZone = null, dragVx = -1, drawing = null;
+
+  function mapPct(e) {
+    var r = inner.getBoundingClientRect();
+    if (!r.width || !r.height) return null;    // карта скрыта другой вкладкой
+    return { x: +clamp((e.clientX - r.left) / r.width * 100, 0, 100).toFixed(2),
+             y: +clamp((e.clientY - r.top) / r.height * 100, 0, 100).toFixed(2) };
+  }
+
+  // перетаскивание вершины
+  $("#zlabels").addEventListener("pointerdown", function (e) {
+    var d = e.target.closest("[data-vx]");
+    if (!editing || !d) return;
+    e.preventDefault(); e.stopPropagation();
+    dragVx = +d.dataset.vx;
+  });
+  $("#zlabels").addEventListener("pointermove", function (e) {
+    if (dragVx < 0) return;
+    var z = D.zones.filter(function (x) { return x.id === edZone; })[0], p = mapPct(e);
+    if (!z || !p) return;
+    z.points[dragVx] = [p.x, p.y];
+    z.geo = "";                                 // геометрию правили руками
+    renderZones();
+  });
+  $("#zlabels").addEventListener("pointerup", function () { dragVx = -1; });
+
+  // обводка: каждое нажатие добавляет вершину
   $("#zones").addEventListener("pointerdown", function (e) {
     if (!editing) return;
+    if (drawing) {
+      var z = D.zones.filter(function (x) { return x.id === drawing; })[0], p = mapPct(e);
+      if (z && p) {
+        e.preventDefault();
+        z.points.push([p.x, p.y]);
+        z.geo = "";
+        renderZones(); renderZoneForm();
+      }
+      return;
+    }
     var el = e.target.closest("[data-zone]");
     if (!el) return;
-    e.preventDefault();
-    e.stopPropagation();
-    dragZone = D.zones.filter(function (z) { return z.id === el.dataset.zone; })[0];
-    edZone = dragZone ? dragZone.id : null;
-    renderZones();
-    renderZoneList();
-    renderZoneForm();
+    e.preventDefault(); e.stopPropagation();
+    var zz = D.zones.filter(function (x) { return x.id === el.dataset.zone; })[0];
+    edZone = zz ? zz.id : null;
+    if (zz && zz.shape !== "poly") dragZone = zz;   // пятно тащим целиком
+    renderZones(); renderZoneList(); renderZoneForm();
   });
   $("#zones").addEventListener("pointermove", function (e) {
     if (!dragZone) return;
-    var r = inner.getBoundingClientRect();
-    if (!r.width || !r.height) return;   // карта скрыта другой вкладкой — тащить нечего
-    dragZone.x = +clamp((e.clientX - r.left) / r.width * 100, 0, 100).toFixed(1);
-    dragZone.y = +clamp((e.clientY - r.top) / r.height * 100, 0, 100).toFixed(1);
-    renderZones();
-    renderZoneForm();
+    var p = mapPct(e);
+    if (!p) return;
+    dragZone.x = p.x; dragZone.y = p.y;
+    renderZones(); renderZoneForm();
   });
   $("#zones").addEventListener("pointerup", function () { dragZone = null; });
 
@@ -1188,28 +1245,64 @@
       return '<option value="' + esc(t.type) + '"' + (t.type === z.type ? " selected" : "") +
         ">" + esc(t.label || t.type) + "</option>";
     }).join("");
+    var poly = z.shape === "poly";
+    var geom = poly
+      ? fld("вершины", '<span class="fld__v">' + z.points.length + " шт." +
+            (z.geo ? " · заданы координатами" : "") + "</span>",
+            "нажимайте по карте, чтобы добавлять; тащите точки, чтобы двигать") +
+        '<div class="fld"><span class="fld__k"></span><div class="dt__acts">' +
+        '<button class="edit__btn" data-zdraw="' + z.id + '">' +
+        (drawing === z.id ? "Закончить обводку" : "Обводить по карте") + "</button>" +
+        '<button class="edit__btn" data-zundo="' + z.id + '">Убрать точку</button></div></div>'
+      : fld("ширина, %", '<input data-k="rx" type="number" step="0.5" value="' + z.rx + '">') +
+        fld("высота, %", '<input data-k="ry" type="number" step="0.5" value="' + z.ry + '">');
+
     $("#zn-form").innerHTML =
       fld("подпись", '<input data-k="label" value="' + esc(z.label) + '">',
           "видна на карте под зоной. Пусто — зона без подписи") +
       fld("вид работ", '<select data-k="type">' + opts + "</select>",
           "цвет зоны берётся отсюда, из раздела «Оформление»") +
-      fld("ширина, %", '<input data-k="rx" type="number" step="0.5" value="' + z.rx + '">') +
-      fld("высота, %", '<input data-k="ry" type="number" step="0.5" value="' + z.ry + '">') +
+      fld("форма", '<select data-k="shape">' +
+          '<option value="ellipse"' + (poly ? "" : " selected") + ">пятно</option>" +
+          '<option value="poly"' + (poly ? " selected" : "") + ">многоугольник</option></select>",
+          "пятно — быстрая схематичная разметка; многоугольник — точный контур") +
+      geom +
       fld("примечание", '<input data-k="note" value="' + esc(z.note || "") + '">',
           "откуда взята геометрия: исходник музея, GPS на местности") +
-      '<p class="fld__hint" style="grid-column:1/-1">Положение — перетаскиванием на карте: ' +
-      "x " + z.x + " y " + z.y + " · " +
-      '<button class="ed__del" data-zdel="' + z.id + '">удалить зону</button></p>';
+      '<p class="fld__hint" style="grid-column:1/-1">' +
+      (poly ? "Контур правится на вкладке «Карта»."
+            : "Положение — перетаскиванием на карте: x " + z.x + " y " + z.y) +
+      ' · <button class="ed__del" data-zdel="' + z.id + '">удалить зону</button></p>';
 
     $("#zn-form").oninput = function (e) {
       var k = e.target.dataset.k;
       if (!k) return;
       z[k] = (k === "rx" || k === "ry") ? (parseFloat(e.target.value) || 1) : e.target.value;
+      if (k === "shape") {
+        if (z.shape === "poly" && !z.points.length) {
+          // стартовый треугольник вокруг прежнего пятна, чтобы было что тащить
+          z.points = [[z.x - z.rx, z.y + z.ry], [z.x, z.y - z.ry], [z.x + z.rx, z.y + z.ry]];
+        }
+        renderZoneForm();
+      }
       renderZones();
       renderZoneList();
     };
     $("#zn-form").onclick = function (e) {
-      if (!e.target.dataset.zdel) return;
+      var t = e.target;
+      if (t.dataset.zdraw) {
+        drawing = (drawing === z.id) ? null : z.id;
+        if (drawing) showView("map");     // обводить можно только на карте
+        renderZoneForm(); renderZones();
+        return;
+      }
+      if (t.dataset.zundo) {
+        z.points.pop();
+        z.geo = "";
+        renderZones(); renderZoneForm();
+        return;
+      }
+      if (!t.dataset.zdel) return;
       if (!confirm("Удалить зону «" + (z.label || z.id) + "»?")) return;
       D.zones.splice(D.zones.indexOf(z), 1);
       edZone = null;
@@ -1221,17 +1314,19 @@
     var n = 1;
     while (D.zones.filter(function (z) { return z.id === "Z" + n; }).length) n++;
     var t = typesOf("zone")[0];
-    var z = { id: "Z" + n, type: t ? t.type : "", label: "Новая зона",
-              x: 50, y: 50, rx: 8, ry: 6, note: "" };
+    var z = { id: "Z" + n, type: t ? t.type : "", label: "Новая зона", shape: "ellipse",
+              x: 50, y: 50, rx: 8, ry: 6, points: [], geo: "", note: "" };
     D.zones.push(z);
     edZone = z.id;
     renderZones(); renderZoneList(); renderZoneForm();
   };
 
   function zonesCsv() {
-    var lines = ["id,type,label,x,y,rx,ry,note"];
+    var lines = ["id,type,label,shape,x,y,rx,ry,points,geo,note"];
     D.zones.forEach(function (z) {
-      lines.push([z.id, csvCell(z.type), csvCell(z.label), z.x, z.y, z.rx, z.ry,
+      var pts = (z.points || []).map(function (p) { return p[0] + "," + p[1]; }).join(";");
+      lines.push([z.id, csvCell(z.type), csvCell(z.label), z.shape || "ellipse",
+                  z.x, z.y, z.rx, z.ry, csvCell(pts), csvCell(z.geo || ""),
                   csvCell(z.note || "")].join(","));
     });
     return lines.join("\n");

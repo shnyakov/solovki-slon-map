@@ -101,9 +101,14 @@ def read_zones():
 
     Геометрия хранится в процентах от габаритов подложки — так же, как метки,
     поэтому от замены карты и от пропорций экрана не зависит.
-    Таблица заведена пустой намеренно: обводить зоны по растровой карте музея
-    на глаз — значит выдумать геометрию и выдать её за музейную. Рисуются
-    в режиме редактора либо переносятся из векторного исходника музея.
+    Две формы:
+      shape=ellipse — пятно, задаётся x/y/rx/ry. Быстро, для схематичной разметки.
+      shape=poly    — многоугольник, задаётся points: «x,y;x,y;…» в процентах.
+
+    Колонка geo — те же вершины в широте и долготе: «lat,lon;lat,lon;…».
+    Если она заполнена, make_map.py пересчитывает из неё points тем же
+    меркатором, каким проецируется береговая линия. Тогда зона привязана
+    к местности, а не к картинке, и переживает замену подложки.
     """
     path = os.path.join(HERE, "zones.csv")
     if not os.path.exists(path):
@@ -113,11 +118,24 @@ def read_zones():
         for r in csv.DictReader(f):
             if not r.get("id"):
                 continue
+            pts = []
+            for pair in (r.get("points") or "").split(";"):
+                pair = pair.strip()
+                if not pair:
+                    continue
+                try:
+                    a, bb = pair.split(",")
+                    pts.append([round(float(a), 2), round(float(bb), 2)])
+                except ValueError:
+                    continue
             try:
                 out.append({
                     "id": r["id"], "type": r.get("type", ""), "label": r.get("label", ""),
+                    "shape": (r.get("shape") or "ellipse").strip(),
                     "x": float(r.get("x") or 50), "y": float(r.get("y") or 50),
                     "rx": float(r.get("rx") or 8), "ry": float(r.get("ry") or 8),
+                    "points": pts,
+                    "geo": (r.get("geo") or "").strip(),
                     "note": r.get("note", ""),
                 })
             except ValueError:
