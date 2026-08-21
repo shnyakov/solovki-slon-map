@@ -9,8 +9,12 @@
      нужно ДО первой отрисовки, иначе экран мигнёт чужим оформлением. -->
 <script src="data/data.js"></script>
 <script>
-  document.documentElement.setAttribute(
-    "data-theme", ((window.DATA || {}).settings || {}).theme || "light");
+  (function () {
+    var local = null;
+    try { local = localStorage.getItem("okoyom-theme"); } catch (e) {}
+    document.documentElement.setAttribute(
+      "data-theme", local || ((window.DATA || {}).settings || {}).theme || "light");
+  })();
 </script>
 </head>
 <body>
@@ -119,7 +123,9 @@
 
     <div class="sub__p" id="sub-typs" hidden>
       <h3 class="dt__h">Тема</h3>
-      <p class="dt__hint">Выбирается один раз под освещение зала. Посетитель тему не переключает.</p>
+      <p class="dt__hint">Выбирается один раз под освещение зала. Посетитель тему не переключает.
+        Выбор запоминается в этом браузере сразу; «Сохранить всё» делает его
+        умолчанием для всех копий приложения.</p>
       <div class="thm" id="thm"></div>
 
       <h3 class="dt__h" style="margin-top:.8em">Вид меток</h3>
