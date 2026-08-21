@@ -116,7 +116,13 @@ button{cursor:pointer; border:0; background:none}
 .map__base{width:100%; height:100%; display:block; opacity:.85; pointer-events:none}
 /* isolation создаёт свой контекст наложения: z-index меток считается внутри
    карты и не может пробиться поверх заставки или панели карточки. */
-.map__points{position:absolute; inset:0; isolation:isolate}
+.map__points{
+  position:absolute; inset:0; isolation:isolate;
+  /* Слой накрывает всю карту и лежит поверх зон. Если он ловит нажатия,
+     до зон и до пустой карты под ним не добраться вообще. Ловят только метки. */
+  pointer-events:none;
+}
+.pt{pointer-events:auto}
 
 .zoom{position:absolute; right:.6em; bottom:.6em; display:flex; flex-direction:column; gap:.3em}
 .zoom__b{
