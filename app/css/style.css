@@ -396,3 +396,19 @@ button{cursor:pointer; border:0; background:none}
                      border:1px solid var(--line); border-radius:4px; padding:.3em .5em}
 .ty select{background:var(--bg); color:var(--ink); border:1px solid var(--line);
            border-radius:4px; padding:.3em .5em}
+
+/* ---------- Выбор темы в панели музея ---------- */
+.thm{display:flex; gap:.6em; flex-wrap:wrap}
+.thm__b{
+  display:flex; align-items:center; gap:.6em; text-align:left;
+  border:1px solid var(--line); border-radius:6px; padding:.5em .8em; min-width:15em;
+}
+.thm__b:hover{border-color:var(--accent)}
+.thm__b.is-on{border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent)}
+.thm__b b{font-weight:600}
+.thm__b small{display:block; font-size:.78em; color:var(--ink-dim); font-weight:400}
+.thm__sw{
+  width:26px; height:26px; border-radius:5px; flex:0 0 auto; border:1px solid var(--line);
+}
+.thm__sw--light{background:linear-gradient(135deg,#f5f2ec 50%,#8a672c 50%)}
+.thm__sw--dark{background:linear-gradient(135deg,#14181a 50%,#b08a4a 50%)}

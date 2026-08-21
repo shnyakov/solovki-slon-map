@@ -251,10 +251,17 @@
   var lastK = -1;                       // масштаб, на котором собраны группы
   var frame = $("#map-frame"), inner = $("#map-inner"), baseImg = $("#map-base");
 
-  // Цвета карты зашиты внутрь SVG, поэтому под светлую тему подставляем свой файл
-  if (document.documentElement.getAttribute("data-theme") === "light") {
-    baseImg.src = "assets/map-base-light.svg";
+  // Тема живёт в данных (settings.theme), а не в разметке: иначе сотруднику музея
+  // пришлось бы править index.html руками. Цвета карты зашиты внутрь SVG —
+  // CSS до них не достаёт, поэтому подложка подменяется файлом.
+  function applyTheme(name) {
+    D.settings = D.settings || {};
+    D.settings.theme = name;
+    document.documentElement.setAttribute("data-theme", name);
+    var want = name === "light" ? "assets/map-base-light.svg" : "assets/map-base.svg";
+    if (baseImg.getAttribute("src") !== want) baseImg.src = want;
   }
+  applyTheme((D.settings || {}).theme || "light");
 
   function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
 
@@ -718,7 +725,7 @@
     if (name === "over") renderOverview();
     if (name === "pers") { renderPersonList(); renderPersonForm(); }
     if (name === "plcs") { renderPlaceList(); renderPlaceForm(); }
-    if (name === "typs") renderTypes();
+    if (name === "typs") { renderThemes(); renderTypes(); }
   }
   $("#dt-sub").onclick = function (e) {
     var b = e.target.closest("[data-sub]");
@@ -1006,6 +1013,25 @@
 
   /* ---- вид меток ---- */
 
+  var THEMES = [["light", "Светлая", "для светлого зала и дневного света"],
+                ["dark", "Тёмная", "для затемнённого зала и подсветки витрин"]];
+
+  function renderThemes() {
+    var now = (D.settings || {}).theme || "light";
+    $("#thm").innerHTML = THEMES.map(function (t) {
+      return '<button class="thm__b' + (t[0] === now ? " is-on" : "") + '" data-th="' + t[0] + '">' +
+        '<span class="thm__sw thm__sw--' + t[0] + '"></span>' +
+        "<b>" + esc(t[1]) + "</b><small>" + esc(t[2]) + "</small></button>";
+    }).join("");
+  }
+  $("#thm").onclick = function (e) {
+    var b = e.target.closest("[data-th]");
+    if (!b) return;
+    applyTheme(b.dataset.th);
+    renderThemes();
+    renderTypes();
+  };
+
   function renderTypes() {
     var icons = Object.keys(window.ICONS || {});
     $("#ty-rows").innerHTML = (D.types || []).map(function (t, i) {
@@ -1067,6 +1093,12 @@
     });
     return lines.join("\n");
   }
+  function settingsCsv() {
+    var s = D.settings || {};
+    return "key,value\n" + Object.keys(s).map(function (k) {
+      return csvCell(k) + "," + csvCell(s[k]);
+    }).join("\n");
+  }
   function typesCsv() {
     var lines = ["type,label,color,icon"];
     (D.types || []).forEach(function (t) {
@@ -1098,9 +1130,10 @@
     setTimeout(function () { download("persons.csv", personsCsv()); }, 400);
     setTimeout(function () { download("places.csv", placesCsv()); }, 800);
     setTimeout(function () { download("types.csv", typesCsv()); }, 1200);
-    alert("Скачано четыре файла.\n\n" +
+    setTimeout(function () { download("settings.csv", settingsCsv()); }, 1600);
+    alert("Скачано пять файлов.\n\n" +
       "1. data.js — положите в папку app/data вместо старого.\n" +
-      "2. persons.csv, places.csv, types.csv — туда же.\n\n" +
+      "2. persons.csv, places.csv, types.csv, settings.csv — туда же.\n\n" +
       "После этого обновите страницу.");
   };
 
@@ -1109,7 +1142,7 @@
       "ОБЗОР — что в данных не заполнено. Нажмите на строку, чтобы увидеть, кого это касается.\n\n" +
       "ПЕРСОНАЛИИ — найдите человека в списке слева и правьте справа. Места отмечаются галочками.\n\n" +
       "МЕСТА — описание, тип, вложенность, фотография. Положение метки двигается на самой карте.\n\n" +
-      "ВИД МЕТОК — цвет и значок для каждого типа мест.\n\n" +
+      "ОФОРМЛЕНИЕ — тема (светлая или тёмная) и вид меток: цвет и значок по типу места.\n\n" +
       "Фотографию можно просто выбрать файлом, она уменьшится сама.\n\n" +
       "Когда закончили — «Сохранить всё» и положите скачанные файлы в папку app/data.");
   };
