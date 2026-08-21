@@ -412,3 +412,29 @@ button{cursor:pointer; border:0; background:none}
 }
 .thm__sw--light{background:linear-gradient(135deg,#f5f2ec 50%,#8a672c 50%)}
 .thm__sw--dark{background:linear-gradient(135deg,#14181a 50%,#b08a4a 50%)}
+
+/* ---------- Список мест под картой (вертикальный экран) ---------- */
+/* На широком экране скрыт: там карта занимает всю площадь и список не нужен.
+   На вертикальном киоске карта неизбежно вытягивается в полосу — содержимое
+   карты широкое (от Кеми до Анзера), экран узкий, — и снизу остаётся пустая
+   вода. Отдаём её навигации: заодно цели крупнее, что для пальца лучше. */
+.plist{display:none}
+@media (max-aspect-ratio: 1/1) {
+  #view-map{padding:0 0 var(--pad)}
+  /* Полоса по пропорциям содержимого вместо растянутой рамки с пустой водой */
+  .map__frame{flex:0 0 auto; aspect-ratio:16/9}
+  .plist{
+    display:flex; flex-direction:column; gap:.35em; flex:1 1 auto; min-height:0;
+    padding:var(--pad); overflow-y:auto;
+  }
+  .plist__b{
+    display:flex; align-items:center; gap:.8em; text-align:left; width:100%;
+    border:1px solid var(--line); border-radius:8px; padding:.7em .9em;
+  }
+  .plist__b:hover{border-color:var(--accent)}
+  .plist__d{
+    width:38px; height:38px; border-radius:50%; flex:0 0 auto; color:#fff;
+    display:grid; place-items:center; font-weight:600;
+  }
+  .plist__t{font-size:.8em; color:var(--ink-dim); margin-left:auto}
+}

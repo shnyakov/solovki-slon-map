@@ -57,8 +57,12 @@
           <button class="zoom__b" id="z-out" aria-label="Отдалить">&minus;</button>
           <button class="zoom__b zoom__b--r" id="z-reset" aria-label="Сбросить масштаб">&#8634;</button>
         </div>
+        <p class="map__note">Берег — <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, ODbL · метки ориентировочны</p>
       </div>
-      <p class="map__note">Берег — <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, ODbL · метки ориентировочны</p>
+      <!-- Список мест под картой. Показывается только на вертикальном экране:
+           там карта неизбежно вытягивается в полосу, и снизу остаётся пустая
+           вода на треть высоты — лучше отдать её навигации. -->
+      <div class="plist" id="plist"></div>
     </div>
   </section>
 
