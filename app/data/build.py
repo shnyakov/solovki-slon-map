@@ -96,6 +96,35 @@ def read_settings():
     return out
 
 
+def read_zones():
+    """Зоны работ: мягкие эллипсы поверх карты, цвет берётся от типа.
+
+    Геометрия хранится в процентах от габаритов подложки — так же, как метки,
+    поэтому от замены карты и от пропорций экрана не зависит.
+    Таблица заведена пустой намеренно: обводить зоны по растровой карте музея
+    на глаз — значит выдумать геометрию и выдать её за музейную. Рисуются
+    в режиме редактора либо переносятся из векторного исходника музея.
+    """
+    path = os.path.join(HERE, "zones.csv")
+    if not os.path.exists(path):
+        return []
+    out = []
+    with io.open(path, encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            if not r.get("id"):
+                continue
+            try:
+                out.append({
+                    "id": r["id"], "type": r.get("type", ""), "label": r.get("label", ""),
+                    "x": float(r.get("x") or 50), "y": float(r.get("y") or 50),
+                    "rx": float(r.get("rx") or 8), "ry": float(r.get("ry") or 8),
+                    "note": r.get("note", ""),
+                })
+            except ValueError:
+                continue
+    return out
+
+
 def read_types():
     """Вид метки по типу места: цвет и значок. Правится в types.csv или в панели музея."""
     path = os.path.join(HERE, "types.csv")
@@ -286,6 +315,7 @@ def main():
         "credits": read_credits(),
         "settings": read_settings(),
         "types": read_types(),
+        "zones": read_zones(),
         "meta": {
             "total": len(persons),
             "placed": len(placed),

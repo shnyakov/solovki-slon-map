@@ -438,3 +438,20 @@ button{cursor:pointer; border:0; background:none}
   }
   .plist__t{font-size:.8em; color:var(--ink-dim); margin-left:auto}
 }
+
+/* ---------- Зоны работ ---------- */
+.zones{
+  position:absolute; inset:0; width:100%; height:100%;
+  pointer-events:none;            /* посетителю зоны не мешают попадать по меткам */
+}
+.zones ellipse{opacity:.28}
+.zlabels{position:absolute; inset:0; pointer-events:none}
+.zlab{
+  position:absolute; transform:translate(-50%,-50%); white-space:nowrap;
+  font-size:.74em; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--ink); opacity:.55; text-shadow:0 1px 4px var(--bg), 0 0 3px var(--bg);
+}
+/* В режиме разметки зоны становятся хватаемыми */
+.is-edit .zones{pointer-events:auto}
+.is-edit .zones ellipse{cursor:move; opacity:.38}
+.is-edit .zones ellipse.is-on{stroke:var(--ink); stroke-width:.5; stroke-dasharray:1.5 1}
