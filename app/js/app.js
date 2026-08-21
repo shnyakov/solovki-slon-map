@@ -670,6 +670,7 @@
     $("#edit").hidden = !(on && $("#view-map") && !$("#view-map").hidden);
     document.querySelector(".tab--staff").hidden = !on;
     document.body.classList.toggle("is-edit", on);
+    if (!on) { drawing = null; document.body.classList.remove("is-draw"); }
     if (on) renderStaff();
     else if (!$("#view-data").hidden) showView("map");
     var pts = inner.querySelectorAll(".pt");
@@ -743,7 +744,11 @@
   inner.addEventListener("pointerup", function () { dragPt = null; });
 
   inner.addEventListener("click", function (e) {
-    if (editing && !e.target.closest(".pt")) addPlace(e.clientX, e.clientY);
+    if (!editing) return;
+    if (zoneHit) { zoneHit = false; return; }   // нажатие ушло в зону или вершину
+    if (drawing) return;                        // идёт обводка контура
+    if (e.target.closest(".pt")) return;        // нажатие по метке
+    addPlace(e.clientX, e.clientY);
   });
 
   /* ---------------- реестр ---------------- */
@@ -1154,12 +1159,14 @@
       }).join("");
     }
     $("#zlabels").innerHTML = html;
-    $("#zlabels").style.pointerEvents = (editing && sel && sel.shape === "poly") ? "auto" : "none";
   }
 
   /* ---- работа с геометрией на карте ---- */
 
   var dragZone = null, dragVx = -1, drawing = null;
+  // Нажатие по зоне или вершине всплывает дальше и попадает в обработчик,
+  // который заводит новое место. Помечаем такие нажатия и пропускаем их.
+  var zoneHit = false;
 
   function mapPct(e) {
     var r = inner.getBoundingClientRect();
@@ -1173,6 +1180,7 @@
     var d = e.target.closest("[data-vx]");
     if (!editing || !d) return;
     e.preventDefault(); e.stopPropagation();
+    zoneHit = true;
     dragVx = +d.dataset.vx;
   });
   $("#zlabels").addEventListener("pointermove", function (e) {
@@ -1192,6 +1200,7 @@
       var z = D.zones.filter(function (x) { return x.id === drawing; })[0], p = mapPct(e);
       if (z && p) {
         e.preventDefault();
+        zoneHit = true;
         z.points.push([p.x, p.y]);
         z.geo = "";
         renderZones(); renderZoneForm();
@@ -1201,6 +1210,7 @@
     var el = e.target.closest("[data-zone]");
     if (!el) return;
     e.preventDefault(); e.stopPropagation();
+    zoneHit = true;
     var zz = D.zones.filter(function (x) { return x.id === el.dataset.zone; })[0];
     edZone = zz ? zz.id : null;
     if (zz && zz.shape !== "poly") dragZone = zz;   // пятно тащим целиком
@@ -1292,6 +1302,7 @@
       var t = e.target;
       if (t.dataset.zdraw) {
         drawing = (drawing === z.id) ? null : z.id;
+        document.body.classList.toggle("is-draw", !!drawing);
         if (drawing) showView("map");     // обводить можно только на карте
         renderZoneForm(); renderZones();
         return;
