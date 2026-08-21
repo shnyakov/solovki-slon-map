@@ -83,6 +83,19 @@ def find_xlsx():
     sys.exit(u"Не найден %s. Укажите путь: python3 build.py /путь/к/файлу.xlsx" % XLSX_NAME)
 
 
+def read_settings():
+    """Настройки киоска: пока только тема оформления. Правится в панели музея."""
+    path = os.path.join(HERE, "settings.csv")
+    out = {"theme": "light"}
+    if not os.path.exists(path):
+        return out
+    with io.open(path, encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            if r.get("key"):
+                out[r["key"]] = r.get("value", "")
+    return out
+
+
 def read_types():
     """Вид метки по типу места: цвет и значок. Правится в types.csv или в панели музея."""
     path = os.path.join(HERE, "types.csv")
@@ -271,6 +284,7 @@ def main():
 
     data = {
         "credits": read_credits(),
+        "settings": read_settings(),
         "types": read_types(),
         "meta": {
             "total": len(persons),
