@@ -81,8 +81,50 @@ def stitch(ways):
             cg += segs[nxt][1][1:]
             if cn[-1] == cn[0]:
                 break
-        rings.append((cn[0] == cn[-1], cg))
-    return rings
+        rings.append((cn[0] == cn[-1], cn, cg))
+
+    # Второй проход: сшиваем сами цепи. За один проход куски берега соединяются
+    # не всегда: если продолжение уже израсходовано в другую цепь, она остаётся
+    # оборванной посреди карты, и её край потом дорисовывается прямой линией.
+    #
+    # Обход начинаем только с НАСТОЯЩИХ начал — цепей, чьё первое звено не является
+    # ничьим концом. Иначе всё решает порядок в файле: цепь, обработанная первой,
+    # занимает место, и присоединиться к ней уже нельзя.
+    closed = [r for r in rings if r[0]]
+    opened = [(cn, cg) for cl, cn, cg in rings if not cl]
+    start = {}
+    tails = set()
+    for i, (cn, _) in enumerate(opened):
+        start.setdefault(cn[0], []).append(i)
+        tails.add(cn[-1])
+    used = [False] * len(opened)
+    out = []
+
+    def grow(i):
+        used[i] = True
+        cn, cg = list(opened[i][0]), list(opened[i][1])
+        while cn[0] != cn[-1]:
+            nxt = None
+            for j in start.get(cn[-1], []):
+                if not used[j]:
+                    nxt = j
+                    break
+            if nxt is None:
+                break
+            used[nxt] = True
+            cn += opened[nxt][0][1:]
+            cg += opened[nxt][1][1:]
+        out.append((cn[0] == cn[-1], cn, cg))
+
+    for i, (cn, _) in enumerate(opened):      # сначала настоящие начала
+        if not used[i] and cn[0] not in tails:
+            grow(i)
+    for i in range(len(opened)):              # затем всё, что осталось (кольца)
+        if not used[i]:
+            grow(i)
+    rings = closed + out
+
+    return [(cl, cg) for cl, cn, cg in rings]
 
 
 def dp(p, tol):
@@ -157,6 +199,13 @@ def main():
             # прямоугольные заплаты у края листа. Оставляем только длинные линии —
             # то есть собственно материк.
             if len(p) < 60:
+                continue
+            # Страховка: если конец обрывка не на кромке листа, значит это не берег,
+            # уходящий за рамку, а обрубок посреди карты. Дорисовывать его до края
+            # нельзя — получится прямая линия поперёк суши.
+            def to_edge(q):
+                return min(q[0], W - q[0], q[1], H - q[1])
+            if max(to_edge(p[0]), to_edge(p[-1])) > 1.0:
                 continue
             # Уводим контур на боковой обрез листа с той стороны, где лежит суша,
             # и возвращаемся вдоль него: материк заливается до края, а не срезается
