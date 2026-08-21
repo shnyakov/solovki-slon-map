@@ -463,6 +463,12 @@
   var TYPES = {};
   (D.types || []).forEach(function (t) { TYPES[t.type] = t; });
 
+  // Две разные таксономии: типы мест и виды работ. Смешивать нельзя —
+  // это ответы на разные вопросы, и у музея они разными легендами.
+  function typesOf(kind) {
+    return (D.types || []).filter(function (t) { return (t.kind || "place") === kind; });
+  }
+
   function typeOf(p) {
     return TYPES[(p.type || "").trim()] || null;
   }
@@ -566,10 +572,26 @@
       if (t) used[t.type] = t;
     });
     var items = Object.keys(used).map(function (k) { return used[k]; });
-    $("#legend").innerHTML = items.length < 2 ? "" : items.map(function (t) {
-      return '<span class="legend__i"><span class="legend__d" style="background:' +
-        esc(t.color) + '">' + iconSvg(t.icon, "pt__ic") + "</span>" + esc(t.label || t.type) + "</span>";
-    }).join("");
+
+    // Виды работ — отдельной группой и только если зоны действительно есть
+    var zused = {};
+    D.zones.forEach(function (z) {
+      var t = TYPES[(z.type || "").trim()];
+      if (t) zused[t.type] = t;
+    });
+    var zitems = Object.keys(zused).map(function (k) { return zused[k]; });
+
+    function line(t, zone) {
+      return '<span class="legend__i"><span class="legend__d' + (zone ? " legend__d--z" : "") +
+        '" style="background:' + esc(t.color) + '">' +
+        (zone ? "" : iconSvg(t.icon, "pt__ic")) + "</span>" + esc(t.label || t.type) + "</span>";
+    }
+    var html = items.length < 2 ? "" : items.map(function (t) { return line(t, false); }).join("");
+    if (zitems.length) {
+      html += '<span class="legend__h">Работы</span>' +
+        zitems.map(function (t) { return line(t, true); }).join("");
+    }
+    $("#legend").innerHTML = html;
   }
 
   // Карточка группы: перечень слипшихся мест с числами
@@ -1004,7 +1026,7 @@
       $("#pl-form").innerHTML = '<p class="ed__empty">Выберите место в списке слева.</p>';
       return;
     }
-    var typeOpts = (D.types || []).map(function (t) {
+    var typeOpts = typesOf("place").map(function (t) {
       return '<option value="' + esc(t.type) + '"' +
         (t.type === p.type ? " selected" : "") + ">" + esc(t.label || t.type) + "</option>";
     }).join("");
@@ -1162,7 +1184,7 @@
       $("#zn-form").innerHTML = '<p class="ed__empty">Выберите зону слева или добавьте новую.</p>';
       return;
     }
-    var opts = (D.types || []).map(function (t) {
+    var opts = typesOf("zone").map(function (t) {
       return '<option value="' + esc(t.type) + '"' + (t.type === z.type ? " selected" : "") +
         ">" + esc(t.label || t.type) + "</option>";
     }).join("");
@@ -1198,7 +1220,7 @@
   $("#zn-add").onclick = function () {
     var n = 1;
     while (D.zones.filter(function (z) { return z.id === "Z" + n; }).length) n++;
-    var t = (D.types || [])[0];
+    var t = typesOf("zone")[0];
     var z = { id: "Z" + n, type: t ? t.type : "", label: "Новая зона",
               x: 50, y: 50, rx: 8, ry: 6, note: "" };
     D.zones.push(z);
