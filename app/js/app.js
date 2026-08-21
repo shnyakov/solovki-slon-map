@@ -628,7 +628,31 @@
      Нужен, когда карту заменят на изображение и координаты перестанут
      считаться из широты и долготы. Включение: Ctrl+E или #edit в адресе. */
 
-  var editing = false, dragPt = null;
+  var editing = false, dragPt = null, editMode = "places";
+
+  // Правится что-то одно: метки или зоны. Иначе два слоя спорят за одну
+  // площадь карты, и нажатие уходит не туда — на этом уже обжигались.
+  function setMode(m) {
+    editMode = m;
+    zoneHit = false;
+    document.body.classList.toggle("is-places", m === "places");
+    document.body.classList.toggle("is-zones", m === "zones");
+    document.querySelectorAll("[data-mode]").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(b.dataset.mode === m));
+    });
+    if (m !== "zones" && drawing) {
+      drawing = null;
+      document.body.classList.remove("is-draw");
+    }
+    $("#edit-t").innerHTML = m === "places"
+      ? "Правка меток. Перетаскивайте метки по карте, нажатие по пустому месту заводит новую. Зоны сейчас не трогаются."
+      : "Правка зон. Перетаскивайте зону или её вершины; обводка включается в панели. Метки сейчас не трогаются.";
+    renderZones();
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-mode]");
+    if (b) setMode(b.dataset.mode);
+  });
 
   function editOut() {
     var moved = "id,x,y\n" + D.places.map(function (p) {
@@ -671,7 +695,7 @@
     document.querySelector(".tab--staff").hidden = !on;
     document.body.classList.toggle("is-edit", on);
     if (!on) { drawing = null; document.body.classList.remove("is-draw"); }
-    if (on) renderStaff();
+    if (on) { setMode(editMode); renderStaff(); }
     else if (!$("#view-data").hidden) showView("map");
     var pts = inner.querySelectorAll(".pt");
     for (var i = 0; i < pts.length; i++) pts[i].classList.toggle("pt--edit", on);
@@ -721,7 +745,7 @@
   };
 
   inner.addEventListener("pointerdown", function (e) {
-    if (!editing) return;
+    if (!editing || editMode !== "places") return;
     var el = e.target.closest(".pt");
     if (!el) return;
     e.preventDefault();
@@ -744,10 +768,13 @@
   inner.addEventListener("pointerup", function () { dragPt = null; });
 
   inner.addEventListener("click", function (e) {
-    if (!editing) return;
-    if (zoneHit) { zoneHit = false; return; }   // нажатие ушло в зону или вершину
-    if (drawing) return;                        // идёт обводка контура
-    if (e.target.closest(".pt")) return;        // нажатие по метке
+    // Флаг снимаем всегда, даже когда выходим раньше: иначе он доживёт
+    // до смены режима и съест первое нажатие уже по меткам.
+    var hit = zoneHit;
+    zoneHit = false;
+    if (!editing || editMode !== "places") return;
+    if (hit) return;
+    if (e.target.closest(".pt")) return;
     addPlace(e.clientX, e.clientY);
   });
 
@@ -816,8 +843,8 @@
     });
     if (name === "over") renderOverview();
     if (name === "pers") { renderPersonList(); renderPersonForm(); }
-    if (name === "plcs") { renderPlaceList(); renderPlaceForm(); }
-    if (name === "zons") { renderZoneList(); renderZoneForm(); }
+    if (name === "plcs") { setMode("places"); renderPlaceList(); renderPlaceForm(); }
+    if (name === "zons") { setMode("zones"); renderZoneList(); renderZoneForm(); }
     if (name === "typs") { renderThemes(); renderTypes(); }
   }
   $("#dt-sub").onclick = function (e) {
@@ -1152,7 +1179,7 @@
     }).join("");
 
     var sel = D.zones.filter(function (z) { return z.id === edZone; })[0];
-    if (editing && sel && sel.shape === "poly") {
+    if (editing && editMode === "zones" && sel && sel.shape === "poly") {
       html += sel.points.map(function (p, i) {
         return '<span class="zdot" data-vx="' + i + '" style="left:' + p[0] +
           "%;top:" + p[1] + '%"></span>';
@@ -1178,7 +1205,7 @@
   // перетаскивание вершины
   $("#zlabels").addEventListener("pointerdown", function (e) {
     var d = e.target.closest("[data-vx]");
-    if (!editing || !d) return;
+    if (!editing || editMode !== "zones" || !d) return;
     e.preventDefault(); e.stopPropagation();
     zoneHit = true;
     dragVx = +d.dataset.vx;
@@ -1195,7 +1222,7 @@
 
   // обводка: каждое нажатие добавляет вершину
   $("#zones").addEventListener("pointerdown", function (e) {
-    if (!editing) return;
+    if (!editing || editMode !== "zones") return;
     if (drawing) {
       var z = D.zones.filter(function (x) { return x.id === drawing; })[0], p = mapPct(e);
       if (z && p) {
@@ -1303,6 +1330,7 @@
       if (t.dataset.zdraw) {
         drawing = (drawing === z.id) ? null : z.id;
         document.body.classList.toggle("is-draw", !!drawing);
+        if (drawing) setMode("zones");
         if (drawing) showView("map");     // обводить можно только на карте
         renderZoneForm(); renderZones();
         return;
@@ -1452,24 +1480,137 @@
     download("отчёт-о-полноте.csv", lines.join("\n"));
   };
 
-  // «Сохранить всё»: приложение само пересобирает data.js из того, что в памяти,
-  // и заодно отдаёт три таблицы — чтобы правки пережили пересборку скриптом.
-  $("#dt-apply").onclick = function () {
+  /* ---- сохранение ---- */
+  /* Браузер умеет писать в папку напрямую, если пользователь один раз её выбрал.
+     Папка запоминается в IndexedDB, поэтому спрашивают только в первый раз.
+     Где API недоступен (не Chrome) — откат на скачивание файлов. */
+
+  var dirHandle = null;
+  var CAN_WRITE = typeof window.showDirectoryPicker === "function";
+
+  function idbOpen() {
+    return new Promise(function (res, rej) {
+      var r = indexedDB.open("okoyom", 1);
+      r.onupgradeneeded = function () { r.result.createObjectStore("h"); };
+      r.onsuccess = function () { res(r.result); };
+      r.onerror = function () { rej(r.error); };
+    });
+  }
+  function idbGet(k) {
+    return idbOpen().then(function (db) {
+      return new Promise(function (res) {
+        var q = db.transaction("h").objectStore("h").get(k);
+        q.onsuccess = function () { res(q.result || null); };
+        q.onerror = function () { res(null); };
+      });
+    }).catch(function () { return null; });
+  }
+  function idbPut(k, v) {
+    return idbOpen().then(function (db) {
+      db.transaction("h", "readwrite").objectStore("h").put(v, k);
+    }).catch(function () {});
+  }
+
+  function files() {
+    return {
+      "data.js": "// Файл собран панелью музея " + new Date().toISOString().slice(0, 10) +
+                 "\n// Правки сделаны в приложении.\nwindow.DATA = " +
+                 JSON.stringify(D, null, 1) + ";\n",
+      "persons.csv": personsCsv(),
+      "places.csv": placesCsv(),
+      "types.csv": typesCsv(),
+      "settings.csv": settingsCsv(),
+      "zones.csv": zonesCsv()
+    };
+  }
+
+  function allow(h) {
+    return h.queryPermission({ mode: "readwrite" }).then(function (p) {
+      return p === "granted" ? p : h.requestPermission({ mode: "readwrite" });
+    }).then(function (p) { return p === "granted"; });
+  }
+
+  function pickDir() {
+    return window.showDirectoryPicker({ mode: "readwrite" }).then(function (h) {
+      // Проверяем, что выбрали именно папку данных, а не что попало
+      return h.getFileHandle("places.csv").then(function () {
+        dirHandle = h;
+        return idbPut("dataDir", h).then(function () { return h; });
+      }, function () {
+        alert("В этой папке нет places.csv.\n\nНужно выбрать папку app/data " +
+              "внутри папки приложения.");
+        return null;
+      });
+    }, function () { return null; });      // пользователь закрыл выбор
+  }
+
+  function writeAll(h) {
+    var f = files(), names = Object.keys(f);
+    return names.reduce(function (chain, name) {
+      return chain.then(function () {
+        return h.getFileHandle(name, { create: true })
+          .then(function (fh) { return fh.createWritable(); })
+          .then(function (w) {
+            return w.write(new Blob(["﻿" + f[name]])).then(function () { return w.close(); });
+          });
+      });
+    }, Promise.resolve()).then(function () { return names.length; });
+  }
+
+  function downloadAll() {
+    var f = files(), i = 0;
+    Object.keys(f).forEach(function (name) {
+      setTimeout(function () {
+        download(name, f[name], name === "data.js" ? "application/javascript" : "text/csv");
+      }, i++ * 400);
+    });
+    alert("Скачано шесть файлов.\n\nПоложите их все в папку app/data вместо старых " +
+          "и обновите страницу.\n\nЧтобы сохранять сразу в папку, откройте приложение " +
+          "в Chrome — там браузер умеет писать в файлы.");
+  }
+
+  function saveAll() {
     recount();
-    var text = "// Файл собран панелью музея " + new Date().toISOString().slice(0, 10) + "\n" +
-      "// Положите его в app/data вместо старого — правки применятся.\n" +
-      "window.DATA = " + JSON.stringify(D, null, 1) + ";\n";
-    download("data.js", text, "application/javascript");
-    setTimeout(function () { download("persons.csv", personsCsv()); }, 400);
-    setTimeout(function () { download("places.csv", placesCsv()); }, 800);
-    setTimeout(function () { download("types.csv", typesCsv()); }, 1200);
-    setTimeout(function () { download("settings.csv", settingsCsv()); }, 1600);
-    setTimeout(function () { download("zones.csv", zonesCsv()); }, 2000);
-    alert("Скачано шесть файлов.\n\n" +
-      "1. data.js — положите в папку app/data вместо старого.\n" +
-      "2. persons.csv, places.csv, types.csv, settings.csv, zones.csv — туда же.\n\n" +
-      "После этого обновите страницу.");
+    if (!CAN_WRITE) return downloadAll();
+    var btn = $("#dt-apply"), was = btn.textContent;
+    btn.textContent = "Сохраняю…";
+    (dirHandle ? Promise.resolve(dirHandle) : idbGet("dataDir"))
+      .then(function (h) {
+        if (!h) return pickDir();
+        return allow(h).then(function (okp) { return okp ? (dirHandle = h) : pickDir(); });
+      })
+      .then(function (h) {
+        if (!h) { btn.textContent = was; return null; }
+        return writeAll(h).then(function (n) {
+          btn.textContent = was;
+          $("#dt-where").textContent = "Сохраняется в выбранную папку";
+          alert("Сохранено, файлов: " + n + ".\n\nОбновите страницу, чтобы увидеть " +
+                "результат так, как его увидит посетитель.");
+        });
+      })
+      .catch(function (err) {
+        btn.textContent = was;
+        alert("Не удалось записать в папку: " + err.message + "\n\nСкачаю файлы, " +
+              "положите их в app/data вручную.");
+        downloadAll();
+      });
+  }
+
+  $("#dt-apply").onclick = saveAll;
+  $("#dt-dir").onclick = function () {
+    if (!CAN_WRITE) { alert("Этот браузер не умеет писать в папку. Файлы будут скачиваться."); return; }
+    pickDir().then(function (h) {
+      $("#dt-where").textContent = h ? "Сохраняется в выбранную папку" : "Папка не выбрана";
+    });
   };
+
+  if (CAN_WRITE) {
+    idbGet("dataDir").then(function (h) {
+      if (h) $("#dt-where").textContent = "Папка запомнена — сохранение в один клик";
+    });
+  } else {
+    $("#dt-where").textContent = "Браузер не умеет писать в папку: файлы будут скачиваться";
+  }
 
   $("#dt-help").onclick = function () {
     alert("Панель музея\n\n" +
@@ -1479,7 +1620,9 @@
       "ЗОНЫ РАБОТ — где какие работы велись. Добавьте зону и перетащите её на карте.\n\n" +
       "ОФОРМЛЕНИЕ — тема (светлая или тёмная) и вид меток: цвет и значок по типу места.\n\n" +
       "Фотографию можно просто выбрать файлом, она уменьшится сама.\n\n" +
-      "Когда закончили — «Сохранить всё» и положите скачанные файлы в папку app/data.");
+      "СОХРАНЕНИЕ. Нажмите «Сохранить всё». В первый раз браузер попросит выбрать " +
+      "папку app/data внутри папки приложения — выберите её и разрешите запись. " +
+      "Дальше всё сохраняется одной кнопкой, папка запоминается.");
   };
 
   function renderStaff() { showSub(subNow); }

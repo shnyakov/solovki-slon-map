@@ -96,6 +96,8 @@
       <button class="sub__b" data-sub="typs">Оформление</button>
       <span class="sub__sp"></span>
       <button class="edit__btn" id="dt-apply">Сохранить всё</button>
+      <button class="edit__btn" id="dt-dir" title="Выбрать папку app/data">Папка…</button>
+      <span class="dt__where" id="dt-where">Папка не выбрана</span>
       <button class="edit__btn" id="dt-help">Как это работает</button>
     </nav>
 
@@ -169,10 +171,14 @@
 
 <!-- РЕЖИМ РАЗМЕТКИ. Включается Ctrl+E или адресом ...index.html#edit -->
 <aside class="edit" id="edit" hidden>
-  <p class="edit__t">Режим разметки. Перетаскивайте метки по карте, затем скопируйте столбцы <code>x,y</code> в <code>data/places.csv</code> и запустите <code>build.py</code>.</p>
+  <p class="edit__t" id="edit-t"></p>
   <textarea class="edit__out" id="edit-out" readonly rows="6"></textarea>
   <div class="edit__row">
-    <button class="edit__btn" id="edit-copy">Скопировать</button>
+    <span class="edit__lbl">Правлю:</span>
+    <button class="edit__btn edit__btn--m" data-mode="places">Метки мест</button>
+    <button class="edit__btn edit__btn--m" data-mode="zones">Зоны работ</button>
+    <span class="sub__sp"></span>
+    <button class="edit__btn" id="edit-copy">Скопировать координаты меток</button>
     <button class="edit__btn" id="edit-off">Выйти</button>
   </div>
 </aside>

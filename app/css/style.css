@@ -481,3 +481,18 @@ button{cursor:pointer; border:0; background:none}
 }
 .zdot:hover{background:var(--accent)}
 .fld__v{font-size:.9em; padding-top:.45em; display:block}
+
+/* ---------- Разделение правки: метки или зоны ---------- */
+/* Одновременно правится что-то одно. Неактивный слой гасится и перестаёт
+   ловить нажатия — иначе они спорят за одну и ту же площадь карты. */
+.edit__lbl{font-size:.85em; color:var(--ink-dim)}
+.edit__btn--m[aria-pressed="true"]{background:var(--accent); color:var(--accent-in); border-color:var(--accent)}
+
+body.is-zones .map__points{opacity:.3}
+body.is-zones .pt{pointer-events:none}
+body.is-places .zones{opacity:.45}
+body.is-places .zones ellipse,
+body.is-places .zones polygon{pointer-events:none; cursor:default}
+body.is-places .zdot{display:none}
+
+.dt__where{font-size:.78em; color:var(--ink-dim); align-self:center}
