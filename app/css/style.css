@@ -450,7 +450,7 @@ button{cursor:pointer; border:0; background:none}
   position:absolute; inset:0; width:100%; height:100%;
   pointer-events:none;            /* посетителю зоны не мешают попадать по меткам */
 }
-.zones ellipse{opacity:.28}
+.zones ellipse,.zones polygon{opacity:.28}
 .zlabels{position:absolute; inset:0; pointer-events:none}
 .zlab{
   position:absolute; transform:translate(-50%,-50%); white-space:nowrap;
@@ -459,5 +459,13 @@ button{cursor:pointer; border:0; background:none}
 }
 /* В режиме разметки зоны становятся хватаемыми */
 .is-edit .zones{pointer-events:auto}
-.is-edit .zones ellipse{cursor:move; opacity:.38}
-.is-edit .zones ellipse.is-on{stroke:var(--ink); stroke-width:.5; stroke-dasharray:1.5 1}
+.is-edit .zones ellipse,.is-edit .zones polygon{cursor:move; opacity:.38}
+.is-edit .zones .is-on{stroke:var(--ink); stroke-width:.5; stroke-dasharray:1.5 1}
+/* Вершина многоугольника — обычный div: в растянутом SVG кружок стал бы эллипсом */
+.zdot{
+  position:absolute; width:13px; height:13px; margin:-7px 0 0 -7px;
+  border-radius:50%; background:var(--bg); border:2px solid var(--accent);
+  cursor:move; touch-action:none;
+}
+.zdot:hover{background:var(--accent)}
+.fld__v{font-size:.9em; padding-top:.45em; display:block}

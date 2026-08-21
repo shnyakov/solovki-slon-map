@@ -279,7 +279,41 @@ def main():
         w.writeheader()
         w.writerows(rows)
 
+    # Зоны с настоящими координатами проецируются тем же меркатором, что и берег:
+    # тогда они привязаны к местности, а не к картинке, и переживают замену подложки.
+    zpath = os.path.join(HERE, "zones.csv")
+    zdone = 0
+    if os.path.exists(zpath):
+        zrows = list(csv.DictReader(io.open(zpath, encoding="utf-8")))
+        if zrows:
+            zf = list(zrows[0].keys())
+            for r in zrows:
+                geo = (r.get("geo") or "").strip()
+                if not geo:
+                    continue
+                pts = []
+                for pair in geo.split(";"):
+                    pair = pair.strip()
+                    if not pair:
+                        continue
+                    try:
+                        la, lo = [float(v) for v in pair.split(",")]
+                    except ValueError:
+                        continue
+                    x, y = to_pct(la, lo)
+                    pts.append("%.2f,%.2f" % (x, y))
+                if pts:
+                    r["points"] = ";".join(pts)
+                    r["shape"] = "poly"
+                    zdone += 1
+            with io.open(zpath, "w", encoding="utf-8", newline="") as f:
+                w = csv.DictWriter(f, fieldnames=zf)
+                w.writeheader()
+                w.writerows(zrows)
+
     print(u"Контуров суши: %d, озёр: %d, лист 100x%.0f" % (len(lands), len(lakes), H))
+    if zdone:
+        print(u"Зон пересчитано из координат: %d" % zdone)
     print(u"SVG: %d файла по %.0f КБ (тёмный и светлый)" % (len(THEMES), os.path.getsize(out) / 1024.0))
     print(u"places.csv: пересчитано меток — %d" % moved)
     print(u"Дальше: cd .. && python3 build.py")
