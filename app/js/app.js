@@ -254,14 +254,25 @@
   // Тема живёт в данных (settings.theme), а не в разметке: иначе сотруднику музея
   // пришлось бы править index.html руками. Цвета карты зашиты внутрь SVG —
   // CSS до них не достаёт, поэтому подложка подменяется файлом.
-  function applyTheme(name) {
+  var THEME_KEY = "okoyom-theme";
+
+  function applyTheme(name, remember) {
     D.settings = D.settings || {};
     D.settings.theme = name;
     document.documentElement.setAttribute("data-theme", name);
     var want = name === "light" ? "assets/map-base-light.svg" : "assets/map-base.svg";
     if (baseImg.getAttribute("src") !== want) baseImg.src = want;
+    // Запоминаем в браузере: иначе выбор слетал бы при каждом обновлении страницы,
+    // пока сотрудник не выгрузит файлы. settings.csv остаётся умолчанием
+    // для свежей копии приложения на другой машине.
+    if (remember) {
+      try { localStorage.setItem(THEME_KEY, name); } catch (e) {}
+    }
   }
-  applyTheme((D.settings || {}).theme || "light");
+
+  var savedTheme = null;
+  try { savedTheme = localStorage.getItem(THEME_KEY); } catch (e) {}
+  applyTheme(savedTheme || (D.settings || {}).theme || "light", false);
 
   function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
 
@@ -1027,7 +1038,7 @@
   $("#thm").onclick = function (e) {
     var b = e.target.closest("[data-th]");
     if (!b) return;
-    applyTheme(b.dataset.th);
+    applyTheme(b.dataset.th, true);
     renderThemes();
     renderTypes();
   };
