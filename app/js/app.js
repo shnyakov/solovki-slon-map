@@ -289,7 +289,7 @@
     fitW = fw;
     fitH = fw * ih / iw;
     lastK = -1;      // размер карты изменился — группы пересобрать заново
-    apply();
+    resetZoom();     // и заново подобрать вид под область с метками
   }
 
   // Зум — это ширина и высота, а не transform. SVG и текст перерисовываются
@@ -368,7 +368,35 @@
     apply();
   }
 
-  function resetZoom() { k = 1; tx = 0; ty = 0; apply(); }
+  // Вид по умолчанию подгоняется под ОБЛАСТЬ С МЕТКАМИ, а не под весь лист.
+  // Лист шире и выше, чем нужно: по краям пустое море. На широком экране это
+  // терпимо, на вертикальном киоске карта превращалась в тонкую полосу
+  // с пустой водой сверху и снизу на две трети высоты.
+  function defaultView() {
+    var pts = mapped();
+    if (!pts.length || !fitW) return { k: 1, tx: 0, ty: 0 };
+    var x0 = 100, x1 = 0, y0 = 100, y1 = 0;
+    pts.forEach(function (p) {
+      if (p.x < x0) x0 = p.x;
+      if (p.x > x1) x1 = p.x;
+      if (p.y < y0) y0 = p.y;
+      if (p.y > y1) y1 = p.y;
+    });
+    var PADX = 7, PADY = 9;            // запас под кружки и подписи
+    x0 -= PADX; x1 += PADX; y0 -= PADY; y1 += PADY;
+    var fw = frame.clientWidth, fh = frame.clientHeight;
+    var kx = fw / (fitW * (x1 - x0) / 100);
+    var ky = fh / (fitH * (y1 - y0) / 100);
+    var k0 = clamp(Math.min(kx, ky), K_MIN, K_MAX);
+    var cx = (x0 + x1) / 200, cy = (y0 + y1) / 200;
+    return { k: k0, tx: (0.5 - cx) * fitW * k0, ty: (0.5 - cy) * fitH * k0 };
+  }
+
+  function resetZoom() {
+    var v = defaultView();
+    k = v.k; tx = v.tx; ty = v.ty;
+    apply();
+  }
 
   function zoomCenter(f) {
     var r = frame.getBoundingClientRect();
@@ -514,6 +542,23 @@
     relabel();
   }
 
+  // Дублирует метки карты списком: на вертикальном экране это основной способ
+  // добраться до места, потому что сама карта там мелкая.
+  function renderPlaceStrip() {
+    var list = mapped().slice().sort(function (a, b) { return b.count - a.count; });
+    $("#plist").innerHTML = list.map(function (p) {
+      var ty = typeOf(p);
+      return '<button class="plist__b" data-place="' + p.id + '">' +
+        '<span class="plist__d" style="background:' + (ty && ty.color ? esc(ty.color) : "var(--accent)") +
+        '">' + p.count + "</span><span>" + esc(p.name) + "</span>" +
+        '<span class="plist__t">' + esc(ty ? (ty.label || ty.type) : p.type) + "</span></button>";
+    }).join("");
+    $("#plist").onclick = function (e) {
+      var b = e.target.closest("[data-place]");
+      if (b && !editing) showPlace(b.dataset.place);
+    };
+  }
+
   function renderLegend() {
     var used = {};
     mapped().forEach(function (p) {
@@ -551,6 +596,7 @@
     buildPoints();
     $("#btn-unplaced").querySelector(".unplaced__n").textContent = D.meta.unplaced;
     renderLegend();
+    renderPlaceStrip();
     if (baseImg.complete) layout(); else apply();
   }
 
