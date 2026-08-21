@@ -276,13 +276,18 @@
 
   function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
 
-  // Размер при k=1: картинка вписывается в рамку целиком, без полей внутри слоя.
-  // Слой ровно по картинке — поэтому проценты x/y попадают в нужные точки.
+  // Карта подгоняется ПО ШИРИНЕ, а не вписывается целиком.
+  // Причина в самой карте: суша (материковый берег) доходит до западной кромки,
+  // а север и юг — открытое море. Поле сбоку обрывало бы материк ровной
+  // вертикалью посреди воды; поле сверху и снизу просто сливается с морем,
+  // потому что рамка покрашена в тот же цвет.
+  // Закрывать кадр целиком тоже нельзя: на вертикальном экране обрезало бы
+  // Кемь, а это 24 человека.
   function layout() {
     var fw = frame.clientWidth, fh = frame.clientHeight;
     var iw = baseImg.naturalWidth || 1, ih = baseImg.naturalHeight || 1;
-    if (fw / fh > iw / ih) { fitH = fh; fitW = fh * iw / ih; }
-    else                   { fitW = fw; fitH = fw * ih / iw; }
+    fitW = fw;
+    fitH = fw * ih / iw;
     lastK = -1;      // размер карты изменился — группы пересобрать заново
     apply();
   }
@@ -403,7 +408,8 @@
     if (pinchFrom && ids.length === 2) {
       var a = ptrs[ids[0]], b = ptrs[ids[1]];
       zoomAt((a.x + b.x) / 2, (a.y + b.y) / 2, (dist(a, b) / pinchFrom.d) * pinchFrom.k / k);
-    } else if (panFrom && k > 1) {
+    } else if (panFrom && (fitW * k > frame.clientWidth + 1 ||
+                           fitH * k > frame.clientHeight + 1)) {
       tx = panFrom.tx + (e.clientX - panFrom.x);
       ty = panFrom.ty + (e.clientY - panFrom.y);
       apply();
