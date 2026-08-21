@@ -346,6 +346,12 @@ button{cursor:pointer; border:0; background:none}
   display:inline-block;
 }
 .legend__d .pt__ic{right:-4px; bottom:-4px; width:12px; height:12px}
+/* Зона в легенде — мягкое пятно, как на карте, а не кружок метки */
+.legend__d--z{border-radius:50%; opacity:.45; width:18px; height:12px}
+.legend__h{
+  margin-top:.35em; padding-top:.35em; border-top:1px solid var(--line);
+  font-size:.9em; opacity:.7;
+}
 
 /* ---------- Разделы панели музея ---------- */
 .sub{display:flex; gap:.4em; align-items:center; flex:0 0 auto; flex-wrap:wrap}
