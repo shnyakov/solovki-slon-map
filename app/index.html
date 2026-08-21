@@ -50,6 +50,11 @@
         <div class="legend" id="legend"></div>
         <div class="map__inner" id="map-inner">
           <img class="map__base" id="map-base" src="assets/map-base.svg" alt="Схема Соловецкого архипелага">
+          <!-- Зоны работ. preserveAspectRatio="none" и viewBox 0..100 нарочно:
+               так координаты зон — те же проценты, что у меток. -->
+          <svg class="zones" id="zones" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+          <!-- Подписи зон — обычным HTML: внутри растянутого SVG текст деформируется -->
+          <div class="zlabels" id="zlabels"></div>
           <div class="map__points" id="map-points"></div>
         </div>
         <div class="zoom">
@@ -87,6 +92,7 @@
       <button class="sub__b" data-sub="over">Обзор</button>
       <button class="sub__b" data-sub="pers">Персоналии</button>
       <button class="sub__b" data-sub="plcs">Места</button>
+      <button class="sub__b" data-sub="zons">Зоны работ</button>
       <button class="sub__b" data-sub="typs">Оформление</button>
       <span class="sub__sp"></span>
       <button class="edit__btn" id="dt-apply">Сохранить всё</button>
@@ -122,6 +128,22 @@
           <button class="edit__btn" id="pl-add">+ Добавить место</button>
         </div>
         <div class="ed__form" id="pl-form"></div>
+      </div>
+    </div>
+
+    <div class="sub__p" id="sub-zons" hidden>
+      <p class="dt__hint">Зоны показывают, <b>где какие работы</b> велись — вторая половина
+        брифа наряду с местами заключения. Мягкое пятно поверх карты, цвет берётся от типа.
+        <br>Добавьте зону и задайте размер здесь, затем перейдите на вкладку
+        <b>«Карта»</b> — там зона перетаскивается мышью или пальцем. Таблица пустая намеренно: обводить зоны по растровой карте музея
+        на глаз нельзя, это выдуманная геометрия. Переносите с векторного исходника
+        или размечайте на местности.</p>
+      <div class="ed">
+        <div class="ed__list">
+          <div class="ed__rows" id="zn-rows"></div>
+          <button class="edit__btn" id="zn-add">+ Добавить зону</button>
+        </div>
+        <div class="ed__form" id="zn-form"></div>
       </div>
     </div>
 

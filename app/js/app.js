@@ -597,6 +597,7 @@
     $("#btn-unplaced").querySelector(".unplaced__n").textContent = D.meta.unplaced;
     renderLegend();
     renderPlaceStrip();
+    renderZones();
     if (baseImg.complete) layout(); else apply();
   }
 
@@ -646,6 +647,7 @@
     editing = on;
     $("#edit").hidden = !(on && $("#view-map") && !$("#view-map").hidden);
     document.querySelector(".tab--staff").hidden = !on;
+    document.body.classList.toggle("is-edit", on);
     if (on) renderStaff();
     else if (!$("#view-data").hidden) showView("map");
     var pts = inner.querySelectorAll(".pt");
@@ -779,7 +781,7 @@
 
   function showSub(name) {
     subNow = name;
-    ["over", "pers", "plcs", "typs"].forEach(function (s) {
+    ["over", "pers", "plcs", "zons", "typs"].forEach(function (s) {
       $("#sub-" + s).hidden = s !== name;
     });
     document.querySelectorAll(".sub__b").forEach(function (b) {
@@ -788,6 +790,7 @@
     if (name === "over") renderOverview();
     if (name === "pers") { renderPersonList(); renderPersonForm(); }
     if (name === "plcs") { renderPlaceList(); renderPlaceForm(); }
+    if (name === "zons") { renderZoneList(); renderZoneForm(); }
     if (name === "typs") { renderThemes(); renderTypes(); }
   }
   $("#dt-sub").onclick = function (e) {
@@ -1074,6 +1077,144 @@
     recount(); renderPlaceList(); renderPlaceForm();
   };
 
+  /* ---------------- зоны работ ---------------- */
+  /* Показывают, ГДЕ КАКИЕ РАБОТЫ велись: вторая половина брифа наряду
+     с местами заключения. Мягкий эллипс поверх карты, цвет — от типа места.
+     Геометрия в процентах от габаритов подложки, как и метки, поэтому
+     не зависит ни от замены карты, ни от пропорций экрана.
+
+     Эллипс, а не многоугольник, выбран нарочно: на карте-схеме музея зоны
+     нарисованы такими же мягкими пятнами, а обводить контуры пальцем
+     на киоске невозможно. Если музей отдаст векторный исходник — можно
+     будет заменить на настоящие полигоны, модель к этому готова. */
+
+  D.zones = D.zones || [];
+  var edZone = null;
+
+  function zoneColor(z) {
+    var t = TYPES[(z.type || "").trim()];
+    return t && t.color ? t.color : "#888";
+  }
+
+  function renderZones() {
+    $("#zones").innerHTML = D.zones.map(function (z) {
+      return '<ellipse data-zone="' + z.id + '" cx="' + z.x + '" cy="' + z.y +
+        '" rx="' + z.rx + '" ry="' + z.ry + '" fill="' + esc(zoneColor(z)) + '"' +
+        (edZone === z.id ? ' class="is-on"' : "") + "/>";
+    }).join("");
+    // Подписи отдельным слоем: SVG растянут неравномерно, текст в нём поехал бы
+    $("#zlabels").innerHTML = D.zones.filter(function (z) { return z.label; })
+      .map(function (z) {
+        // Под эллипсом, а не в центре: в центре стоят метки мест
+        return '<span class="zlab" style="left:' + z.x + '%;top:' + (z.y + z.ry) + '%">' +
+          esc(z.label) + "</span>";
+      }).join("");
+  }
+
+  // Перетаскивание зоны прямо по карте — размеры задаются в форме
+  var dragZone = null;
+  $("#zones").addEventListener("pointerdown", function (e) {
+    if (!editing) return;
+    var el = e.target.closest("[data-zone]");
+    if (!el) return;
+    e.preventDefault();
+    e.stopPropagation();
+    dragZone = D.zones.filter(function (z) { return z.id === el.dataset.zone; })[0];
+    edZone = dragZone ? dragZone.id : null;
+    renderZones();
+    renderZoneList();
+    renderZoneForm();
+  });
+  $("#zones").addEventListener("pointermove", function (e) {
+    if (!dragZone) return;
+    var r = inner.getBoundingClientRect();
+    if (!r.width || !r.height) return;   // карта скрыта другой вкладкой — тащить нечего
+    dragZone.x = +clamp((e.clientX - r.left) / r.width * 100, 0, 100).toFixed(1);
+    dragZone.y = +clamp((e.clientY - r.top) / r.height * 100, 0, 100).toFixed(1);
+    renderZones();
+    renderZoneForm();
+  });
+  $("#zones").addEventListener("pointerup", function () { dragZone = null; });
+
+  function renderZoneList() {
+    var rows = D.zones.map(function (z) {
+      var t = TYPES[(z.type || "").trim()];
+      return '<button class="ed__r" data-z="' + z.id + '"' +
+        (edZone === z.id ? ' aria-selected="true"' : "") + ">" +
+        esc(z.label || "без подписи") +
+        "<small>" + esc(t ? (t.label || t.type) : z.type || "тип не задан") + "</small></button>";
+    }).join("");
+    $("#zn-rows").innerHTML = rows ||
+      '<p class="ed__empty" style="padding:.6em">Зон пока нет</p>';
+  }
+  $("#zn-rows").onclick = function (e) {
+    var b = e.target.closest("[data-z]");
+    if (!b) return;
+    edZone = b.dataset.z;
+    renderZoneList();
+    renderZoneForm();
+    renderZones();
+  };
+
+  function renderZoneForm() {
+    var z = D.zones.filter(function (x) { return x.id === edZone; })[0];
+    if (!z) {
+      $("#zn-form").innerHTML = '<p class="ed__empty">Выберите зону слева или добавьте новую.</p>';
+      return;
+    }
+    var opts = (D.types || []).map(function (t) {
+      return '<option value="' + esc(t.type) + '"' + (t.type === z.type ? " selected" : "") +
+        ">" + esc(t.label || t.type) + "</option>";
+    }).join("");
+    $("#zn-form").innerHTML =
+      fld("подпись", '<input data-k="label" value="' + esc(z.label) + '">',
+          "видна на карте под зоной. Пусто — зона без подписи") +
+      fld("вид работ", '<select data-k="type">' + opts + "</select>",
+          "цвет зоны берётся отсюда, из раздела «Оформление»") +
+      fld("ширина, %", '<input data-k="rx" type="number" step="0.5" value="' + z.rx + '">') +
+      fld("высота, %", '<input data-k="ry" type="number" step="0.5" value="' + z.ry + '">') +
+      fld("примечание", '<input data-k="note" value="' + esc(z.note || "") + '">',
+          "откуда взята геометрия: исходник музея, GPS на местности") +
+      '<p class="fld__hint" style="grid-column:1/-1">Положение — перетаскиванием на карте: ' +
+      "x " + z.x + " y " + z.y + " · " +
+      '<button class="ed__del" data-zdel="' + z.id + '">удалить зону</button></p>';
+
+    $("#zn-form").oninput = function (e) {
+      var k = e.target.dataset.k;
+      if (!k) return;
+      z[k] = (k === "rx" || k === "ry") ? (parseFloat(e.target.value) || 1) : e.target.value;
+      renderZones();
+      renderZoneList();
+    };
+    $("#zn-form").onclick = function (e) {
+      if (!e.target.dataset.zdel) return;
+      if (!confirm("Удалить зону «" + (z.label || z.id) + "»?")) return;
+      D.zones.splice(D.zones.indexOf(z), 1);
+      edZone = null;
+      renderZones(); renderZoneList(); renderZoneForm();
+    };
+  }
+
+  $("#zn-add").onclick = function () {
+    var n = 1;
+    while (D.zones.filter(function (z) { return z.id === "Z" + n; }).length) n++;
+    var t = (D.types || [])[0];
+    var z = { id: "Z" + n, type: t ? t.type : "", label: "Новая зона",
+              x: 50, y: 50, rx: 8, ry: 6, note: "" };
+    D.zones.push(z);
+    edZone = z.id;
+    renderZones(); renderZoneList(); renderZoneForm();
+  };
+
+  function zonesCsv() {
+    var lines = ["id,type,label,x,y,rx,ry,note"];
+    D.zones.forEach(function (z) {
+      lines.push([z.id, csvCell(z.type), csvCell(z.label), z.x, z.y, z.rx, z.ry,
+                  csvCell(z.note || "")].join(","));
+    });
+    return lines.join("\n");
+  }
+
   /* ---- вид меток ---- */
 
   var THEMES = [["light", "Светлая", "для светлого зала и дневного света"],
@@ -1116,6 +1257,7 @@
       t[k] = e.target.value;
       TYPES[t.type] = t;
       renderTypes();
+      renderZones();
       renderMap();
     };
   }
@@ -1194,9 +1336,10 @@
     setTimeout(function () { download("places.csv", placesCsv()); }, 800);
     setTimeout(function () { download("types.csv", typesCsv()); }, 1200);
     setTimeout(function () { download("settings.csv", settingsCsv()); }, 1600);
-    alert("Скачано пять файлов.\n\n" +
+    setTimeout(function () { download("zones.csv", zonesCsv()); }, 2000);
+    alert("Скачано шесть файлов.\n\n" +
       "1. data.js — положите в папку app/data вместо старого.\n" +
-      "2. persons.csv, places.csv, types.csv, settings.csv — туда же.\n\n" +
+      "2. persons.csv, places.csv, types.csv, settings.csv, zones.csv — туда же.\n\n" +
       "После этого обновите страницу.");
   };
 
@@ -1205,6 +1348,7 @@
       "ОБЗОР — что в данных не заполнено. Нажмите на строку, чтобы увидеть, кого это касается.\n\n" +
       "ПЕРСОНАЛИИ — найдите человека в списке слева и правьте справа. Места отмечаются галочками.\n\n" +
       "МЕСТА — описание, тип, вложенность, фотография. Положение метки двигается на самой карте.\n\n" +
+      "ЗОНЫ РАБОТ — где какие работы велись. Добавьте зону и перетащите её на карте.\n\n" +
       "ОФОРМЛЕНИЕ — тема (светлая или тёмная) и вид меток: цвет и значок по типу места.\n\n" +
       "Фотографию можно просто выбрать файлом, она уменьшится сама.\n\n" +
       "Когда закончили — «Сохранить всё» и положите скачанные файлы в папку app/data.");
