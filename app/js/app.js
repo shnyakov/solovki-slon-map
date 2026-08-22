@@ -628,7 +628,21 @@
      Нужен, когда карту заменят на изображение и координаты перестанут
      считаться из широты и долготы. Включение: Ctrl+E или #edit в адресе. */
 
-  var editing = false, dragPt = null, editMode = "places";
+  var editing = false, dragPt = null, editMode = "places", dirty = false;
+
+  // Правки живут в открытой вкладке, пока не нажали «Сохранить всё».
+  // Закрыть её случайно — потерять всю работу, поэтому предупреждаем.
+  function markDirty() {
+    if (dirty) return;
+    dirty = true;
+    var w = $("#dt-where");
+    if (w) w.textContent = "Есть несохранённые правки";
+  }
+  window.addEventListener("beforeunload", function (e) {
+    if (!dirty) return;
+    e.preventDefault();
+    e.returnValue = "";
+  });
 
   // Правится что-то одно: метки или зоны. Иначе два слоя спорят за одну
   // площадь карты, и нажатие уходит не туда — на этом уже обжигались.
@@ -757,6 +771,7 @@
   inner.addEventListener("pointermove", function (e) {
     if (!dragPt) return;
     var r = inner.getBoundingClientRect();     // учитывает текущий зум и сдвиг
+    markDirty();
     dragPt.x = clamp((e.clientX - r.left) / r.width * 100, 0, 100);
     dragPt.y = clamp((e.clientY - r.top) / r.height * 100, 0, 100);
     var el = inner.querySelector('[data-place="' + dragPt.id + '"]');
@@ -786,8 +801,23 @@
     }).join("");
   }
 
+  // Русский поиск обязан считать ё и е одной буквой: посетитель наберёт
+  // «Зернов», а в реестре «Зёрнов» — и не найдёт ничего.
+  function norm(s) {
+    return String(s || "").toLowerCase().replace(/ё/g, "е");
+  }
+  // Искать только по имени мало: «епископ» или «Анзер» давали пусто,
+  // и это выглядело как поломка.
+  function haystack(p) {
+    if (p._h) return p._h;
+    p._h = norm([p.name, p.surname, p.rank, p.years, p.source,
+                 p.places.map(function (id) { return byId[id] ? byId[id].name : ""; }).join(" ")
+                ].join(" "));
+    return p._h;
+  }
+
   function renderRegistry() {
-    var q = $("#q").value.trim().toLowerCase();
+    var q = norm($("#q").value.trim());
     var rank = $("#f-rank").value;
     var place = $("#f-place").value;
 
@@ -795,7 +825,7 @@
       if (rank && p.rank !== rank) return false;
       if (place === "__none" && p.places.length) return false;
       if (place && place !== "__none" && p.places.indexOf(place) < 0) return false;
-      if (q && (p.name + " " + p.surname).toLowerCase().indexOf(q) < 0) return false;
+      if (q && haystack(p).indexOf(q) < 0) return false;
       return true;
     });
 
@@ -847,6 +877,10 @@
     if (name === "zons") { setMode("zones"); renderZoneList(); renderZoneForm(); }
     if (name === "typs") { renderThemes(); renderTypes(); }
   }
+  document.addEventListener("input", function (e) {
+    if (editing && e.target.closest("#view-data")) markDirty();
+  });
+
   $("#dt-sub").onclick = function (e) {
     var b = e.target.closest("[data-sub]");
     if (b) showSub(b.dataset.sub);
@@ -1022,6 +1056,8 @@
   };
 
   function recount() {
+    D.persons.forEach(function (p) { p._h = null; });   // кэш поиска устарел
+    markDirty();
     var c = {};
     D.persons.forEach(function (p) {
       p.places.forEach(function (id) { c[id] = (c[id] || 0) + 1; });
@@ -1214,6 +1250,7 @@
     if (dragVx < 0) return;
     var z = D.zones.filter(function (x) { return x.id === edZone; })[0], p = mapPct(e);
     if (!z || !p) return;
+    markDirty();
     z.points[dragVx] = [p.x, p.y];
     z.geo = "";                                 // геометрию правили руками
     renderZones();
@@ -1228,6 +1265,7 @@
       if (z && p) {
         e.preventDefault();
         zoneHit = true;
+        markDirty();
         z.points.push([p.x, p.y]);
         z.geo = "";
         renderZones(); renderZoneForm();
@@ -1247,6 +1285,7 @@
     if (!dragZone) return;
     var p = mapPct(e);
     if (!p) return;
+    markDirty();
     dragZone.x = p.x; dragZone.y = p.y;
     renderZones(); renderZoneForm();
   });
@@ -1564,6 +1603,7 @@
         download(name, f[name], name === "data.js" ? "application/javascript" : "text/csv");
       }, i++ * 400);
     });
+    dirty = false;
     alert("Скачано шесть файлов.\n\nПоложите их все в папку app/data вместо старых " +
           "и обновите страницу.\n\nЧтобы сохранять сразу в папку, откройте приложение " +
           "в Chrome — там браузер умеет писать в файлы.");
@@ -1583,7 +1623,8 @@
         if (!h) { btn.textContent = was; return null; }
         return writeAll(h).then(function (n) {
           btn.textContent = was;
-          $("#dt-where").textContent = "Сохраняется в выбранную папку";
+          dirty = false;
+          $("#dt-where").textContent = "Сохранено в выбранную папку";
           alert("Сохранено, файлов: " + n + ".\n\nОбновите страницу, чтобы увидеть " +
                 "результат так, как его увидит посетитель.");
         });
