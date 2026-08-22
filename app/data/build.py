@@ -83,6 +83,17 @@ def find_xlsx():
     sys.exit(u"Не найден %s. Укажите путь: python3 build.py /путь/к/файлу.xlsx" % XLSX_NAME)
 
 
+def read_glossary():
+    """Словарь терминов. Вынесен в таблицу, чтобы музей правил его сам."""
+    path = os.path.join(HERE, "glossary.csv")
+    if not os.path.exists(path):
+        return []
+    with io.open(path, encoding="utf-8") as f:
+        return [{"term": r.get("term", ""), "text": r.get("text", ""),
+                 "term_en": r.get("term_en", ""), "text_en": r.get("text_en", "")}
+                for r in csv.DictReader(f) if r.get("term")]
+
+
 def read_settings():
     """Настройки киоска: пока только тема оформления. Правится в панели музея."""
     path = os.path.join(HERE, "settings.csv")
@@ -186,6 +197,7 @@ def read_places():
             "id": r["id"],
             "name": r["name_short"],
             "full": r["name_full"],
+            "name_en": r.get("name_en", ""),
             "type": r["type"],
             "parent": r.get("parent", ""),   # место внутри места: лазарет внутри кремля
             "x": float(r["x"]),
@@ -258,20 +270,20 @@ def read_persons(xlsx):
     return persons, unmatched
 
 
-GLOSSARY = [
-    (u"СЛОН", u"Соловецкий лагерь особого назначения. Действовал на архипелаге в 1923–1933 годах."),
-    (u"Командировка", u"Отдалённый участок лагеря с собственным начальством и работами — лесной, рыболовный, сельскохозяйственный."),
-    (u"Тоня", u"Место промыслового лова рыбы на морском берегу и стан при нём."),
-    (u"Скит", u"Небольшое монашеское поселение в отдалении от главного монастыря. В лагерное время скиты занимали под места заключения."),
-    (u"Сан", u"Степень священства. По возрастанию: диакон, священник (иерей), протоиерей, епископ, архиепископ, митрополит."),
-    (u"Сщмч.", u"Священномученик — священнослужитель, принявший мученическую смерть за веру."),
-    (u"Прмч.", u"Преподобномученик — монах, принявший мученическую смерть за веру."),
-    (u"Штрафной изолятор", u"Место содержания заключённых в наказание, с наиболее тяжёлыми условиями."),
-]
-
-
 PERSON_FIELDS = ["id", "name", "surname", "rank", "years_details", "source",
-                 "places", "has_source", "has_place"]
+                 "places", "year_from", "year_to", "has_source", "has_place"]
+
+# Годы в графе «годы и обстоятельства» записаны свободным текстом:
+# «1927-1934гг.», «с 1930-1933», «на зиму 1927-1928гг». Вытаскиваем все
+# четырёхзначные числа в пределах лагерного времени и берём размах.
+# Разбираем ТОЛЬКО эту графу: в графе источника стоят страницы и годы изданий.
+RE_YEAR = re.compile(r"(19[2-3][0-9]|194[0-5])")
+
+
+def years_of(text):
+    ys = [int(y) for y in RE_YEAR.findall(text or "")]
+    ys = [y for y in ys if 1920 <= y <= 1940]
+    return (min(ys), max(ys)) if ys else ("", "")
 
 
 def write_persons(persons):
@@ -280,8 +292,9 @@ def write_persons(persons):
         w = csv.writer(f)
         w.writerow(PERSON_FIELDS)
         for p in persons:
+            yf, yt = years_of(p["years"])
             w.writerow([p["id"], p["name"], p["surname"], p["rank"], p["years"],
-                        p["source"], ";".join(p["places"]),
+                        p["source"], ";".join(p["places"]), yf, yt,
                         int(bool(p["source"])), int(bool(p["places"]))])
 
 
@@ -335,6 +348,10 @@ def main():
     for pl in places:
         pl["count"] = counts.get(pl["id"], 0)
 
+    for p in persons:
+        yf, yt = years_of(p["years"])
+        p["y0"], p["y1"] = yf, yt
+
     data = {
         "credits": read_credits(),
         "settings": read_settings(),
@@ -345,12 +362,13 @@ def main():
             "placed": len(placed),
             "unplaced": len(persons) - len(placed),
             "withSource": sum(1 for p in persons if p["source"]),
+            "withYears": sum(1 for p in persons if p["y0"]),
             "source": "persons.csv",
         },
         "places": places,
         "placeFields": place_fields,
         "persons": persons,
-        "glossary": [{"term": t, "text": d} for t, d in GLOSSARY],
+        "glossary": read_glossary(),
     }
 
     out = os.path.join(HERE, "data.js")
