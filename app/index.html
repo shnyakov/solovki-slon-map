@@ -21,23 +21,24 @@
 
 <!-- ЭКРАН ПОКОЯ. Показывается при запуске и через 90 секунд бездействия -->
 <section id="idle" class="idle">
-  <p class="idle__over">Соловецкий лагерь особого назначения · 1923–1933</p>
-  <h1 class="idle__title">Испытание веры</h1>
-  <p class="idle__count"><b id="idle-total">—</b> имён священнослужителей,<br>прошедших через соловецкие лагеря</p>
+  <p class="idle__over" data-i18n="idleOver"></p>
+  <h1 class="idle__title" data-i18n="idleTitle"></h1>
+  <p class="idle__count"><b id="idle-total">—</b> <span data-i18n-html="idleCount"></span></p>
   <div class="idle__stage">
     <p class="idle__name" id="idle-a"></p>
     <p class="idle__name" id="idle-b"></p>
   </div>
-  <p class="idle__hint">Коснитесь экрана</p>
+  <p class="idle__hint" data-i18n="idleHint"></p>
 </section>
 
 <header class="top">
-  <div class="top__title">Испытание веры. Век ХХ</div>
+  <div class="top__title" data-i18n="title"></div>
   <nav class="tabs">
-    <button class="tab" data-view="map">Карта</button>
-    <button class="tab" data-view="registry">Все имена</button>
-    <button class="tab" data-view="glossary">Словарь</button>
+    <button class="tab" data-view="map" data-i18n="tabMap"></button>
+    <button class="tab" data-view="registry" data-i18n="tabList"></button>
+    <button class="tab" data-view="glossary" data-i18n="tabGloss"></button>
     <button class="tab tab--staff" data-view="data" hidden>Данные</button>
+    <button class="lang" id="lang">EN</button>
   </nav>
 </header>
 
@@ -58,11 +59,11 @@
           <div class="map__points" id="map-points"></div>
         </div>
         <div class="zoom">
-          <button class="zoom__b" id="z-in" aria-label="Приблизить">+</button>
-          <button class="zoom__b" id="z-out" aria-label="Отдалить">&minus;</button>
-          <button class="zoom__b zoom__b--r" id="z-reset" aria-label="Сбросить масштаб">&#8634;</button>
+          <button class="zoom__b" id="z-in" data-i18n-t="zoomIn">+</button>
+          <button class="zoom__b" id="z-out" data-i18n-t="zoomOut">&minus;</button>
+          <button class="zoom__b zoom__b--r" id="z-reset" data-i18n-t="zoomReset">&#8634;</button>
         </div>
-        <p class="map__note">Берег — <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, ODbL · метки ориентировочны</p>
+        <p class="map__note" data-i18n-html="mapNote"></p>
       </div>
       <!-- Список мест под картой. Показывается только на вертикальном экране:
            там карта неизбежно вытягивается в полосу, и снизу остаётся пустая
@@ -74,14 +75,18 @@
   <!-- РЕЕСТР -->
   <section id="view-registry" class="view" hidden>
     <div class="filters">
-      <input type="search" id="q" class="search" placeholder="Имя, фамилия, сан, место или источник" autocomplete="off">
-      <select id="f-rank" class="select"><option value="">Любой сан</option></select>
-      <select id="f-place" class="select"><option value="">Любое место</option></select>
+      <input type="search" id="q" class="search" data-i18n-ph="search" autocomplete="off">
+      <select id="f-rank" class="select"><option value="" data-i18n="anyRank"></option></select>
+      <select id="f-place" class="select"><option value="" data-i18n="anyPlace"></option></select>
       <span class="found" id="found"></span>
     </div>
+    <!-- Шкала лет. Только в реестре: на карте фильтр по годам создавал бы
+         ложное впечатление, будто в этот год в месте никого не было,
+         тогда как годы известны лишь у меньшинства. -->
+    <div class="years" id="years"></div>
     <button class="unplaced" id="btn-unplaced">
       <span class="unplaced__n">—</span>
-      <span class="unplaced__t">человек: место пребывания не установлено</span>
+      <span class="unplaced__t" data-i18n="unplacedTail"></span>
     </button>
     <ul class="list" id="list"></ul>
   </section>
@@ -177,6 +182,7 @@
     <span class="edit__lbl">Правлю:</span>
     <button class="edit__btn edit__btn--m" data-mode="places">Метки мест</button>
     <button class="edit__btn edit__btn--m" data-mode="zones">Зоны работ</button>
+    <button class="edit__btn" id="edit-undo" disabled>Отменить</button>
     <span class="sub__sp"></span>
     <button class="edit__btn" id="edit-copy">Скопировать координаты меток</button>
     <button class="edit__btn" id="edit-off">Выйти</button>
@@ -194,12 +200,13 @@
 
 <!-- ПАНЕЛЬ КАРТОЧКИ -->
 <aside class="panel" id="panel" hidden>
-  <button class="panel__close" id="panel-close" aria-label="Закрыть">×</button>
+  <button class="panel__close" id="panel-close" data-i18n-t="close">×</button>
   <div class="panel__body" id="panel-body"></div>
 </aside>
 <div class="scrim" id="scrim" hidden></div>
 
 <script src="assets/icons.js"></script>
+<script src="js/lang.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

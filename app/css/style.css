@@ -86,7 +86,12 @@ button{cursor:pointer; border:0; background:none}
   background-repeat:no-repeat; background-position:0 100%; background-size:0 2px;
 }
 .top__title.is-hold{background-size:100% 2px; transition:background-size 2s linear}
-.tabs{display:flex; gap:.4em; margin-left:auto}
+.tabs{display:flex; gap:.4em; margin-left:auto; align-items:center}
+.lang{
+  margin-left:.5em; padding:.3em .7em; border:1px solid var(--line); border-radius:2em;
+  font-size:.78em; letter-spacing:.06em; color:var(--ink-dim);
+}
+.lang:hover{border-color:var(--accent); color:var(--accent)}
 .tab{
   padding:.45em 1.1em; border-radius:2em; color:var(--ink-dim);
   border:1px solid transparent;
@@ -212,6 +217,11 @@ button{cursor:pointer; border:0; background:none}
   overflow-y:auto;
 }
 .panel[hidden]{display:none}
+.panel__back{
+  display:inline-block; margin:0 0 .8em; padding:.3em .8em .3em .6em;
+  border:1px solid var(--line); border-radius:2em; color:var(--ink-dim); font-size:.85em;
+}
+.panel__back:hover{border-color:var(--accent); color:var(--accent)}
 .panel__close{position:absolute; top:.4em; right:.6em; font-size:1.8em; color:var(--ink-dim); line-height:1}
 .panel__close:hover{color:var(--ink)}
 
@@ -496,3 +506,15 @@ body.is-places .zones polygon{pointer-events:none; cursor:default}
 body.is-places .zdot{display:none}
 
 .dt__where{font-size:.78em; color:var(--ink-dim); align-self:center}
+
+.edit__btn[disabled]{opacity:.4; cursor:default}
+
+/* ---------- Шкала лет ---------- */
+.years{display:flex; flex-wrap:wrap; gap:.25em; align-items:center; flex:0 0 auto}
+.years__b{
+  padding:.25em .55em; border-radius:4px; font-size:.82em; color:var(--ink-dim);
+  border:1px solid transparent;
+}
+.years__b:hover{color:var(--ink); border-color:var(--line)}
+.years__b[aria-pressed="true"]{background:var(--accent); color:var(--accent-in)}
+.years__n{font-size:.75em; color:var(--ink-dim); margin-left:.5em}

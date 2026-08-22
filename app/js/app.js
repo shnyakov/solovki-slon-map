@@ -11,6 +11,51 @@
 
   var IDLE_MS = 90000;   // возврат на экран покоя через 90 с бездействия
 
+  /* ---------------- язык ---------------- */
+  /* Переводится только то, что видит посетитель. Панель сотрудника музея
+     оставлена по-русски намеренно: ею пользуются в музее.
+     Названия мест и терминов берутся из данных (name_en, label_en, term_en),
+     пусто — показывается русское. */
+
+  var LANG_KEY = "okoyom-lang", lang = "ru";
+  try { lang = localStorage.getItem(LANG_KEY) || (D.settings || {}).lang || "ru"; } catch (e) {}
+
+  function T(k) {
+    var s = (window.LANG[lang] || {})[k];
+    if (s == null) s = (window.LANG.ru || {})[k];
+    return s == null ? k : s;
+  }
+  function Tf(k) {                       // подстановка %1, %2
+    var s = T(k), a = arguments;
+    return s.replace(/%(\d)/g, function (_, i) { return a[+i]; });
+  }
+  function placeName(p) { return (lang === "en" && p.name_en) || p.name; }
+  function typeLabel(t) { return (lang === "en" && t.label_en) || t.label || t.type; }
+
+  function applyLang() {
+    document.documentElement.setAttribute("lang", lang);
+    $("#lang").textContent = lang === "ru" ? "EN" : "РУС";
+    document.querySelectorAll("[data-i18n]").forEach(function (el) {
+      el.textContent = T(el.dataset.i18n);
+    });
+    document.querySelectorAll("[data-i18n-html]").forEach(function (el) {
+      el.innerHTML = T(el.dataset.i18nHtml);
+    });
+    document.querySelectorAll("[data-i18n-ph]").forEach(function (el) {
+      el.placeholder = T(el.dataset.i18nPh);
+    });
+    document.querySelectorAll("[data-i18n-t]").forEach(function (el) {
+      el.setAttribute("aria-label", T(el.dataset.i18nT));
+    });
+  }
+  $("#lang").onclick = function () {
+    lang = lang === "ru" ? "en" : "ru";
+    try { localStorage.setItem(LANG_KEY, lang); } catch (e) {}
+    D.persons.forEach(function (p) { p._h = null; });
+    applyLang();
+    renderMap(); renderYears(); renderRegistry(); renderGlossary(); closePanel();
+  };
+
   /* ---------------- экраны ---------------- */
 
   function showView(name) {
@@ -31,13 +76,37 @@
 
   /* ---------------- панель карточки ---------------- */
 
+  // История переходов внутри панели: место -> человек -> обратно к месту.
+  // Без неё из карточки человека приходилось заново искать место.
+  var cardNow = null, cardHist = [];
+  var CARDS = {};
+
+  function showCard(kind, arg) {
+    if (cardNow) cardHist.push(cardNow);
+    cardNow = [kind, arg];
+    CARDS[kind](arg);
+  }
+  function cardBack() {
+    var prev = cardHist.pop();
+    if (!prev) return;
+    cardNow = prev;
+    CARDS[prev[0]](prev[1]);
+  }
+  function cardReset() { cardNow = null; cardHist.length = 0; }
+
   function openPanel(html) {
+    if (cardHist.length) {
+      html = '<button class="panel__back" id="panel-back">' + esc(T("back")) + '</button>' + html;
+    }
     $("#panel-body").innerHTML = html;
+    var b = $("#panel-back");
+    if (b) b.onclick = cardBack;
     $("#panel").hidden = false;
     $("#scrim").hidden = false;
     $("#panel").scrollTop = 0;
   }
   function closePanel() {
+    cardReset();
     $("#panel").hidden = true;
     $("#scrim").hidden = true;
     lbClose();
@@ -49,8 +118,8 @@
   $("#panel-body").onclick = function (e) {
     var el = e.target.closest("[data-person],[data-place]");
     if (!el) return;
-    if (el.dataset.person) showPerson(el.dataset.person);
-    else showPlace(el.dataset.place);
+    if (el.dataset.person) showCard("person", el.dataset.person);
+    else showCard("place", el.dataset.place);
   };
 
   function esc(s) {
@@ -62,7 +131,7 @@
     var has = value && String(value).trim();
     return '<div class="card__row"><p class="card__k">' + esc(label) + '</p>' +
       '<p class="card__v' + (has ? '' : ' card__v--none') + '">' +
-      esc(has ? value : (emptyText || "сведения уточняются")) + '</p></div>';
+      esc(has ? value : (emptyText || T("cardPending"))) + '</p></div>';
   }
 
   /* ---------------- изображения ---------------- */
@@ -173,7 +242,7 @@
     return '<li><button class="row" data-person="' + p.id + '">' +
       '<span class="row__name">' + esc(p.name + " " + p.surname) + '</span>' +
       '<span class="row__rank">' + esc(p.rank) + '</span>' +
-      (p.source ? '' : '<span class="row__flag">без источника</span>') +
+      (p.source ? '' : '<span class="row__flag">' + esc(T("noSource")) + '</span>') +
       '</button></li>';
   }
 
@@ -181,19 +250,20 @@
     var p = D.persons.filter(function (x) { return x.id === id; })[0];
     if (!p) return;
     var places = p.places.map(function (pid) {
-      return '<button class="chip" data-place="' + pid + '">' + esc(byId[pid].name) + '</button>';
+      return '<button class="chip" data-place="' + pid + '">' + esc(placeName(byId[pid])) + '</button>';
     }).join("");
 
     openPanel(
-      '<p class="card__over">Персоналия</p>' +
+      '<p class="card__over">' + esc(T("cardPerson")) + '</p>' +
       '<figure class="card__fig" id="gallery"></figure>' +
       '<h2 class="card__name">' + esc((p.name + " " + p.surname).trim()) + '</h2>' +
       '<p class="card__rank">' + esc(p.rank) + '</p>' +
-      '<div class="card__row"><p class="card__k">Место пребывания</p>' +
+      '<div class="card__row"><p class="card__k">' + esc(T("cardPlaces")) + '</p>' +
         (places ? '<div>' + places + '</div>'
-                : '<p class="card__v card__v--none">не установлено</p>') + '</div>' +
-      field("Годы и обстоятельства", p.years) +
-      field("Источник", p.source, "ссылка на источник не указана — требует уточнения")
+                : '<p class="card__v card__v--none">' + esc(T("cardNotSet")) + '</p>') + '</div>' +
+      (p.y0 ? field(T("cardInCamp"), p.y0 === p.y1 ? String(p.y0) : p.y0 + "–" + p.y1) : "") +
+      field(T("cardYears"), p.years) +
+      field(T("cardSource"), p.source, T("cardNoSource"))
     );
     fillGallery("photos", p.id);
   }
@@ -204,7 +274,7 @@
     var people = D.persons.filter(function (p) { return p.places.indexOf(id) >= 0; });
     var kids = D.places.filter(function (p) { return p.parent === id; });
     var kidsHtml = kids.length
-      ? '<div class="card__row"><p class="card__k">Внутри этого места</p>' +
+      ? '<div class="card__row"><p class="card__k">' + esc(T("cardInside")) + '</p>' +
         '<ul class="list card__list">' + kids.map(function (p) {
           return '<li><button class="row" data-place="' + p.id + '">' +
             '<span class="row__name">' + esc(p.name) + '</span>' +
@@ -213,19 +283,19 @@
         }).join("") + '</ul></div>'
       : '';
     var warn = pl.count !== pl.museumCount
-      ? '<div class="card__row"><p class="card__k">Расхождение</p><p class="card__v card__v--none">' +
-        'по учёту музея — ' + pl.museumCount + ', в таблице расписано — ' + pl.count +
-        '. Уточнить у заказчика.</p></div>' : '';
+      ? '<div class="card__row"><p class="card__k">' + esc(T("cardDiff")) +
+        '</p><p class="card__v card__v--none">' +
+        esc(Tf("cardDiffText", pl.museumCount, pl.count)) + '</p></div>' : '';
 
     openPanel(
-      '<p class="card__over">' + esc(pl.type) + '</p>' +
+      '<p class="card__over">' + esc(TYPES[pl.type] ? typeLabel(TYPES[pl.type]) : pl.type) + '</p>' +
       '<figure class="card__fig" id="gallery"></figure>' +
-      '<h2 class="card__name">' + esc(pl.name) + '</h2>' +
+      '<h2 class="card__name">' + esc(placeName(pl)) + '</h2>' +
       '<p class="card__rank">' + esc(pl.full) + '</p>' +
-      field("Историческая справка", pl.about, "справка ещё не написана") +
-      field("Работы заключённых", pl.work, "сведения уточняются") +
+      field(T("cardAbout"), pl.about, T("cardNoAbout")) +
+      field(T("cardWork"), pl.work, T("cardPending")) +
       kidsHtml + warn +
-      '<div class="card__row"><p class="card__k">Известно имён: ' + people.length + '</p>' +
+      '<div class="card__row"><p class="card__k">' + esc(T("cardKnown")) + ": " + people.length + '</p>' +
       '<ul class="list card__list">' + people.map(personRowHtml).join("") + '</ul></div>'
     );
     fillGallery("places", id);
@@ -234,14 +304,17 @@
   function showUnplaced() {
     var people = D.persons.filter(function (p) { return !p.places.length; });
     openPanel(
-      '<p class="card__over">Место не установлено</p>' +
-      '<h2 class="card__name">' + people.length + " имён</h2>" +
-      '<p class="card__rank">Известно, что эти люди прошли через соловецкие лагеря, ' +
-      'но где именно они содержались и работали — пока не установлено. Исследование продолжается.</p>' +
+      '<p class="card__over">' + esc(T("unplacedOver")) + '</p>' +
+      '<h2 class="card__name">' + esc(Tf("unplacedTitle", people.length)) + "</h2>" +
+      '<p class="card__rank">' + esc(T("unplacedHint")) + '</p>' +
       '<ul class="list card__list">' + people.map(personRowHtml).join("") + '</ul>'
     );
   }
-  $("#btn-unplaced").onclick = showUnplaced;
+  $("#btn-unplaced").onclick = function () { cardReset(); showCard("unplaced"); };
+  CARDS.person = showPerson;
+  CARDS.place = showPlace;
+  CARDS.group = showGroup;
+  CARDS.unplaced = showUnplaced;
 
   /* ---------------- карта: раскладка, зум, панорама ---------------- */
 
@@ -526,7 +599,7 @@
       var n = 0;
       for (var i = 0; i < g.length; i++) n += g[i].p.count;
       var ids = g.map(function (m) { return m.p.id; }).join(" ");
-      var label = g.length > 1 ? head.name + " +" + (g.length - 1) : head.name;
+      var label = g.length > 1 ? placeName(head) + " +" + (g.length - 1) : placeName(head);
       var size = dotSize(n);
       var ty = typeOf(head);
       var col = ty && ty.color ? ";background:" + ty.color : "";
@@ -543,7 +616,8 @@
       var b = e.target.closest("[data-place]");
       if (!b || editing) return;
       var ids = b.dataset.ids.split(" ");
-      if (ids.length > 1) showGroup(ids); else showPlace(ids[0]);
+      cardReset();
+      if (ids.length > 1) showCard("group", ids); else showCard("place", ids[0]);
     };
     relabel();
   }
@@ -556,12 +630,12 @@
       var ty = typeOf(p);
       return '<button class="plist__b" data-place="' + p.id + '">' +
         '<span class="plist__d" style="background:' + (ty && ty.color ? esc(ty.color) : "var(--accent)") +
-        '">' + p.count + "</span><span>" + esc(p.name) + "</span>" +
-        '<span class="plist__t">' + esc(ty ? (ty.label || ty.type) : p.type) + "</span></button>";
+        '">' + p.count + "</span><span>" + esc(placeName(p)) + "</span>" +
+        '<span class="plist__t">' + esc(ty ? typeLabel(ty) : p.type) + "</span></button>";
     }).join("");
     $("#plist").onclick = function (e) {
       var b = e.target.closest("[data-place]");
-      if (b && !editing) showPlace(b.dataset.place);
+      if (b && !editing) { cardReset(); showCard("place", b.dataset.place); }
     };
   }
 
@@ -584,11 +658,11 @@
     function line(t, zone) {
       return '<span class="legend__i"><span class="legend__d' + (zone ? " legend__d--z" : "") +
         '" style="background:' + esc(t.color) + '">' +
-        (zone ? "" : iconSvg(t.icon, "pt__ic")) + "</span>" + esc(t.label || t.type) + "</span>";
+        (zone ? "" : iconSvg(t.icon, "pt__ic")) + "</span>" + esc(typeLabel(t)) + "</span>";
     }
     var html = items.length < 2 ? "" : items.map(function (t) { return line(t, false); }).join("");
     if (zitems.length) {
-      html += '<span class="legend__h">Работы</span>' +
+      html += '<span class="legend__h">' + esc(T("works")) + '</span>' +
         zitems.map(function (t) { return line(t, true); }).join("");
     }
     $("#legend").innerHTML = html;
@@ -600,10 +674,9 @@
     var total = 0;
     for (var i = 0; i < list.length; i++) total += list[i].count;
     openPanel(
-      '<p class="card__over">Несколько мест рядом</p>' +
-      '<h2 class="card__name">' + list.length + ' места, ' + total + ' имён</h2>' +
-      '<p class="card__rank">Точки стоят слишком близко, чтобы развести их на карте. ' +
-      'Приблизьте карту — они разойдутся сами, или выберите место из списка.</p>' +
+      '<p class="card__over">' + esc(T("groupOver")) + '</p>' +
+      '<h2 class="card__name">' + esc(Tf("groupTitle", list.length, total)) + '</h2>' +
+      '<p class="card__rank">' + esc(T("groupHint")) + '</p>' +
       '<ul class="list card__list">' + list.map(function (p) {
         return '<li><button class="row" data-place="' + p.id + '">' +
           '<span class="row__name">' + esc(p.name) + '</span>' +
@@ -687,6 +760,7 @@
   // Клик по пустому месту карты в режиме разметки заводит новую точку.
   // Координаты снимаются кликом, названия дописываются в places.csv.
   function addPlace(cx, cy) {
+    snapshot();
     var r = inner.getBoundingClientRect();
     var n = 1;
     while (byId["L" + (n < 10 ? "0" : "") + n]) n++;
@@ -751,6 +825,7 @@
   })();
 
   $("#edit-off").onclick = function () { setEdit(false); };
+  $("#edit-undo").onclick = undo;
   $("#edit-copy").onclick = function () {
     $("#edit-out").select();
     try { document.execCommand("copy"); } catch (err) {}
@@ -764,6 +839,7 @@
     if (!el) return;
     e.preventDefault();
     e.stopPropagation();
+    snapshot();
     dragPt = byId[el.dataset.place];
     el.setPointerCapture(e.pointerId);
   });
@@ -816,6 +892,30 @@
     return p._h;
   }
 
+  var yearNow = 0;
+
+  // Годы разобраны из свободного текста и известны у меньшинства, поэтому
+  // отбор по году честно подписывает, сколько записей он вообще может видеть.
+  function renderYears() {
+    var have = D.persons.filter(function (p) { return p.y0; }).length;
+    var html = '<button class="years__b" data-year="0"' +
+      (yearNow ? "" : ' aria-selected="true" aria-pressed="true"') + ">" + esc(T("yearAll")) + "</button>";
+    for (var y = 1923; y <= 1939; y++) {
+      html += '<button class="years__b" data-year="' + y + '"' +
+        (yearNow === y ? ' aria-pressed="true"' : "") + ">" + y + "</button>";
+    }
+    html += '<span class="years__n">' + esc(T("yearsKnown")) + " " + have + " " + esc(T("yearsFrom")) +
+      " " + D.meta.total + ", " + esc(T("yearsHow")) + "</span>";
+    $("#years").innerHTML = html;
+  }
+  $("#years").onclick = function (e) {
+    var b = e.target.closest("[data-year]");
+    if (!b) return;
+    yearNow = +b.dataset.year;
+    renderYears();
+    renderRegistry();
+  };
+
   function renderRegistry() {
     var q = norm($("#q").value.trim());
     var rank = $("#f-rank").value;
@@ -826,17 +926,20 @@
       if (place === "__none" && p.places.length) return false;
       if (place && place !== "__none" && p.places.indexOf(place) < 0) return false;
       if (q && haystack(p).indexOf(q) < 0) return false;
+      if (yearNow && !(p.y0 && p.y0 <= yearNow && p.y1 >= yearNow)) return false;
       return true;
     });
 
     $("#list").innerHTML = rows.map(personRowHtml).join("") ||
-      '<li class="card__v--none">Ничего не найдено</li>';
-    $("#found").textContent = rows.length + " из " + D.meta.total;
+      '<li class="card__v--none">' + esc(T("nothing")) + '</li>';
+    $("#found").textContent = yearNow
+      ? rows.length + " " + T("inYear") + " " + yearNow
+      : rows.length + " " + T("of") + " " + D.meta.total;
   }
 
   $("#list").onclick = function (e) {
     var b = e.target.closest("[data-person]");
-    if (b) showPerson(b.dataset.person);
+    if (b) { cardReset(); showCard("person", b.dataset.person); }
   };
   ["#q", "#f-rank", "#f-place"].forEach(function (s) {
     $(s).oninput = renderRegistry;
@@ -846,7 +949,9 @@
 
   function renderGlossary() {
     $("#glossary").innerHTML = D.glossary.map(function (g) {
-      return "<dt>" + esc(g.term) + "</dt><dd>" + esc(g.text) + "</dd>";
+      var term = (lang === "en" && g.term_en) || g.term;
+      var text = (lang === "en" && g.text_en) || g.text;
+      return "<dt>" + esc(term) + "</dt><dd>" + esc(text) + "</dd>";
     }).join("");
   }
 
@@ -1039,6 +1144,7 @@
       if (t.dataset.picdel) { delete D.photos[t.dataset.picdel]; renderPersonForm(); }
       if (t.dataset.pdel) {
         if (!confirm("Удалить " + (p.name + " " + p.surname).trim() + " из реестра?")) return;
+        snapshot();
         D.persons.splice(D.persons.indexOf(p), 1);
         edPerson = null;
         recount(); renderPersonList(); renderPersonForm();
@@ -1047,6 +1153,7 @@
   }
 
   $("#ed-add").onclick = function () {
+    snapshot();
     var id = "P" + Math.random().toString(16).slice(2, 8);
     D.persons.unshift({ id: id, name: "", surname: "Новая запись", rank: "",
                         years: "", source: "", places: [] });
@@ -1142,6 +1249,7 @@
       if (t.dataset.picdel) { delete D.photos[t.dataset.picdel]; renderPlaceForm(); }
       if (t.dataset.ldel) {
         if (!confirm("Удалить место «" + p.name + "»? Привязки людей к нему пропадут.")) return;
+        snapshot();
         D.persons.forEach(function (x) {
           var i = x.places.indexOf(p.id);
           if (i >= 0) x.places.splice(i, 1);
@@ -1155,6 +1263,7 @@
   }
 
   $("#pl-add").onclick = function () {
+    snapshot();
     var n = 1;
     while (byId["L" + (n < 10 ? "0" : "") + n]) n++;
     var id = "L" + (n < 10 ? "0" : "") + n;
@@ -1244,6 +1353,7 @@
     if (!editing || editMode !== "zones" || !d) return;
     e.preventDefault(); e.stopPropagation();
     zoneHit = true;
+    snapshot();
     dragVx = +d.dataset.vx;
   });
   $("#zlabels").addEventListener("pointermove", function (e) {
@@ -1276,6 +1386,7 @@
     if (!el) return;
     e.preventDefault(); e.stopPropagation();
     zoneHit = true;
+    snapshot();
     var zz = D.zones.filter(function (x) { return x.id === el.dataset.zone; })[0];
     edZone = zz ? zz.id : null;
     if (zz && zz.shape !== "poly") dragZone = zz;   // пятно тащим целиком
@@ -1382,6 +1493,7 @@
       }
       if (!t.dataset.zdel) return;
       if (!confirm("Удалить зону «" + (z.label || z.id) + "»?")) return;
+      snapshot();
       D.zones.splice(D.zones.indexOf(z), 1);
       edZone = null;
       renderZones(); renderZoneList(); renderZoneForm();
@@ -1389,6 +1501,7 @@
   }
 
   $("#zn-add").onclick = function () {
+    snapshot();
     var n = 1;
     while (D.zones.filter(function (z) { return z.id === "Z" + n; }).length) n++;
     var t = typesOf("zone")[0];
@@ -1519,6 +1632,120 @@
     download("отчёт-о-полноте.csv", lines.join("\n"));
   };
 
+  /* ---- отмена действия ---- */
+  /* Снимок всех правимых данных перед каждым изменением. Данные простые,
+     весь снимок — около 120 КБ, тридцати хватает с запасом и по памяти,
+     и по смыслу: дальше проще перезагрузить страницу.
+
+     Снимок делается ДО изменения. Для текстовых полей — в момент, когда
+     в поле входят (focusin), а не на каждую букву: иначе стек забьётся
+     посимвольно и отмена станет бесполезной. */
+
+  var UNDO_MAX = 30, hist = [];
+
+  function snapState() {
+    return JSON.stringify({
+      p: D.persons, l: D.places, z: D.zones, t: D.types, s: D.settings, ph: D.photos
+    });
+  }
+
+  function snapshot() {
+    hist.push(snapState());
+    if (hist.length > UNDO_MAX) hist.shift();
+    refreshUndo();
+  }
+
+  function refreshUndo() {
+    var b = $("#edit-undo");
+    if (!b) return;
+    b.disabled = !hist.length;
+    b.textContent = hist.length ? "Отменить (" + hist.length + ")" : "Отменить";
+  }
+
+  function undo() {
+    var s = hist.pop();
+    if (!s) return;
+    var o = JSON.parse(s);
+    D.persons = o.p; D.places = o.l; D.zones = o.z; D.types = o.t;
+    D.settings = o.s; D.photos = o.ph || {};
+
+    // справочники строятся заново: ссылки на прежние объекты больше не годятся
+    for (var k in byId) delete byId[k];
+    D.places.forEach(function (p) { byId[p.id] = p; });
+    for (var k2 in TYPES) delete TYPES[k2];
+    (D.types || []).forEach(function (t) { TYPES[t.type] = t; });
+    edPerson = edPlace = edZone = null;
+    drawing = null;
+    document.body.classList.remove("is-draw");
+
+    applyTheme((D.settings || {}).theme || "light", false);
+    recount();
+    if (!$("#view-data").hidden) renderStaff();
+    refreshUndo();
+  }
+
+  document.addEventListener("keydown", function (e) {
+    if (!editing) return;
+    if ((e.metaKey || e.ctrlKey) && (e.key === "z" || e.key === "Z" ||
+        e.key === "я" || e.key === "Я")) {
+      e.preventDefault();
+      undo();
+    }
+  });
+
+  // Вход в текстовое поле панели = начало правки: снимаем состояние до неё
+  document.addEventListener("focusin", function (e) {
+    if (!editing) return;
+    if (e.target.closest("#view-data") &&
+        /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) snapshot();
+  });
+
+  /* ---- проверка данных перед записью ---- */
+  /* Мусор накапливается незаметно: человек без фамилии, два места с одним
+     названием, ссылка на удалённое место. Проверяем перед сохранением
+     и показываем список — сохранить всё равно можно, но осознанно. */
+
+  function validate() {
+    var bad = [];
+    var seenPlace = {}, seenId = {};
+
+    D.persons.forEach(function (p) {
+      if (!(p.name + p.surname).trim()) bad.push("Персоналия " + p.id + " без имени и фамилии");
+      if (seenId[p.id]) bad.push("Повторяющийся идентификатор персоналии: " + p.id);
+      seenId[p.id] = 1;
+      p.places.forEach(function (id) {
+        if (!byId[id]) bad.push((p.name + " " + p.surname).trim() + " привязан к несуществующему месту " + id);
+      });
+    });
+
+    D.places.forEach(function (pl) {
+      var key = pl.name.trim().toLowerCase();
+      if (!key) bad.push("Место " + pl.id + " без названия");
+      else if (seenPlace[key]) bad.push("Два места с названием «" + pl.name + "»");
+      else seenPlace[key] = 1;
+      if (!pl.type) bad.push("У места «" + pl.name + "» не задан тип");
+      if (pl.parent && !byId[pl.parent]) bad.push("Место «" + pl.name + "» вложено в несуществующее " + pl.parent);
+      if (pl.parent === pl.id) bad.push("Место «" + pl.name + "» вложено само в себя");
+    });
+
+    D.zones.forEach(function (z) {
+      if (!z.type) bad.push("У зоны «" + (z.label || z.id) + "» не задан вид работ");
+      if (z.shape === "poly" && z.points.length < 3)
+        bad.push("У зоны «" + (z.label || z.id) + "» меньше трёх вершин — она не нарисуется");
+    });
+
+    return bad;
+  }
+
+  function checkBeforeSave() {
+    var bad = validate();
+    if (!bad.length) return true;
+    var head = bad.length === 1 ? "Нашлась одна неточность:" : "Нашлось неточностей: " + bad.length;
+    return confirm(head + "\n\n" + bad.slice(0, 12).join("\n") +
+      (bad.length > 12 ? "\n… и ещё " + (bad.length - 12) : "") +
+      "\n\nСохранить всё равно?");
+  }
+
   /* ---- сохранение ---- */
   /* Браузер умеет писать в папку напрямую, если пользователь один раз её выбрал.
      Папка запоминается в IndexedDB, поэтому спрашивают только в первый раз.
@@ -1611,6 +1838,7 @@
 
   function saveAll() {
     recount();
+    if (!checkBeforeSave()) return;
     if (!CAN_WRITE) return downloadAll();
     var btn = $("#dt-apply"), was = btn.textContent;
     btn.textContent = "Сохраняю…";
@@ -1680,6 +1908,8 @@
     resetZoom();
     showView("map");
     $("#q").value = "";
+    yearNow = 0;
+    renderYears();
     $("#f-rank").value = "";
     $("#f-place").value = "";
     renderRegistry();
@@ -1736,13 +1966,15 @@
   var ranks = {};
   D.persons.forEach(function (p) { if (p.rank) ranks[p.rank] = 1; });
   fillSelect($("#f-rank"), Object.keys(ranks).sort());
-  $("#f-place").innerHTML += '<option value="__none">Место не установлено</option>';
+  $("#f-place").innerHTML += '<option value="__none">' + esc(T("noPlace")) + '</option>';
   fillSelect($("#f-place"), []);
   D.places.forEach(function (p) {
     $("#f-place").innerHTML += '<option value="' + p.id + '">' + esc(p.name) + "</option>";
   });
 
+  applyLang();
   renderMap();
+  renderYears();
   renderRegistry();
   renderGlossary();
   showView("map");

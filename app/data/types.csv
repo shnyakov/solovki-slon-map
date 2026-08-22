@@ -1,12 +1,12 @@
-type,kind,label,color,icon
-отделение,place,Отделение лагеря,#b08a4a,castle
-командировка,place,Командировка,#7d8a6a,tent
-лазарет,place,Лазарет,#a06a68,medical
-пересыльный пункт,place,Пересыльный пункт,#6a8494,ship
-штрафной изолятор,place,Штрафной изолятор,#8a5a52,lock
-скит,place,Скит,#8a7a9a,church
-лесоразработки,zone,Лесоразработки,#7d8a5a,tree
-промысел,zone,Рыболовный и зверобойный промысел,#9a6a7a,fish
-сельское хозяйство,zone,Сельское хозяйство и звероводство,#5f8a8a,wheat
-торфоразработки,zone,Торфоразработки,#7a6a94,pick
-смолокурение,zone,Смолокурение,#a8904a,flame
+type,kind,label,label_en,color,icon
+отделение,place,Отделение лагеря,Camp section,#b08a4a,castle
+командировка,place,Командировка,Work detachment,#7d8a6a,tent
+лазарет,place,Лазарет,Infirmary,#a06a68,medical
+пересыльный пункт,place,Пересыльный пункт,Transit point,#6a8494,ship
+штрафной изолятор,place,Штрафной изолятор,Punishment block,#8a5a52,lock
+скит,place,Скит,Skete,#8a7a9a,church
+лесоразработки,zone,Лесоразработки,Logging,#7d8a5a,tree
+промысел,zone,Рыболовный и зверобойный промысел,Fishing and sea animal hunting,#9a6a7a,fish
+сельское хозяйство,zone,Сельское хозяйство и звероводство,Farming and fur farming,#5f8a8a,wheat
+торфоразработки,zone,Торфоразработки,Peat extraction,#7a6a94,pick
+смолокурение,zone,Смолокурение,Tar production,#a8904a,flame

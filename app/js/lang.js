@@ -1,0 +1,70 @@
+/* Строки, которые видит ПОСЕТИТЕЛЬ. Панель сотрудника музея не переводится
+   намеренно: ею пользуются в музее, и английский там только мешал бы.
+
+   Названия мест, санов и видов работ живут в данных: колонки name_en
+   в places.csv, label_en в types.csv, term_en и text_en в glossary.csv.
+   Пусто — показывается русское. */
+window.LANG = {
+  ru: {
+    tabMap: "Карта", tabList: "Все имена", tabGloss: "Словарь",
+    title: "Испытание веры. Век ХХ",
+    idleOver: "Соловецкий лагерь особого назначения · 1923–1933",
+    idleTitle: "Испытание веры",
+    idleCount: "имён священнослужителей,<br>прошедших через соловецкие лагеря",
+    idleHint: "Коснитесь экрана",
+    mapNote: 'Берег — <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, ODbL · метки ориентировочны',
+    search: "Имя, фамилия, сан, место или источник",
+    anyRank: "Любой сан", anyPlace: "Любое место",
+    noPlace: "Место не установлено",
+    unplacedTail: "человек: место пребывания не установлено",
+    of: "из", inYear: "в", yearAll: "все годы",
+    yearsKnown: "годы известны у", yearsFrom: "из", yearsHow: "разобраны из текста записей",
+    nothing: "Ничего не найдено", noSource: "без источника",
+    works: "Работы",
+    cardPerson: "Персоналия", cardPlaces: "Место пребывания", cardNotSet: "не установлено",
+    cardYears: "Годы и обстоятельства", cardInCamp: "В лагере",
+    cardSource: "Источник", cardPending: "сведения уточняются",
+    cardNoSource: "ссылка на источник не указана — требует уточнения",
+    cardAbout: "Историческая справка", cardNoAbout: "справка ещё не написана",
+    cardWork: "Работы заключённых", cardDiff: "Расхождение",
+    cardDiffText: "по учёту музея — %1, в таблице расписано — %2. Уточнить у заказчика.",
+    cardKnown: "Известно имён", cardInside: "Внутри этого места",
+    groupOver: "Несколько мест рядом", groupTitle: "%1 места, %2 имён",
+    groupHint: "Точки стоят слишком близко, чтобы развести их на карте. Приблизьте карту — они разойдутся сами, или выберите место из списка.",
+    unplacedOver: "Место не установлено", unplacedTitle: "%1 имён",
+    unplacedHint: "Известно, что эти люди прошли через соловецкие лагеря, но где именно они содержались и работали — пока не установлено. Исследование продолжается.",
+    back: "← Назад", close: "Закрыть",
+    zoomIn: "Приблизить", zoomOut: "Отдалить", zoomReset: "Сбросить масштаб"
+  },
+  en: {
+    tabMap: "Map", tabList: "All names", tabGloss: "Glossary",
+    title: "A Trial of Faith. 20th century",
+    idleOver: "Solovki Camp of Special Designation · 1923–1933",
+    idleTitle: "A Trial of Faith",
+    idleCount: "names of clergy<br>who passed through the Solovki camps",
+    idleHint: "Touch the screen",
+    mapNote: 'Coastline — <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, ODbL · marker positions approximate',
+    search: "Name, holy orders, place or source",
+    anyRank: "Any orders", anyPlace: "Any place",
+    noPlace: "Place not established",
+    unplacedTail: "people whose place of confinement is not established",
+    of: "of", inYear: "in", yearAll: "all years",
+    yearsKnown: "years known for", yearsFrom: "of", yearsHow: "parsed from record texts",
+    nothing: "Nothing found", noSource: "no source",
+    works: "Labour",
+    cardPerson: "Person", cardPlaces: "Place of confinement", cardNotSet: "not established",
+    cardYears: "Years and circumstances", cardInCamp: "In the camp",
+    cardSource: "Source", cardPending: "details to be confirmed",
+    cardNoSource: "no source given — to be confirmed",
+    cardAbout: "Historical note", cardNoAbout: "note not written yet",
+    cardWork: "Prisoners' labour", cardDiff: "Discrepancy",
+    cardDiffText: "museum records — %1, listed by name — %2. To be confirmed.",
+    cardKnown: "Names known", cardInside: "Inside this place",
+    groupOver: "Several places nearby", groupTitle: "%1 places, %2 names",
+    groupHint: "The points are too close to separate on the map. Zoom in and they will spread apart, or pick a place from the list.",
+    unplacedOver: "Place not established", unplacedTitle: "%1 names",
+    unplacedHint: "These people are known to have passed through the Solovki camps, but where exactly they were held and worked is not established. Research continues.",
+    back: "← Back", close: "Close",
+    zoomIn: "Zoom in", zoomOut: "Zoom out", zoomReset: "Reset zoom"
+  }
+};
