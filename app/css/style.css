@@ -1,3 +1,57 @@
+/* Шрифт лежит в проекте, а не берётся системный.
+
+   Причина не в красоте: киоск в зале — машина неизвестная, и на ней
+   system-ui может оказаться чем угодно. Свой файл снимает эту лотерею:
+   на маке разработчика и на киоске одно и то же.
+
+   PT Sans — ParaType, спроектирован под кириллицу, свободная лицензия
+   (см. assets/fonts/ЛИЦЕНЗИЯ.txt). Тот же, что на сайте музея solovky.ru.
+   Подмножества cyrillic и latin, два начертания — 44 КБ на всё.
+
+   Проверено: @font-face с относительным url() работает по file://.
+   Запасные шрифты в стеке оставлены на случай, если файл не доедет. */
+
+/* Pobeda — гарнитура заголовков сайта музея. Файлы взяты с их же сервера.
+
+   Применяется ровно так, как у них: на сайте это `h1, h2`, у нас —
+   название экспозиции в шапке и на экране покоя. Имена людей и мест
+   набираются PT Sans: на сайте контент тоже PT Sans, и это правильно —
+   Pobeda сделан по типографике советских плакатов, и набирать им имена
+   репрессированных было бы неуместно. */
+@font-face{
+  font-family:"Pobeda"; font-style:normal; font-weight:400; font-display:swap;
+  src:url(../assets/fonts/Pobeda-Regular.woff) format("woff");
+}
+@font-face{
+  font-family:"Pobeda"; font-style:normal; font-weight:700; font-display:swap;
+  src:url(../assets/fonts/Pobeda-Bold.woff) format("woff");
+}
+
+@font-face{
+  font-family:"PT Sans"; font-style:normal; font-weight:400; font-display:swap;
+  src:url(../assets/fonts/ptsans-cyrillic-400.woff2) format("woff2");
+  unicode-range:U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face{
+  font-family:"PT Sans"; font-style:normal; font-weight:400; font-display:swap;
+  src:url(../assets/fonts/ptsans-latin-400.woff2) format("woff2");
+  unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face{
+  font-family:"PT Sans"; font-style:normal; font-weight:700; font-display:swap;
+  src:url(../assets/fonts/ptsans-cyrillic-700.woff2) format("woff2");
+  unicode-range:U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face{
+  font-family:"PT Sans"; font-style:normal; font-weight:700; font-display:swap;
+  src:url(../assets/fonts/ptsans-latin-700.woff2) format("woff2");
+  unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 /* Палитра и типографика — всё здесь.
    Подогнать под стиль музея = поменять переменные ниже, больше ничего. */
 :root{
@@ -8,10 +62,19 @@
   --line:      #2e3538;
   --accent:    #b08a4a;   /* приглушённая охра */
   --accent-in: #14181a;
+  --arm:       #c9714e;   /* взведённая кнопка добавления — намеренно не охра */
+  --arm-in:    #14181a;
   --sea:       #10161a;   /* совпадает с THEMES в data/make_map.py */
 
-  --serif: Georgia, "Times New Roman", "PT Serif", serif;
-  --sans:  system-ui, "Segoe UI", -apple-system, Roboto, Arial, sans-serif;
+  /* Одна гарнитура на всё приложение. Иерархия делается размером, весом
+     и разрядкой, а не второй гарнитурой: на экране в зале смена шрифта
+     читается как смена интонации, и для темы экспозиции это лишнее.
+     --display остался отдельной переменной, чтобы заголовки можно было
+     поменять одной строкой, не трогая текст. */
+  --display: "PT Sans", "Segoe UI", system-ui, Arial, sans-serif;
+  /* Название экспозиции — гарнитурой заголовков музея. Больше нигде */
+  --title:   "Pobeda", "PT Sans", "Segoe UI", system-ui, sans-serif;
+  --sans:    "PT Sans", system-ui, "Segoe UI", -apple-system, Roboto, Arial, sans-serif;
 
   /* Отступы задаются один раз и здесь. Раньше было вдвое больше, и карта
      теряла половину высоты на воздух. Меняется в одном месте — везде. */
@@ -23,15 +86,26 @@
    выбирает один вид под свет в зале. Включается атрибутом в index.html:
        <html lang="ru" data-theme="light">
    Карта подменяется на светлый вариант из JS — цвета зашиты внутрь SVG. */
+/* Светлая тема приведена к сайту музея solovky.ru: #282522 — цвет текста,
+   #f35120 — акцент. Проверено по их таблице стилей. Остальные яркие цвета,
+   которые там встречаются часто, принадлежат виджету для слабовидящих
+   (селекторы bvi-*), а не фирменному стилю, и взяты не были.
+
+   Тёмная тема оставлена прежней, охристой: она делалась под тёмный зал,
+   а сайт музея светлый. Выбор темы — за экспозицией. */
 :root[data-theme="light"]{
-  --bg:        #f5f2ec;
-  --bg-soft:   #ffffff;
-  --ink:       #1b2022;
-  --ink-dim:   #5d686b;
-  --line:      #ddd5c7;
-  --accent:    #8a672c;
+  --bg:        #ffffff;
+  --bg-soft:   #f6f4f1;
+  --ink:       #282522;
+  --ink-dim:   #6b665f;
+  --line:      #e3ded7;
+  --accent:    #f35120;
   --accent-in: #ffffff;
-  --sea:       #d3dcdd;
+  /* Взведённая кнопка не может быть охрой рядом с оранжевым акцентом:
+     их спутают. Здесь она синяя — ни с чем не пересекается. */
+  --arm:       #2b4c7e;
+  --arm-in:    #ffffff;
+  --sea:       #bccdd6;
 }
 
 *{box-sizing:border-box}
@@ -55,16 +129,22 @@ button{cursor:pointer; border:0; background:none}
 }
 .idle[hidden]{display:none}
 .idle__over{color:var(--accent); letter-spacing:.14em; text-transform:uppercase; font-size:.8em; margin:0}
-.idle__title{font:400 clamp(44px,7vw,110px)/1.05 var(--serif); margin:.1em 0}
+.idle__title{font:700 clamp(30px,4.6vw,76px)/1.06 var(--title); margin:.15em 0;
+  letter-spacing:.01em}
+.idle__age{
+  display:inline-block; margin-top:1.8em; padding:.15em .5em;
+  border:1px solid var(--line); border-radius:3px;
+  font-size:.72em; color:var(--ink-dim);
+}
 .idle__count{color:var(--ink-dim); margin:0; max-width:22em}
-.idle__count b{color:var(--ink); font-size:1.5em; font-family:var(--serif)}
+.idle__count b{color:var(--ink); font-size:1.5em; font-family:var(--display)}
 /* Сцена фиксированной высоты: слои наложены друг на друга и гасятся
    встречно. Без этого блок рос и сжимался, и всё на экране прыгало. */
 .idle__stage{position:relative; width:min(26em,90vw); height:5.5em; margin:1.4em 0 0}
 .idle__name{
   position:absolute; inset:0; margin:0;
   display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.3em;
-  font-family:var(--serif); font-size:1.25em; color:var(--ink-dim);
+  font-family:var(--display); font-size:1.25em; color:var(--ink-dim);
   opacity:0; transition:opacity 1.2s ease;
 }
 .idle__name.is-on{opacity:1}
@@ -74,19 +154,25 @@ button{cursor:pointer; border:0; background:none}
 
 /* ---------- Шапка ---------- */
 .top{
+  position:relative;
   display:flex; align-items:center; gap:var(--pad);
   padding:calc(var(--pad)*.45) var(--pad);
   border-bottom:1px solid var(--line); flex:0 0 auto;
 }
-.top__title{
-  font-family:var(--serif); font-size:1.05em; color:var(--ink-dim);
-  cursor:default; -webkit-user-select:none; user-select:none;
-  /* Полоска заполняется за 2 секунды удержания — подсказка, что что-то происходит */
-  background-image:linear-gradient(var(--accent),var(--accent));
-  background-repeat:no-repeat; background-position:0 100%; background-size:0 2px;
+/* Название выровнено по вертикали с вкладками. Крупный кегль тянет строку
+   вверх, если положиться на выравнивание по базовой линии, поэтому
+   центрируем явно. */
+.top__c{
+  display:flex; align-items:center; gap:.6em; white-space:nowrap;
+  align-self:center;
 }
-.top__title.is-hold{background-size:100% 2px; transition:background-size 2s linear}
+.top__title{
+  font-family:var(--title); font-size:clamp(1.15em, 1.5vw, 1.75em);
+  letter-spacing:.015em; color:var(--ink);
+  cursor:default; -webkit-user-select:none; user-select:none;
+}
 .tabs{display:flex; gap:.4em; margin-left:auto; align-items:center}
+
 .lang{
   margin-left:.5em; padding:.3em .7em; border:1px solid var(--line); border-radius:2em;
   font-size:.78em; letter-spacing:.06em; color:var(--ink-dim);
@@ -114,6 +200,23 @@ button{cursor:pointer; border:0; background:none}
   background:var(--sea);          /* поля по бокам сливаются с морем на карте */
 }
 .map__frame.is-drag{cursor:grabbing}
+
+/* Плавный переход — ТОЛЬКО для программных перемещений: нажали метку,
+   раскрыли группу, нажали кнопку зума. Перетаскивание и щипок идут без
+   перехода, иначе карта плывёт под пальцем и промахивается мимо цели.
+   Поэтому класс вешается на время и снимается, а не живёт постоянно.
+
+   Кривая с замедлением к концу: движение начинается решительно и мягко
+   останавливается — так понятнее, куда именно карта пришла. */
+.map__inner.is-anim{
+  transition:left .42s cubic-bezier(.22,.61,.36,1),
+             top .42s cubic-bezier(.22,.61,.36,1),
+             width .42s cubic-bezier(.22,.61,.36,1),
+             height .42s cubic-bezier(.22,.61,.36,1);
+}
+@media (prefers-reduced-motion:reduce){
+  .map__inner.is-anim{transition:none}
+}
 /* Размер и положение задаются из JS. Зум меняет ШИРИНУ И ВЫСОТУ, а не transform:
    при scale() браузер растрирует слой один раз и потом растягивает битмап —
    карта, подписи и кружки становятся мылом. */
@@ -129,17 +232,50 @@ button{cursor:pointer; border:0; background:none}
 }
 .pt{pointer-events:auto}
 
+/* Все три кнопки одного размера, и кегль у них тоже один.
+
+   У «сброса» стоял font-size:.9em ради глифа помельче — и вместе с ним
+   ужималась коробка: ширина задана в em, то есть считается от кегля самой
+   кнопки. Через переменную это не обходится: em в custom property тоже
+   резолвится у того, кто её использует, а не там, где объявлена. Поэтому
+   кегль просто одинаковый. */
 .zoom{position:absolute; right:.6em; bottom:.6em; display:flex; flex-direction:column; gap:.3em}
 .zoom__b{
   width:2.1em; height:2.1em; border-radius:5px; background:var(--bg-soft);
   border:1px solid var(--line); color:var(--ink); font-size:1.05em; line-height:1;
+  display:flex; align-items:center; justify-content:center;
 }
 .zoom__b:hover{border-color:var(--accent); color:var(--accent)}
-.zoom__b--r{font-size:.9em}
+
+/* Переключатель спутникового слоя. Стоит под кнопками зума, но выглядит
+   иначе: это не управление масштабом, а смена того, что показано. */
+.satbtn{
+  /* Правый верхний угол — напротив легенды. Со стопкой зума не соседствует
+     намеренно: это не управление масштабом, а смена того, что показано,
+     и на низком экране кнопки налезали друг на друга. */
+  position:absolute; right:.6em; top:.6em; z-index:6;
+  padding:.42em 1em; border:1px solid var(--line); border-radius:2em;
+  background:color-mix(in srgb, var(--bg) 88%, transparent);
+  color:var(--ink-dim); font-size:.8em; letter-spacing:.03em;
+}
+.satbtn:hover{border-color:var(--accent); color:var(--accent)}
+.satbtn[aria-pressed="true"]{
+  background:var(--accent); color:var(--accent-in); border-color:var(--accent);
+}
+/* На снимке белые подписи мест не читаются — им нужна тёмная обводка.
+   На схеме наоборот: фон светлый, обводка светлая. */
+body.is-sat .pt__label,
+body.is-sat .zlab{
+  color:#fff;
+  text-shadow:0 1px 4px rgba(0,0,0,.9), 0 0 3px rgba(0,0,0,.9);
+}
+/* Кружок группы обведён цветом фона — на снимке он должен быть тёмным */
+body.is-sat .pt--group .pt__dot{box-shadow:0 0 0 2px rgba(0,0,0,.55), 0 0 0 4px var(--accent)}
+body.is-sat .map__note{color:#fff; opacity:.85; text-shadow:0 1px 3px rgba(0,0,0,.8)}
 /* Подпись прижата к углу карты, чтобы не отнимать высоту */
 .map__note{
   position:absolute; left:.6em; bottom:.5em; margin:0; z-index:5;
-  font-size:.66em; color:var(--ink-dim); opacity:.75; pointer-events:auto;
+  font-size:.66em; color:var(--ink-dim); opacity:.75; pointer-events:none;
 }
 .map__note code{color:var(--accent)}
 
@@ -176,14 +312,26 @@ button{cursor:pointer; border:0; background:none}
   display:flex; align-items:baseline; gap:.6em; font-size:.9em;
 }
 .unplaced:hover{border-color:var(--accent)}
-.unplaced__n{font-family:var(--serif); font-size:1.6em; color:var(--accent)}
+.unplaced__n{font-family:var(--display); font-size:1.6em; color:var(--accent)}
 .unplaced__t{color:var(--ink-dim)}
 
 /* ---------- Реестр ---------- */
-.filters{display:flex; flex-wrap:wrap; gap:.6em; align-items:center; flex:0 0 auto}
+/* Высота элементов строки задана явно и одинаково.
+
+   Раньше её определяли отступы, и каждый элемент приходил к своей: поле
+   поиска 41.8, списки 39.5, кнопка клавиатуры 23 — у неё отступов нет вовсе,
+   а высоту ей никто не задавал. Разнобой сразу видно, потому что элементы
+   стоят в ряд. */
+.filters{
+  display:flex; flex-wrap:wrap; gap:.6em; align-items:center; flex:0 0 auto;
+  --ctl:2.7em;
+}
+.search,.select,.kbcall{
+  height:var(--ctl); box-sizing:border-box;
+}
 .search,.select{
   background:var(--bg-soft); border:1px solid var(--line); border-radius:5px;
-  padding:.55em .9em; min-width:11em;
+  padding:0 .9em; min-width:11em;
 }
 .search{flex:1 1 16em}
 .search:focus,.select:focus{outline:2px solid var(--accent); outline-offset:1px}
@@ -193,30 +341,107 @@ button{cursor:pointer; border:0; background:none}
   flex:1 1 auto; min-height:0; overflow-y:auto; margin:0; padding:0; list-style:none;
   columns:2; column-gap:var(--pad);
 }
+/* Строки списка читались как обычный текст: ни рамки, ни стрелки, ни намёка
+   на нажатие. Добавлены три подсказки, все сдержанные — это мемориальный
+   список, а не витрина:
+     · тонкая линия снизу собирает строки в перечень, а не в абзац;
+     · стрелка справа появляется при наведении и на фокусе с клавиатуры;
+     · при наведении строка чуть подаётся вправо и подсвечивается. */
 .row{
-  break-inside:avoid; padding:.55em .8em; border-radius:5px; width:100%; text-align:left;
-  display:flex; gap:.6em; align-items:baseline;
+  break-inside:avoid; padding:.6em .8em; border-radius:5px; width:100%; text-align:left;
+  display:flex; gap:.6em; align-items:baseline; position:relative;
+  border-bottom:1px solid var(--line);
+  transition:background .16s ease, padding-left .16s ease;
 }
-.row:hover{background:var(--bg-soft)}
-.row__name{font-family:var(--serif)}
+.row:last-child{border-bottom:0}
+.row{background:var(--bg-soft)}
+/* Стрелка видна ВСЕГДА, просто приглушённая. Прежде она появлялась только
+   при наведении — и в покое строка читалась обычным текстом. На сенсорном
+   экране наведения нет вовсе: там подсказка нужна именно в покое. */
+.row:after{
+  /* auto прижимает стрелку к правому краю. Если в строке есть счётчик,
+     он забирает auto первым, и стрелка встаёт после него — как и нужно. */
+  content:"›"; margin-left:auto; padding-left:.6em; color:var(--accent);
+  opacity:.4; transform:none;
+  transition:opacity .16s ease, transform .16s ease;
+  font-size:1.15em; line-height:1;
+}
+.row:hover, .row:focus-visible{background:var(--bg); padding-left:1.1em}
+.row:hover:after, .row:focus-visible:after{opacity:1; transform:translateX(2px)}
+.row:focus-visible{outline:2px solid var(--accent); outline-offset:-2px}
+.row__name{font-family:var(--display); font-weight:700}
 .row__rank{color:var(--ink-dim); font-size:.8em}
 .row__flag{margin-left:auto; font-size:.7em; color:var(--accent); opacity:.75}
 
 /* ---------- Словарь ---------- */
 .glossary{overflow-y:auto; margin:0; max-width:44em}
-.glossary dt{font-family:var(--serif); font-size:1.15em; color:var(--accent); margin-top:1.2em}
+.glossary dt{font-family:var(--display); font-size:1.15em; color:var(--accent); margin-top:1.2em}
 .glossary dd{margin:.25em 0 0; color:var(--ink-dim)}
 
 /* ---------- Панель карточки ---------- */
-.scrim{position:fixed; inset:0; background:#000a; z-index:60}
+/* Подложка панели прозрачная и НИЧЕГО НЕ ЛОВИТ.
+
+   Прозрачная — потому что карточка про место, а место на карте, и гасить
+   карту в этот самый момент неправильно: посетитель теряет, куда смотреть.
+
+   Не ловит нажатия — потому что иначе карта под ней становится мёртвой:
+   чтобы открыть другую метку, надо было сперва закрыть эту карточку.
+   Теперь метки нажимаются прямо поверх открытой панели, а закрытие по
+   нажатию мимо перенесено на саму карту (см. обработчик на .map__frame). */
+.scrim{position:fixed; inset:0; background:transparent; z-index:60; pointer-events:none}
 .scrim[hidden]{display:none}
 .panel{
   position:fixed; top:0; right:0; bottom:0; z-index:70;
   width:min(560px,92vw); background:var(--bg-soft);
   border-left:1px solid var(--line); padding:var(--pad);
   overflow-y:auto;
+  /* Раз фон больше не гасится, панель отделяется тенью, а не темнотой */
+  box-shadow:-10px 0 30px rgba(0,0,0,.16);
 }
 .panel[hidden]{display:none}
+/* Панель выезжает справа, а не возникает. Сдвиг небольшой — 28 пикселей:
+   на киоске полноэкранный вылет читался бы как смена страницы, а это
+   не смена страницы, а подробность о том, что уже на карте. */
+@keyframes panel-in{
+  from{opacity:0; transform:translateX(28px)}
+  to  {opacity:1; transform:none}
+}
+@keyframes panel-out{
+  from{opacity:1; transform:none}
+  to  {opacity:0; transform:translateX(28px)}
+}
+.panel:not([hidden]){animation:panel-in .26s cubic-bezier(.22,.61,.36,1)}
+.panel.is-out{animation:panel-out .2s ease forwards}
+
+/* 2. Смена раздела. Разделы лежат друг на друге и переключаются скрытием,
+   поэтому анимация вешается на тот, что стал видимым: он проступает
+   и чуть подаётся снизу — движение говорит «пришло новое», а не «мигнуло». */
+@keyframes view-in{
+  from{opacity:0; transform:translateY(8px)}
+  to  {opacity:1; transform:none}
+}
+.view:not([hidden]){animation:view-in .24s cubic-bezier(.22,.61,.36,1)}
+/* Карту не двигаем: она и так занимает весь экран, и сдвиг читался бы
+   как рывок самой карты. Ей достаточно проявления. */
+#view-map:not([hidden]){animation:fade-in .24s ease}
+@keyframes fade-in{from{opacity:0} to{opacity:1}}
+
+/* 4. Переходы внутри карточки: место -> человек -> обратно. Содержимое
+   подменяется целиком, и без перехода это выглядит как подмена страницы. */
+@keyframes body-in{
+  from{opacity:0; transform:translateX(10px)}
+  to  {opacity:1; transform:none}
+}
+.panel__body.is-in{animation:body-in .22s cubic-bezier(.22,.61,.36,1)}
+@media (prefers-reduced-motion:reduce){
+  .panel:not([hidden]){animation:none}
+  .lb:not([hidden]), .lb:not([hidden]) .lb__img, .lb.is-out{animation:none}
+  .card__photo, .lb__img, .card__ghost, .lb__ghost{transition:none}
+  .lb__cap.is-in,
+  .lb:not([hidden]) .lb__img.is-from-r,
+  .lb:not([hidden]) .lb__img.is-from-l{animation:none}
+  .card__fig, .card__fig.is-in{transition:none; opacity:1; transform:none}
+}
 .panel__back{
   display:inline-block; margin:0 0 .8em; padding:.3em .8em .3em .6em;
   border:1px solid var(--line); border-radius:2em; color:var(--ink-dim); font-size:.85em;
@@ -226,7 +451,7 @@ button{cursor:pointer; border:0; background:none}
 .panel__close:hover{color:var(--ink)}
 
 .card__over{color:var(--accent); font-size:.78em; letter-spacing:.12em; text-transform:uppercase; margin:0 0 .3em}
-.card__name{font:400 1.9em/1.15 var(--serif); margin:0 0 .15em}
+.card__name{font:400 1.9em/1.15 var(--display); margin:0 0 .15em}
 .card__rank{color:var(--ink-dim); margin:0 0 1.2em}
 .card__row{border-top:1px solid var(--line); padding:.8em 0}
 .card__k{font-size:.75em; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-dim); margin:0 0 .2em}
@@ -254,6 +479,20 @@ button{cursor:pointer; border:0; background:none}
   border-radius:5px; padding:.6em; font:.8em/1.4 ui-monospace, Menlo, Consolas, monospace;
   resize:vertical;
 }
+/* Свёрнутое поле координат. Оно нужно раз в конце работы, а место занимало
+   всегда — панель съедала нижнюю четверть карты, и метку в этой полосе
+   нельзя было ни выбрать, ни перетащить.
+
+   Сворачивается высотой, а не display:none: «Скопировать» делает select()
+   по этому полю, а у невидимого элемента выделять нечего. Элемент остаётся
+   в потоке, просто нулевой высоты. */
+.edit.is-min .edit__out{
+  height:0; min-height:0; margin:0; padding-top:0; padding-bottom:0;
+  border-top-width:0; border-bottom-width:0; opacity:0; overflow:hidden;
+}
+.edit.is-min{gap:.45em}
+/* В режиме зон поле показывает координаты меток — здесь оно ни при чём */
+body.is-zones #edit-coords{display:none}
 .edit__row{display:flex; gap:.5em}
 .edit__btn{border:1px solid var(--line); border-radius:5px; padding:.45em 1.1em; color:var(--ink)}
 .edit__btn:hover{border-color:var(--accent); color:var(--accent)}
@@ -269,6 +508,16 @@ button{cursor:pointer; border:0; background:none}
 .pt--edit .pt__dot{outline:2px dashed var(--accent); outline-offset:3px}
 
 .card__fig{margin:0 0 1em}
+/* Снимки ищутся перебором и появляются не мгновенно. Без перехода блок
+   возникает рывком и сдвигает всё, что ниже. Пропорции при этом уже заданы
+   в разметке (см. ratio() в app.js), поэтому высота сразу верная —
+   переход остаётся только чтобы появление не било по глазам. */
+.card__fig[hidden]{display:none}
+.card__fig{opacity:0; transform:translateY(-6px)}
+.card__fig.is-in{
+  opacity:1; transform:none;
+  transition:opacity .3s ease, transform .3s cubic-bezier(.22,.61,.36,1);
+}
 .card__photo{cursor:zoom-in}
 /* Лента миниатюр: показывается, только если снимков больше одного */
 .card__thumbs{display:flex; gap:.4em; margin:.5em 0 0; flex-wrap:wrap}
@@ -283,8 +532,24 @@ button{cursor:pointer; border:0; background:none}
 }
 .card__credit a{color:var(--ink-dim)}
 .card__credit a:hover{color:var(--accent)}
+/* Смена снимка по миниатюре — наплывом, а не подменой кадра встык.
+   Высота едет вместе с картинкой: снимки разной пропорции, и без перехода
+   подпись с лентой миниатюр прыгали вниз раньше, чем появлялся снимок. */
+.card__shot{position:relative}
+.card__photo{transition:opacity .22s ease, height .32s cubic-bezier(.22,.61,.36,1)}
+.card__photo.is-swap{opacity:0}
+/* Уходящий кадр: лежит поверх нового и растворяется. Тянется вместе
+   с коробкой, поэтому старый снимок «сжимается» в размер нового. */
+.card__ghost{
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:contain; background:var(--bg); border-radius:6px;
+  pointer-events:none; opacity:1; transition:opacity .28s ease;
+}
+.card__ghost.is-out{opacity:0}
 .card__photo{
   display:block; width:100%; max-height:44vh;
+  /* Пока пропорции не пришли — не нулевая высота, иначе всё равно прыгнет */
+  min-height:12vh;
   /* contain, а не cover: на портретах кадрирование срезает лица */
   object-fit:contain;
   border-radius:6px; margin:0; background:var(--bg);
@@ -297,7 +562,45 @@ button{cursor:pointer; border:0; background:none}
   padding:clamp(20px,4vw,60px);
 }
 .lb[hidden]{display:none}
+/* Открытие и закрытие полноэкранного просмотра. Фон проявляется, снимок
+   заодно чуть подрастает — движение подсказывает, что картинка вышла
+   вперёд, а не просто сменился экран. */
+@keyframes lb-in    {from{opacity:0} to{opacity:1}}
+@keyframes lb-out   {from{opacity:1} to{opacity:0}}
+@keyframes lb-img-in{from{opacity:0; transform:scale(.96)} to{opacity:1; transform:none}}
+.lb:not([hidden]){animation:lb-in .2s ease}
+.lb:not([hidden]) .lb__img{animation:lb-img-in .28s cubic-bezier(.22,.61,.36,1)}
+.lb.is-out{animation:lb-out .18s ease forwards}
+/* Листание внутри полного экрана — тем же наплывом, что и в карточке,
+   но с направлением: новый кадр приходит с той стороны, куда листаешь,
+   старый уходит в противоположную. Без этого в ленте из полутора десятков
+   снимков непонятно, вперёд ты пошёл или назад.
+
+   Сдвиг маленький, 26 пикселей: это подсказка направления, а не перелистывание
+   страницы. Больше — и полноэкранный просмотр начинает мельтешить. */
+.lb__img.is-swap{opacity:0; transition:opacity .2s ease}
 .lb__img{max-width:100%; max-height:100%; object-fit:contain; cursor:zoom-out}
+/* Приход нового кадра — анимацией, а не переходом. Переход здесь не годится:
+   снимки лежат в кэше, load приходит через считанные миллисекунды, и браузер
+   успевает только начать движение «туда», а потом разворачивает его обратно.
+   Проверено: за весь наплыв снимок бледнел всего до 0,95. Анимация играет
+   от начала до конца независимо от того, когда пришёл файл. */
+@keyframes lb-from-r{from{opacity:0; transform:translateX(26px)} to{opacity:1; transform:none}}
+@keyframes lb-from-l{from{opacity:0; transform:translateX(-26px)} to{opacity:1; transform:none}}
+/* Селектор с .lb:not([hidden]) — не для красоты: правило открытия выше задаёт
+   этому же элементу свою анимацию и по весу перебивает простое .lb__img.is-from-r.
+   Проверено: снимок оставался при непрозрачности 1, наплыв не играл вовсе. */
+.lb:not([hidden]) .lb__img.is-from-r{animation:lb-from-r .26s cubic-bezier(.22,.61,.36,1)}
+.lb:not([hidden]) .lb__img.is-from-l{animation:lb-from-l .26s cubic-bezier(.22,.61,.36,1)}
+/* Копия прежнего кадра. Лежит по своим координатам поверх нового: у соседних
+   снимков разная пропорция, и в общем потоке старый съехал бы с места. */
+.lb__ghost{
+  position:absolute; object-fit:contain; border-radius:6px; pointer-events:none;
+  transition:opacity .26s ease, transform .26s cubic-bezier(.22,.61,.36,1);
+}
+.lb__ghost.is-to-l{opacity:0; transform:translateX(-26px)}
+.lb__ghost.is-to-r{opacity:0; transform:translateX(26px)}
+.lb__cap.is-in{animation:fade-in .26s ease}
 .lb__cap{
   position:absolute; left:0; right:0; bottom:1em; margin:0;
   text-align:center; font-size:.8em; color:#cfcac0;
@@ -310,16 +613,112 @@ button{cursor:pointer; border:0; background:none}
 .lb__nav:hover,.lb__close:hover{color:#fff}
 .lb__nav[hidden]{display:none}
 
+/* Список перестраивается при поиске, фильтре и выборе года. Без перехода
+   он подменяется встык, и непонятно, что это отклик на твоё действие. */
+@keyframes list-in{from{opacity:0} to{opacity:1}}
+.list.is-in{animation:list-in .18s ease}
+
+/* Метки при смене масштаба пересобираются заново: кластеры расходятся,
+   появляются новые. Без перехода они возникают из ниоткуда. */
+/* ВНИМАНИЕ: метка центрируется на своей точке через transform
+   (translate(-50%,-50%) в .pt). Всякая анимация transform обязана этот сдвиг
+   повторить — иначе на время анимации метка теряет центровку и рисуется
+   на пол-кружка ниже и правее, а в конце возвращается рывком. Ровно это
+   и выглядело как «метки скачут, когда собираются в кластеры». */
+@keyframes pt-in{
+  from{opacity:0; transform:translate(-50%,-50%) scale(.86)}
+  to  {opacity:1; transform:translate(-50%,-50%) scale(1)}
+}
+/* Метка, которой раньше на карте не было вовсе */
+.pt--fade{animation:pt-in .22s cubic-bezier(.22,.61,.36,1)}
+
+/* Слияние и распад групп.
+
+   Точка не должна исчезать на месте и появляться в другом: человеку нужно
+   видеть, ЧТО куда делось. Поэтому при отдалении метка уезжает в кружок
+   группы, которая её поглотила, и там гаснет, а при приближении —
+   выезжает из него. Едет transform, а не left/top: браузер считает его
+   на видеокарте и не пересчитывает раскладку всего слоя. */
+.pt--move{transition:transform .38s cubic-bezier(.22,.61,.36,1)}
+.pt--ghost{
+  pointer-events:none;
+  transition:transform .38s cubic-bezier(.22,.61,.36,1), opacity .38s ease;
+}
+.pt--ghost.is-out{opacity:0}
+.pt--ghost .pt__label{display:none}      /* подпись уезжает вместе с меткой — лишнее */
+
+/* Экран покоя включается каждые полторы минуты и так же уходит.
+   В зале это происходит весь день — рывок будет мозолить глаза. */
+@keyframes idle-in {from{opacity:0} to{opacity:1}}
+@keyframes idle-out{from{opacity:1} to{opacity:0}}
+.idle:not([hidden]){animation:idle-in .5s ease}
+.idle.is-out{animation:idle-out .35s ease forwards}
+
+@media (prefers-reduced-motion:reduce){
+  .list.is-in, .pt--fade,
+  .idle:not([hidden]), .idle.is-out{animation:none}
+}
+
+/* Кнопка вызова клавиатуры — рядом с полем поиска, того же роста */
+.kbcall{
+  flex:0 0 auto; width:var(--ctl, 2.7em); padding:0;
+  border:1px solid var(--line); border-radius:5px;
+  background:var(--bg-soft); color:var(--ink-dim);
+  display:flex; align-items:center; justify-content:center;
+}
+.kbcall[hidden]{display:none}
+.kbcall svg{width:1.4em; height:1.4em}
+.kbcall:hover{border-color:var(--accent); color:var(--accent)}
+.kbcall[aria-pressed="true"]{
+  background:var(--accent); color:var(--accent-in); border-color:var(--accent);
+}
+
+/* ---------- Экранная клавиатура ---------- */
+/* Появляется снизу, когда посетитель встал в поле поиска. Клавиши крупные:
+   палец на киоске толще курсора, и мелкие кнопки на сенсоре не нажимаются. */
+.kb{
+  position:fixed; left:0; right:0; bottom:0; z-index:75;
+  background:var(--bg-soft); border-top:1px solid var(--line);
+  padding:.7em clamp(.5em,2vw,1.5em) 1em;
+  box-shadow:0 -10px 30px rgba(0,0,0,.12);
+  animation:kb-in .22s cubic-bezier(.22,.61,.36,1);
+}
+.kb[hidden]{display:none}
+.kb.is-out{animation:kb-out .18s ease forwards}
+@keyframes kb-in {from{opacity:0; transform:translateY(24px)} to{opacity:1; transform:none}}
+@keyframes kb-out{from{opacity:1; transform:none} to{opacity:0; transform:translateY(24px)}}
+
+.kb__rows{display:flex; flex-direction:column; gap:.4em; max-width:56em; margin:0 auto}
+.kb__r{display:flex; gap:.4em; justify-content:center}
+.kb__k{
+  flex:1 1 0; min-width:1.8em; max-width:3.6em;
+  padding:.7em 0; border:1px solid var(--line); border-radius:6px;
+  background:var(--bg); color:var(--ink); font-size:1.05em; line-height:1;
+  transition:background .12s ease, border-color .12s ease, transform .08s ease;
+}
+.kb__k:hover{border-color:var(--accent); color:var(--accent)}
+.kb__k:active{transform:translateY(1px); background:var(--bg-soft)}
+.kb__k--wide{flex:3 1 0; max-width:none}
+/* Клавиши со словами. Ограничение в 3.4em ставилось под одну букву,
+   и «Очистить» из него вылезало: буквы шире клавиши. */
+.kb__k--txt{flex:1.6 1 0; max-width:none; font-size:.86em; white-space:nowrap; padding:.75em .6em}
+.kb__k--act{background:var(--accent); color:var(--accent-in); border-color:var(--accent)}
+.kb__k--act:hover{color:var(--accent-in)}
+
+@media (prefers-reduced-motion:reduce){
+  .kb, .kb.is-out{animation:none}
+}
+
 /* ---------- Панель музея ---------- */
 .tab--staff{border-color:var(--accent)}
 .tab--staff[hidden]{display:none}
 
 .dt{display:flex; flex-wrap:wrap; gap:1.4em; flex:0 0 auto}
-.dt__n{font:1.7em/1 var(--serif); color:var(--accent); display:block}
+.dt__n{font:1.7em/1 var(--display); color:var(--accent); display:block}
 .dt__l{font-size:.75em; color:var(--ink-dim); text-transform:uppercase; letter-spacing:.07em}
 .dt__cols{display:flex; gap:var(--pad); flex:1 1 auto; min-height:0}
 .dt__col{flex:1 1 0; min-width:0; display:flex; flex-direction:column; gap:.5em}
-.dt__h{margin:0; font:1.1em/1.2 var(--serif); color:var(--ink)}
+.dt__h{margin:0; font:1.1em/1.2 var(--display); color:var(--ink)}
 .dt__hint{margin:0; font-size:.78em; color:var(--ink-dim)}
 .dt__hint code{color:var(--accent)}
 .dt__acts{display:flex; gap:.5em; flex:0 0 auto}
@@ -329,7 +728,7 @@ button{cursor:pointer; border:0; background:none}
   width:100%; text-align:left; padding:.6em .9em; display:flex; gap:.7em; align-items:baseline;
 }
 .iss__t:hover{background:var(--bg-soft)}
-.iss__n{font-family:var(--serif); font-size:1.2em; color:var(--accent); min-width:2.6em}
+.iss__n{font-family:var(--display); font-size:1.2em; color:var(--accent); min-width:2.6em}
 .iss--ok .iss__n{color:var(--ink-dim)}
 .iss__b{padding:0 .9em .8em; font-size:.85em; color:var(--ink-dim); max-height:12em; overflow-y:auto}
 .iss__b[hidden]{display:none}
@@ -348,7 +747,12 @@ button{cursor:pointer; border:0; background:none}
 #dt-places{overflow-y:auto; flex:1 1 auto; min-height:0}
 
 /* ---------- Легенда ---------- */
+/* Легенда и подпись под картой — справочные, обработчиков на них нет.
+   Но лежат они поверх карты и молча съедали нажатия: в левом верхнем углу
+   не поставить ни метку, ни вершину. Тот же случай, что и со слоями, —
+   перехват должен висеть на том, что действительно нажимают. */
 .legend{
+  pointer-events:none;
   position:absolute; left:.6em; top:.6em; z-index:5;
   display:flex; flex-direction:column; gap:.3em;
   background:color-mix(in srgb, var(--bg) 82%, transparent);
@@ -492,6 +896,22 @@ button{cursor:pointer; border:0; background:none}
 .zdot:hover{background:var(--accent)}
 .fld__v{font-size:.9em; padding-top:.45em; display:block}
 
+/* Служебная строка внизу карточки: координаты. Нужна сотруднику музея,
+   посетителю не мешает — намеренно на грани заметности. */
+.card__tech{
+  margin:2em 0 0; font-size:.68em; letter-spacing:.04em;
+  color:var(--ink-dim); opacity:.5;
+  font-variant-numeric:tabular-nums;
+}
+
+/* Список прошлых версий */
+.hist__r{
+  display:flex; align-items:center; justify-content:space-between; gap:1em;
+  padding:.5em .2em; border-bottom:1px solid var(--line);
+}
+.hist__r b{font-weight:400}
+.hist__r small{color:var(--ink-dim); font-size:.82em}
+
 /* ---------- Разделение правки: метки или зоны ---------- */
 /* Одновременно правится что-то одно. Неактивный слой гасится и перестаёт
    ловить нажатия — иначе они спорят за одну и ту же площадь карты. */
@@ -505,7 +925,85 @@ body.is-places .zones ellipse,
 body.is-places .zones polygon{pointer-events:none; cursor:default}
 body.is-places .zdot{display:none}
 
-.dt__where{font-size:.78em; color:var(--ink-dim); align-self:center}
+/* ---------- Добавление объектов — только по взведённой кнопке ---------- */
+/* Кнопка добавления намеренно другого цвета, чем переключатель режима:
+   режим — это «что я правлю», а взведённая кнопка — «следующее нажатие
+   создаст объект». Спутать эти два состояния дороже, чем лишний цвет. */
+.edit__btn--arm[aria-pressed="true"]{
+  background:var(--arm); color:var(--arm-in); border-color:var(--arm);
+}
+.edit__btn--arm[aria-pressed="true"]:hover{color:var(--arm-in); border-color:var(--arm)}
+/* Перекрестье = следующее нажатие что-то создаст. При панорамировании
+   курсор остаётся «схваченной рукой», иначе непонятно, что карта тащится. */
+body.is-add .map__frame:not(.is-drag),
+body.is-draw .map__frame:not(.is-drag){cursor:crosshair}
+/* Кнопка показывается только в своём режиме — вторая была бы бессмысленна */
+body.is-zones #edit-add{display:none}
+body.is-places #edit-vx,
+body.is-places #edit-vxdel,
+body.is-places #edit-zadd{display:none}
+/* «Скопировать координаты меток» к зонам отношения не имеет и только съедает
+   ширину, которой в режиме зон и так впритык — кнопок там на две больше. */
+body.is-zones #edit-copy{display:none}
+/* Запас на узкий экран: лучше вторая строка, чем кнопки за краем */
+.edit__row{flex-wrap:wrap}
+/* В режиме удаления вершина подсвечивается тем же цветом, что и кнопка:
+   видно, что нажатие её уберёт, а не потащит. */
+body.is-erase .zdot{cursor:crosshair; border-color:var(--arm)}
+body.is-erase .zdot:hover{background:var(--arm)}
+
+/* Кнопка сохранения при несохранённых правках — обведена, а не залита:
+   заливка уже занята («режим» и «взведено»), а третий смысл нужен свой.
+   Обводка читается как «обрати внимание», не соревнуясь с ними. */
+.edit__dirty{font-size:.8em; color:var(--arm); align-self:center; white-space:nowrap}
+.edit__btn--save.is-dirty{border-color:var(--arm); color:var(--arm); font-weight:600}
+.edit__btn--save.is-dirty:hover{border-color:var(--arm); color:var(--arm)}
+
+.dt__where{font-size:.8em; color:var(--arm); align-self:center; white-space:nowrap}
+
+/* Три шага — первое, что видит сотрудник, открыв «Данные». До этого
+   раздел начинался с цифр, и было непонятно, с чего вообще начинать. */
+.steps{
+  margin:0 0 1.4em; padding:0; list-style:none;
+  display:flex; gap:1em; flex-wrap:wrap;
+}
+.steps li{
+  flex:1 1 15em; position:relative;
+  padding:.7em 1em .7em 2.6em;
+  background:var(--bg-soft); border:1px solid var(--line); border-radius:6px;
+  font-size:.9em; line-height:1.45;
+}
+.steps li:before{
+  counter-increment:step; content:counter(step);
+  position:absolute; left:.85em; top:.62em;
+  width:1.5em; height:1.5em; border-radius:50%;
+  background:var(--accent); color:var(--accent-in);
+  font-size:.85em; line-height:1.5em; text-align:center;
+}
+.steps{counter-reset:step}
+/* В панели шаги идут колонкой. Без flex:0 0 auto они растягиваются
+   по высоте контейнера и превращаются в три пустых прямоугольника. */
+.steps--panel{flex-direction:column; gap:.5em; margin-bottom:1.4em}
+.steps--panel li{flex:0 0 auto}
+
+/* Таблица «что где правится» в справке */
+.help{border-collapse:collapse; width:100%; margin:.2em 0 1.4em; font-size:.9em}
+.help td{border-bottom:1px solid var(--line); padding:.45em .2em; vertical-align:top}
+.help td:last-child{color:var(--ink-dim); white-space:nowrap; padding-left:1em}
+
+/* Предупреждение о браузере, который не умеет писать в папку.
+   Показывается СРАЗУ при входе в служебный режим, а не после нажатия
+   «Сохранить»: узнать об этом через час работы — значит узнать поздно. */
+.warn{
+  margin:0 0 1.2em; padding:.8em 1em;
+  background:var(--bg-soft); border:1px solid var(--arm); border-left-width:4px;
+  border-radius:5px; font-size:.92em; line-height:1.5;
+}
+.warn b{color:var(--arm)}
+.warn code{
+  background:var(--bg); padding:.1em .35em; border-radius:3px;
+  font-family:ui-monospace, Menlo, Consolas, monospace; font-size:.92em;
+}
 
 .edit__btn[disabled]{opacity:.4; cursor:default}
 

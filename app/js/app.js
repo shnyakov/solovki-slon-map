@@ -30,6 +30,168 @@
     return s.replace(/%(\d)/g, function (_, i) { return a[+i]; });
   }
   function placeName(p) { return (lang === "en" && p.name_en) || p.name; }
+
+  /* Широта и долгота лежат в raw — полной строке places.csv. В карточку они
+     выводятся текстом, а не ссылкой на карту: на островах нет сети, и ссылка
+     была бы мёртвой. Заодно видно, откуда координата взята: у части мест она
+     от заказчика, у части сверена с OSM, а у одной требует подтверждения. */
+  function coordText(p) {
+    var r = p.raw || {};
+    var la = (r.lat_approx || "").trim(), lo = (r.lon_approx || "").trim();
+    if (!la || !lo) return "";
+    var st = (r.coord_status || "").trim();
+    var mark = /ТРЕБУЕТ/i.test(st) ? " · " + st.toLowerCase() : "";
+    return la + ", " + lo + mark;
+  }
+
+  /* ---- имена персоналий по-английски ----
+
+     411 фамилий кириллицей в английском режиме выглядели как незаконченная
+     работа. Транслитерация делается на лету, в данные не пишется.
+
+     Схема — BGN/PCGN, та, что принята в англоязычных текстах о России
+     (х → kh, ц → ts, щ → shch). Окончания -ский/-ий приводятся к -sky/-y:
+     «Ostashkovskiy» формально верно, но по-английски так не пишут.
+
+     ЭТО МАШИННАЯ ТРАНСЛИТЕРАЦИЯ, а не написание, утверждённое музеем.
+     У них могут быть свои формы имён новомучеников, принятые в их изданиях.
+     Поэтому есть путь переопределения: колонки name_en и rank_en в persons.csv.
+     Заполнены — берутся они, пусто — работает транслитерация. */
+
+  var TR = {
+    "а":"a","б":"b","в":"v","г":"g","д":"d","е":"e","ё":"e","ж":"zh","з":"z",
+    "и":"i","й":"y","к":"k","л":"l","м":"m","н":"n","о":"o","п":"p","р":"r",
+    "с":"s","т":"t","у":"u","ф":"f","х":"kh","ц":"ts","ч":"ch","ш":"sh",
+    "щ":"shch","ъ":"","ы":"y","ь":"","э":"e","ю":"yu","я":"ya"
+  };
+
+  function tr(src) {
+    var out = "";
+    for (var i = 0; i < src.length; i++) {
+      var ch = src[i], low = ch.toLowerCase(), rep = TR[low];
+      if (rep === undefined) { out += ch; continue; }          // латиница, цифры, знаки
+      // Мягкий знак перед е/ё/и даёт «y»: Арефьев → Arefyev, а не Arefev.
+      // Перед я/ю он не нужен — те и сами дают ya/yu (Ильяс → Ilyas).
+      if (low === "ь") {
+        var nx = (src[i + 1] || "").toLowerCase();
+        rep = (nx === "е" || nx === "ё" || nx === "и") ? "y" : "";
+      }
+      if (ch !== low && rep) rep = rep[0].toUpperCase() + rep.slice(1);
+      out += rep;
+    }
+    // Окончания: Ostashkovskiy -> Ostashkovsky, Yuriy -> Yury
+    return out.replace(/iy\b/g, "y").replace(/yy\b/g, "y");
+  }
+
+  // Сан переводится, а не транслитерируется: «episkop» ничего не сообщает
+  // англоязычному посетителю, Bishop — сообщает. Слова вне словаря
+  // (обычно прилагательные от городов) транслитерируются.
+  var RANKS = {
+    "епископ":"Bishop", "еп":"Bishop",
+    "архиепископ":"Archbishop", "архиеп":"Archbishop", "архепис":"Archbishop",
+    "митрополит":"Metropolitan", "митропол":"Metropolitan",
+    "архиерей":"Hierarch", "архиер":"Hierarch",
+    "священник":"Priest", "свящ":"Priest", "свящ-к":"Priest", "иерей":"Priest",
+    "протоиерей":"Archpriest", "протоир":"Archpriest", "протоиер":"Archpriest",
+    "протопресвитер":"Protopresbyter", "протопресв":"Protopresbyter",
+    "иеромонах":"Hieromonk", "иеромон":"Hieromonk",
+    "игумен":"Hegumen", "архимандрит":"Archimandrite",
+    "диакон":"Deacon", "дьякон":"Deacon", "протодиакон":"Protodeacon",
+    "монах":"Monk", "монахиня":"Nun",
+    // «мон.» в таблице музея стоит и у мужчин, и у женщин — гадать нельзя
+    "мон":"Monastic",
+    "схимонах":"Schemamonk", "послушник":"Novice",
+    "псаломщик":"Psalm-reader", "псалом":"Psalm-reader",
+    "сщмч":"Hieromartyr", "прмч":"Venerable Martyr", "прп":"Venerable", "мч":"Martyr",
+    // Написания, встречающиеся в таблице музея, в том числе с опечатками:
+    // «протоирей» стоит в 34 записях, «архепископ» в 15 — переводим как есть,
+    // исправлять чужой источник не наше дело.
+    "протоирей":"Archpriest", "прот":"Archpriest", "архепископ":"Archbishop",
+    "иподиакон":"Subdeacon", "иеродиакон":"Hierodeacon",
+    "мирянин":"Layman", "мирянка":"Laywoman",
+    "исповедник":"Confessor", "исповедница":"Confessor",
+    "настоятель":"Superior", "монастыря":"Monastery",
+    "и":"and",
+    /* «арх.» без уточнения — это может быть и архимандрит, и архиепископ.
+       Таких записей 7. Гадать в мемориальной экспозиции нельзя, поэтому
+       оставляем честное сокращение, а музею вопрос задан отдельно. */
+    "арх":"Arch."
+  };
+
+  function rankEn(src) {
+    return String(src || "").split(/(\s+)/).map(function (w) {
+      if (/^\s+$/.test(w) || !w) return w;
+      var key = w.toLowerCase().replace(/[.,]+$/, "");
+      var hit = RANKS[key];
+      if (!hit) return tr(w);
+      return w.slice(-1) === "," ? hit + "," : hit;
+    }).join("");
+  }
+
+  /* Фильтр по сану.
+
+     В таблице музея сан записан вместе с кафедрой: «епископ Осташковский»,
+     «архепископ Куйбышевский и Ставропольский». Если брать строку как есть,
+     в списке получается сто двадцать пунктов, и почти за каждым стоит один
+     человек. Фильтровать нечем.
+
+     Поэтому сводим к основному сану: кафедру и уточнения вроде «сщмч»
+     отбрасываем, сокращения разворачиваем. Порядок в списке — церковная
+     иерархия, а не алфавит: он тут и есть содержательный. Рядом число людей.
+
+     Написания с опечатками («архепископ», «протоирей») учтены: это таблица
+     музея, править её не наше дело. */
+  var RANK_BASE = {
+    "митрополит":"митрополит", "митр":"митрополит",
+    "архиепископ":"архиепископ", "архепископ":"архиепископ", "археп":"архиепископ",
+    "архепскоп":"архиепископ", "архиеп":"архиепископ",
+    "епископ":"епископ", "еп":"епископ",
+    "архиерей":"архиерей",
+    "архимандрит":"архимандрит", "арх":"архимандрит",
+    "игумен":"игумен",
+    "протопресвитер":"протопресвитер", "протопресв":"протопресвитер",
+    "протоиерей":"протоиерей", "протоирей":"протоиерей", "прот":"протоиерей",
+    "иеромонах":"иеромонах", "иеромон":"иеромонах", "иером":"иеромонах",
+    "священник":"священник", "свящ":"священник", "свящ-к":"священник", "иерей":"священник",
+    "протодиакон":"протодиакон",
+    "иеродиакон":"иеродиакон",
+    "иподиакон":"иподиакон",
+    "диакон":"диакон", "дьякон":"диакон",
+    "схимонах":"схимонах",
+    "монахиня":"монахиня",
+    "монах":"монах", "мон":"монашествующий", "монашествующий":"монашествующий",
+    "послушник":"послушник",
+    "псаломщик":"псаломщик", "псалом":"псаломщик",
+    "регент":"регент",
+    "мирянка":"мирянка", "мирянин":"мирянин", "миряни":"мирянин",
+    "отец":"священник"
+  };
+
+  // Порядок церковной иерархии. Всё, чего здесь нет, уходит в конец.
+  var RANK_ORDER = ["митрополит", "архиепископ", "епископ", "архиерей",
+    "архимандрит", "игумен", "протопресвитер", "протоиерей", "иеромонах",
+    "священник", "протодиакон", "иеродиакон", "иподиакон", "диакон",
+    "схимонах", "монах", "монахиня", "монашествующий", "послушник",
+    "псаломщик", "регент", "мирянин", "мирянка"];
+
+  function baseRank(rank) {
+    var words = String(rank || "").split(/[\s.,]+/);
+    for (var i = 0; i < words.length; i++) {
+      var w = words[i].toLowerCase().replace(/ё/g, "е").replace(/[?()]/g, "");
+      if (RANK_BASE[w]) return RANK_BASE[w];
+    }
+    return "";
+  }
+
+  function personName(p) {
+    var ru = (p.name + " " + p.surname).trim();
+    if (lang !== "en") return ru;
+    return (p.name_en || "").trim() || tr(ru);
+  }
+  function personRank(p) {
+    if (lang !== "en") return p.rank;
+    return (p.rank_en || "").trim() || rankEn(p.rank);
+  }
   function typeLabel(t) { return (lang === "en" && t.label_en) || t.label || t.type; }
 
   function applyLang() {
@@ -98,24 +260,75 @@
     if (cardHist.length) {
       html = '<button class="panel__back" id="panel-back">' + esc(T("back")) + '</button>' + html;
     }
-    $("#panel-body").innerHTML = html;
+    var body = $("#panel-body");
+    body.innerHTML = html;
     var b = $("#panel-back");
     if (b) b.onclick = cardBack;
-    $("#panel").hidden = false;
+
+    var p = $("#panel");
+    // Могли попасть сюда посреди затухания — отменяем его
+    clearTimeout(panelTimer);
+    p.classList.remove("is-out");
+    p.hidden = false;
     $("#scrim").hidden = false;
-    $("#panel").scrollTop = 0;
+    p.scrollTop = 0;
+
+    // Переход внутри карточки: место -> человек -> обратно. Содержимое
+    // подменяется целиком, и без перехода это выглядит подменой страницы.
+    body.classList.remove("is-in");
+    body.offsetHeight;
+    body.classList.add("is-in");
   }
+  /* Закрытие с затуханием — зеркало открытия. Убрать display сразу нельзя:
+     анимации на исчезновение в CSS не бывает, поэтому сперва класс, потом
+     скрытие по таймеру. Повторный вызов во время затухания игнорируется. */
+  var panelTimer = null;
   function closePanel() {
+    var p = $("#panel");
+    if (p.hidden || p.classList.contains("is-out")) return;
     cardReset();
-    $("#panel").hidden = true;
-    $("#scrim").hidden = true;
     lbClose();
+    p.classList.add("is-out");
+    clearTimeout(panelTimer);
+    panelTimer = setTimeout(function () {
+      p.hidden = true;
+      p.classList.remove("is-out");
+      $("#scrim").hidden = true;
+    }, 200);
   }
   $("#panel-close").onclick = closePanel;
   $("#scrim").onclick = closePanel;
 
   // Клики по ссылкам внутри карточки (места и люди)
   $("#panel-body").onclick = function (e) {
+    var rb = e.target.closest("[data-restore]");
+    if (rb) {
+      var name = rb.dataset.restore;
+      if (!confirm("Вернуть данные к версии " + prettyStamp(name) + "?\n\n" +
+                   "Нынешнее состояние будет сохранено отдельным снимком.\n" +
+                   "После возврата страница перезагрузится.")) return;
+      rb.textContent = "Возвращаю…";
+      (srv
+        ? fetch("api/restore", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: name })
+          }).then(function (r) { return r.json(); })
+            .then(function (j) { if (j.error) throw new Error(j.error); })
+        : withDir().then(function (h) {
+            if (!h) return Promise.reject(new Error("папка не выбрана"));
+            return restoreVersion(h, name);
+          })
+      ).then(function () {
+        dirty = false;                      // иначе beforeunload перехватит перезагрузку
+        alert("Возвращено к версии " + prettyStamp(name) + ".");
+        location.reload();
+      }).catch(function (err) {
+        rb.textContent = "Вернуть";
+        alert("Не удалось вернуть: " + err.message);
+      });
+      return;
+    }
     var el = e.target.closest("[data-person],[data-place]");
     if (!el) return;
     if (el.dataset.person) showCard("person", el.dataset.person);
@@ -127,11 +340,26 @@
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
     });
   }
+  /* Пустое поле лучше не показывать вовсе.
+
+     Историческая справка не написана ни у одного из 19 мест, источник
+     не указан у 83 % персоналий — и карточки состояли наполовину из
+     «справка ещё не написана» и «требует уточнения». Посетителю это
+     ничего не даёт: сделать он с этим ничего не может, а экспозиция
+     выглядит недоделанной.
+
+     Пробелы никуда не спрятались: их считает и показывает «Обзор»
+     в панели музея — тем, кто действительно может их закрыть.
+
+     emptyText передаётся, только когда отсутствие само по себе
+     содержательно. Ни одного такого поля сейчас нет, но параметр
+     оставлен: вернуть подпись — одна строка. */
   function field(label, value, emptyText) {
     var has = value && String(value).trim();
+    if (!has && !emptyText) return "";
     return '<div class="card__row"><p class="card__k">' + esc(label) + '</p>' +
       '<p class="card__v' + (has ? '' : ' card__v--none') + '">' +
-      esc(has ? value : (emptyText || T("cardPending"))) + '</p></div>';
+      esc(has ? value : emptyText) + '</p></div>';
   }
 
   /* ---------------- изображения ---------------- */
@@ -140,7 +368,9 @@
      и останавливаемся на первом промахе. Подписи берутся из photo-credits.csv
      по имени файла, так что у каждого снимка может быть свой источник. */
 
-  var PHOTO_MAX = 8;
+  // Пятнадцать снимков у Кремля: четырнадцать от музея плюс прежний
+  // с Викисклада. Предел в восемь обрезал бы почти половину.
+  var PHOTO_MAX = 16;
 
   function creditHtml(name, tag) {
     var c = (D.credits || {})[name];
@@ -156,18 +386,50 @@
 
   // Сначала изображение, встроенное через панель музея, затем файлы по соглашению.
   // Возвращаем пары {src, key}: key нужен, чтобы найти подпись в photo-credits.
-  function findPhotos(dir, id, done) {
-    var found = [];
+  /* Снимки берутся из описи, собранной build.py: там уже известны и состав,
+     и размеры каждого файла. Благодаря этому карточка отводит место под
+     снимок СРАЗУ — раньше галерея была пустой, пока шла проверка файлов,
+     а потом содержимое уезжало вниз рывком (у Кремля на 478 пикселей).
+
+     Каталог по file:// прочитать нельзя, поэтому опись и нужна. Но перебор
+     файлов не выброшен: он продолжается после последнего известного снимка.
+     Так работает обещание из инструкции музею — «положите файл в папку,
+     приложение подхватит его само». Такой снимок покажется с прежним рывком,
+     зато без пересборки. */
+  /* Состав галереи известен заранее — из описи, которую собирает build.py:
+     там и список файлов, и размеры каждого. Поэтому карточка отводит место
+     под снимок СРАЗУ. Раньше галерея была пустой, пока шёл перебор файлов,
+     а потом содержимое уезжало вниз рывком — у Кремля на 478 пикселей.
+
+     Каталог по file:// прочитать нельзя, оттого опись и нужна. Но перебор
+     не выброшен: он продолжается после последнего известного снимка. Так
+     держится обещание из инструкции музею — «положите файл в папку,
+     приложение подхватит его само». Такой снимок появится с прежним рывком,
+     зато без пересборки. */
+  function knownPhotos(dir, id) {
+    var out = [];
     var embedded = (D.photos || {})[id];
-    if (embedded) found.push({ src: embedded, key: id });
-    var n = 0;
+    if (embedded) out.push({ src: embedded, key: id, w: 0, h: 0 });
+    var known = ((D.gallery || {})[dir] || {})[id] || [];
+    for (var i = 0; i < known.length && out.length < PHOTO_MAX; i++) {
+      var nm = i ? id + "-" + (i + 1) : id;
+      out.push({ src: "assets/" + dir + "/" + nm + ".jpg", key: nm,
+                 w: known[i][0], h: known[i][1] });
+    }
+    return out;
+  }
+
+  // Ищет то, чего опись не знает: файлы, положенные без пересборки
+  function extraPhotos(dir, id, from, done) {
+    var found = [], n = from;
     (function step() {
-      if (found.length >= PHOTO_MAX) return done(found);
-      var name = id + (n ? "-" + (n + 1) : "");
+      if (from + found.length >= PHOTO_MAX) return done(found);
+      var name = n ? id + "-" + (n + 1) : id;
       n++;
       var img = new Image();
       img.onload = function () {
-        found.push({ src: "assets/" + dir + "/" + name + ".jpg", key: name });
+        found.push({ src: "assets/" + dir + "/" + name + ".jpg", key: name,
+                     w: img.naturalWidth || 0, h: img.naturalHeight || 0 });
         step();
       };
       img.onerror = function () { done(found); };
@@ -177,10 +439,144 @@
 
   var lbList = [], lbDir = "", lbAt = 0;
 
-  function lbShow(i) {
+  /* Подмена снимка встык выглядит как рывок: один кадр сменяется другим
+     без перехода. Гасим, ставим новый источник, проявляем по загрузке.
+     Снимки уже в кэше, так что пауза почти незаметна — но глаз успевает
+     понять, что картинка сменилась, а не «моргнула». */
+  function swapImage(el, src) {
+    if (!el) return;
+    el.classList.add("is-swap");
+    el.onload = el.onerror = function () { el.classList.remove("is-swap"); };
+    el.src = src;
+  }
+
+  // В CSS движение отключается медиа-запросом, но наплыв снимков делается
+  // из кода — здесь тот же запрос нужен руками.
+  function motionOff() {
+    try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
+    catch (e) { return false; }
+  }
+
+  /* Смена снимка внутри карточки — это два движения сразу, и нужны оба.
+
+     Первое — сама картинка. Гашение в пустоту и проявление читались как
+     «моргнуло»: между снимками показывался фон карточки. Теперь наплыв:
+     старый кадр остаётся лежать поверх и растворяется, пока новый
+     проступает под ним.
+
+     Второе — высота. Снимки разной пропорции, и места им нужно разное:
+     портрет вдвое выше пейзажа. Раньше высота менялась в тот самый миг,
+     когда нажали миниатюру: подпись и лента миниатюр прыгали вниз ещё
+     до того, как появлялся новый снимок. Теперь высота едет тем же
+     переходом, и прыжка нет.
+
+     Целевая высота берётся из описи (w/h в data.js), а не из загруженного
+     файла: иначе пришлось бы сперва дождаться загрузки, и переход
+     начинался бы с опозданием. */
+  var shotTimer = null;
+
+  function swapShot(m, it) {
+    if (!m) return;
+    var box = m.parentNode;
+    if (!box || !box.classList.contains("card__shot") || !(it.w && it.h) || motionOff()) {
+      if (it.w && it.h) m.style.aspectRatio = it.w + "/" + it.h;
+      swapImage(m, it.src);
+      return;
+    }
+
+    clearTimeout(shotTimer);
+    var stale = box.querySelector(".card__ghost");   // быстро щёлкают по миниатюрам
+    if (stale) stale.parentNode.removeChild(stale);
+
+    var cs = getComputedStyle(m);
+    var from = m.getBoundingClientRect().height;
+    var wide = m.clientWidth;
+    var cap = parseFloat(cs.maxHeight), min = parseFloat(cs.minHeight);
+    var to = wide * it.h / it.w;
+    if (cap) to = Math.min(to, cap);
+    if (min) to = Math.max(to, min);
+
+    var ghost = document.createElement("img");
+    ghost.className = "card__ghost";
+    ghost.src = m.currentSrc || m.src;
+    box.appendChild(ghost);
+
+    // Высота задаётся явно: пропорция как способ её задать на время
+    // перехода не годится — переходить нужно между двумя числами.
+    m.style.aspectRatio = "auto";
+    m.style.height = from + "px";
+    m.classList.add("is-swap");
+    m.onload = m.onerror = function () {
+      m.classList.remove("is-swap");                 // новый проступает,
+      ghost.classList.add("is-out");                 // старый растворяется
+    };
+    m.src = it.src;
+
+    m.offsetHeight;                                  // принять высоту до перехода
+    m.style.height = to + "px";
+
+    shotTimer = setTimeout(function () {
+      if (ghost.parentNode) ghost.parentNode.removeChild(ghost);
+      m.classList.remove("is-swap");
+      m.style.height = "";
+      m.style.aspectRatio = it.w + "/" + it.h;       // дальше высоту держит пропорция
+    }, 420);
+  }
+
+  /* Листание во весь экран. Раньше снимок гас в чёрный фон и проявлялся
+     обратно: между кадрами была пустота, и это читалось как «моргнуло» —
+     та же беда, что уже вылечена в карточке.
+
+     Теперь наплыв и направление. Старый кадр остаётся лежать поверх и
+     растворяется, уезжая в ту сторону, откуда листаем; новый проступает
+     под ним, приходя с той стороны, куда листаем. Направление важнее
+     красоты: в ленте из пятнадцати снимков без него непонятно, вперёд
+     ты пошёл или назад.
+
+     Копия кладётся по координатам самого снимка, а не в общий поток:
+     у соседних кадров разная пропорция, и место под них разное — старому
+     надо остаться ровно там, где он был, пока не растворится. */
+  var lbSwapTimer = null;
+
+  function lbSwap(src, dir) {
+    var m = $("#lb-img"), lb = $("#lb");
+    if (!m) return;
+    if (!dir || motionOff()) { swapImage(m, src); return; }
+
+    clearTimeout(lbSwapTimer);
+    var stale = lb.querySelector(".lb__ghost");      // листают быстрее, чем идёт наплыв
+    if (stale) stale.parentNode.removeChild(stale);
+
+    var r = m.getBoundingClientRect();
+    var ghost = document.createElement("img");
+    ghost.className = "lb__ghost";
+    ghost.src = m.currentSrc || m.src;
+    ghost.style.left = r.left + "px";
+    ghost.style.top = r.top + "px";
+    ghost.style.width = r.width + "px";
+    ghost.style.height = r.height + "px";
+    lb.appendChild(ghost);
+
+    var from = dir > 0 ? "is-from-r" : "is-from-l";
+    var to = dir > 0 ? "is-to-l" : "is-to-r";
+    m.classList.remove("is-from-r", "is-from-l");
+    m.onload = m.onerror = function () {
+      replay(m, from);                               // новый выезжает на место,
+      ghost.classList.add(to);                       // старый уходит и гаснет
+    };
+    m.src = src;
+
+    lbSwapTimer = setTimeout(function () {
+      if (ghost.parentNode) ghost.parentNode.removeChild(ghost);
+      m.classList.remove("is-from-r", "is-from-l");
+    }, 420);
+  }
+
+  function lbShow(i, dir) {
     lbAt = (i + lbList.length) % lbList.length;
-    $("#lb-img").src = lbList[lbAt].src;
+    lbSwap(lbList[lbAt].src, dir || 0);
     $("#lb-cap").innerHTML = creditHtml(lbList[lbAt].key, "span");
+    if (dir) replay($("#lb-cap"), "is-in");          // подпись меняется вместе со снимком
     var many = lbList.length > 1;
     $("#lb-prev").hidden = !many;
     $("#lb-next").hidden = !many;
@@ -190,59 +586,109 @@
     $("#lb").hidden = false;
     lbShow(i);
   }
-  function lbClose() { $("#lb").hidden = true; }
+  /* Закрытие с затуханием. Убрать display сразу нельзя — анимации на
+     исчезновение в CSS нет, поэтому сперва класс, потом скрытие по таймеру.
+     Повторный вызов во время затухания игнорируется: закрывать уже нечего. */
+  var lbTimer = null;
+  function lbClose() {
+    var lb = $("#lb");
+    if (lb.hidden || lb.classList.contains("is-out")) return;
+    lb.classList.add("is-out");
+    clearTimeout(lbTimer);
+    lbTimer = setTimeout(function () {
+      lb.hidden = true;
+      lb.classList.remove("is-out");
+      var g = lb.querySelector(".lb__ghost");        // закрыли посреди наплыва
+      if (g) g.parentNode.removeChild(g);
+      $("#lb-img").classList.remove("is-from-r", "is-from-l");
+    }, 180);
+  }
 
   $("#lb-close").onclick = lbClose;
   $("#lb-img").onclick = lbClose;
   $("#lb").onclick = function (e) { if (e.target === $("#lb")) lbClose(); };
-  $("#lb-prev").onclick = function () { lbShow(lbAt - 1); };
-  $("#lb-next").onclick = function () { lbShow(lbAt + 1); };
+  $("#lb-prev").onclick = function () { lbShow(lbAt - 1, -1); };
+  $("#lb-next").onclick = function () { lbShow(lbAt + 1, 1); };
   document.addEventListener("keydown", function (e) {
     if ($("#lb").hidden) return;
     if (e.key === "Escape") lbClose();
-    if (e.key === "ArrowLeft") lbShow(lbAt - 1);
-    if (e.key === "ArrowRight") lbShow(lbAt + 1);
+    if (e.key === "ArrowLeft") lbShow(lbAt - 1, -1);
+    if (e.key === "ArrowRight") lbShow(lbAt + 1, 1);
   });
 
   // Галерея вставляется в карточку после того, как выяснилось, сколько файлов есть
+  // Пропорции в разметку: браузер отводит место до того, как покажет снимок
+  function ratio(it) {
+    return (it.w && it.h) ? ' style="aspect-ratio:' + it.w + "/" + it.h + '"' : "";
+  }
+
   function fillGallery(dir, id) {
     var slot = $("#gallery");
     if (!slot) return;
-    findPhotos(dir, id, function (list) {
-      if (!list.length) { slot.remove(); return; }
+    var list = knownPhotos(dir, id);
+
+    function render() {
+      // Не удаляем, а прячем: если музей положит снимок в папку без
+      // пересборки, extraPhotos его найдёт — и вставлять будет куда.
+      slot.hidden = !list.length;
+      if (!list.length) return;
       var thumbs = list.length > 1
         ? '<div class="card__thumbs">' + list.map(function (it, i) {
             return '<img class="card__thumb' + (i ? "" : " is-on") + '" data-i="' + i +
                    '" src="' + esc(it.src) + '" alt="">';
           }).join("") + "</div>"
         : "";
-      slot.innerHTML = '<img class="card__photo" id="gal-main" src="' + esc(list[0].src) +
-        '" alt="">' + creditHtml(list[0].key, "p") + thumbs;
+      var at = Math.min(+(slot.dataset.at || 0), list.length - 1);
+      slot.innerHTML = '<div class="card__shot"><img class="card__photo" id="gal-main"' +
+        ratio(list[at]) + ' src="' + esc(list[at].src) + '" alt=""></div>' +
+        creditHtml(list[at].key, "p") + thumbs;
+      slot.dataset.at = at;
+    }
 
-      function pick(i) {
-        $("#gal-main").src = list[i].src;
-        var cap = slot.querySelector(".card__credit");
-        var html = creditHtml(list[i].key, "p");
-        if (cap) cap.outerHTML = html || '<p class="card__credit"></p>';
-        slot.querySelectorAll(".card__thumb").forEach(function (el, j) {
-          el.classList.toggle("is-on", j === i);
-        });
-        slot.dataset.at = i;
-      }
-      slot.dataset.at = 0;
-      slot.onclick = function (e) {
-        var th = e.target.closest(".card__thumb");
-        if (th) { pick(+th.dataset.i); return; }
-        if (e.target.id === "gal-main") lbOpen(dir, list, +(slot.dataset.at || 0));
-      };
+    function pick(i) {
+      var m = $("#gal-main");
+      if (!m) return;
+      swapShot(m, list[i]);
+      var cap = slot.querySelector(".card__credit");
+      var html = creditHtml(list[i].key, "p");
+      if (cap) cap.outerHTML = html || '<p class="card__credit"></p>';
+      slot.querySelectorAll(".card__thumb").forEach(function (el, j) {
+        el.classList.toggle("is-on", j === i);
+      });
+      slot.dataset.at = i;
+    }
+
+    slot.dataset.at = 0;
+    render();                                  // сразу, без ожидания
+    slot.classList.add("is-in");
+
+    slot.onclick = function (e) {
+      var th = e.target.closest(".card__thumb");
+      if (th) { pick(+th.dataset.i); return; }
+      if (e.target.id === "gal-main") lbOpen(dir, list, +(slot.dataset.at || 0));
+    };
+
+    // Догоняем то, чего нет в описи. Обычно ничего не находит и молчит.
+    extraPhotos(dir, id, list.length, function (extra) {
+      if (!extra.length) return;
+      list = list.concat(extra);
+      render();
     });
   }
 
   function personRowHtml(p) {
     return '<li><button class="row" data-person="' + p.id + '">' +
-      '<span class="row__name">' + esc(p.name + " " + p.surname) + '</span>' +
-      '<span class="row__rank">' + esc(p.rank) + '</span>' +
-      (p.source ? '' : '<span class="row__flag">' + esc(T("noSource")) + '</span>') +
+      '<span class="row__name">' + esc(personName(p)) + '</span>' +
+      '<span class="row__rank">' + esc(personRank(p)) + '</span>' +
+      /* Пометки «без источника» здесь больше нет.
+
+          Она стояла у 363 записей из 434 и в списке читалась как брак,
+          хотя означала лишь, что музей не проставил ссылку на издание.
+          Источник у всех данных один и тот же — Соловецкий музей-заповедник,
+          и сказано об этом один раз, в подписи под картой.
+
+          Для сотрудников счёт никуда не делся: «Данные → Обзор» по-прежнему
+          показывает, у скольких персоналий ссылки нет. */
       '</button></li>';
   }
 
@@ -256,14 +702,14 @@
     openPanel(
       '<p class="card__over">' + esc(T("cardPerson")) + '</p>' +
       '<figure class="card__fig" id="gallery"></figure>' +
-      '<h2 class="card__name">' + esc((p.name + " " + p.surname).trim()) + '</h2>' +
-      '<p class="card__rank">' + esc(p.rank) + '</p>' +
+      '<h2 class="card__name">' + esc(personName(p)) + '</h2>' +
+      '<p class="card__rank">' + esc(personRank(p)) + '</p>' +
       '<div class="card__row"><p class="card__k">' + esc(T("cardPlaces")) + '</p>' +
         (places ? '<div>' + places + '</div>'
                 : '<p class="card__v card__v--none">' + esc(T("cardNotSet")) + '</p>') + '</div>' +
       (p.y0 ? field(T("cardInCamp"), p.y0 === p.y1 ? String(p.y0) : p.y0 + "–" + p.y1) : "") +
       field(T("cardYears"), p.years) +
-      field(T("cardSource"), p.source, T("cardNoSource"))
+      field(T("cardSource"), p.source)
     );
     fillGallery("photos", p.id);
   }
@@ -282,21 +728,25 @@
             '<span class="row__flag">' + p.count + '</span></button></li>';
         }).join("") + '</ul></div>'
       : '';
-    var warn = pl.count !== pl.museumCount
-      ? '<div class="card__row"><p class="card__k">' + esc(T("cardDiff")) +
-        '</p><p class="card__v card__v--none">' +
-        esc(Tf("cardDiffText", pl.museumCount, pl.count)) + '</p></div>' : '';
+    /* Расхождение учёта музея с расписанным по фамилиям посетителю не говорит
+       ничего: он не знает ни про учёт, ни про таблицу. Это рабочий сигнал для
+       музея, и он остался там, где ему место, — в «Данные → Обзор», строка
+       «мест с расхождением счёта», и в 03_Данные_аудит.md. */
 
     openPanel(
       '<p class="card__over">' + esc(TYPES[pl.type] ? typeLabel(TYPES[pl.type]) : pl.type) + '</p>' +
       '<figure class="card__fig" id="gallery"></figure>' +
       '<h2 class="card__name">' + esc(placeName(pl)) + '</h2>' +
       '<p class="card__rank">' + esc(pl.full) + '</p>' +
-      field(T("cardAbout"), pl.about, T("cardNoAbout")) +
-      field(T("cardWork"), pl.work, T("cardPending")) +
-      kidsHtml + warn +
+      field(T("cardAbout"), pl.about) +
+      field(T("cardWork"), pl.work) +
+      kidsHtml +
       '<div class="card__row"><p class="card__k">' + esc(T("cardKnown")) + ": " + people.length + '</p>' +
-      '<ul class="list card__list">' + people.map(personRowHtml).join("") + '</ul></div>'
+      '<ul class="list card__list">' + people.map(personRowHtml).join("") + '</ul></div>' +
+      /* Координаты — сведение для сотрудника, а не для посетителя: в зале
+         они не значат ничего, а место в карточке занимали наравне с работами.
+         Поэтому в самый низ и почти незаметно. */
+      (coordText(pl) ? '<p class="card__tech">' + esc(coordText(pl)) + '</p>' : "")
     );
     fillGallery("places", id);
   }
@@ -310,7 +760,6 @@
       '<ul class="list card__list">' + people.map(personRowHtml).join("") + '</ul>'
     );
   }
-  $("#btn-unplaced").onclick = function () { cardReset(); showCard("unplaced"); };
   CARDS.person = showPerson;
   CARDS.place = showPlace;
   CARDS.group = showGroup;
@@ -324,16 +773,106 @@
   var lastK = -1;                       // масштаб, на котором собраны группы
   var frame = $("#map-frame"), inner = $("#map-inner"), baseImg = $("#map-base");
 
+  /* ГРУППЫ ПЕРЕСОБИРАЮТСЯ ТОЛЬКО НА ПОКОЯЩЕЙСЯ КАРТЕ.
+
+     Метки стоят в процентах от слоя, поэтому при изменении масштаба они едут
+     вместе с ним и сами по себе никуда не прыгают. Прыгает — группировка:
+     она считается в пикселях, и на каждом новом масштабе состав групп другой.
+     Пока карта движется, эта пересборка не нужна и только мешает: слой ещё
+     едет, а метки уже переставлены под то, куда он приедет.
+
+     Движением считаем три вещи, и все три — «палец на пульсе», а не догадки:
+       · gestureOn — на карте есть указатель (перетаскивание, щипок);
+       · wheelOn   — колесо ещё крутится (у трекпада это десятки событий в секунду);
+       · is-anim   — идёт переход по ширине после кнопки зума.
+     Пока хоть одно верно, пересборка откладывается; когда всё стихло —
+     выполняется один раз. */
+  var gestureOn = false, wheelOn = false;
+  var pendingBuild = false, rebuildTimer = null;
+
+  function mapMoving() {
+    return gestureOn || wheelOn || inner.classList.contains("is-anim");
+  }
+
+  var waitFrom = 0;
+  var WAIT_MAX = 2500;         // дольше этого ждать нечего: что-то пошло не так
+
+  function schedulePoints() {
+    if (!mapMoving()) { pendingBuild = false; clearTimeout(rebuildTimer); buildPoints(true); return; }
+    if (!pendingBuild) waitFrom = Date.now();
+    pendingBuild = true;
+    clearTimeout(rebuildTimer);
+    rebuildTimer = setTimeout(settlePoints, 250);
+  }
+
+  /* Вызывается там, где движение заведомо кончилось: отпустили пальцы,
+     доиграл переход, замолчало колесо. Плюс сама себя переспрашивает
+     по таймеру — на случай, если такое событие не придёт вовсе.
+
+     Ждать бесконечно нельзя. Киоск работает в зале без присмотра, и если
+     признак движения почему-то залипнет, метки останутся собранными
+     по старому масштабу до перезагрузки страницы. Через две с половиной
+     секунды пересобираем, что бы там ни было. */
+  function settlePoints() {
+    clearTimeout(rebuildTimer);
+    if (!pendingBuild) return;
+    if (mapMoving() && Date.now() - waitFrom < WAIT_MAX) {
+      rebuildTimer = setTimeout(settlePoints, 250);
+      return;
+    }
+    pendingBuild = false;
+    buildPoints(true);
+  }
+
   // Тема живёт в данных (settings.theme), а не в разметке: иначе сотруднику музея
   // пришлось бы править index.html руками. Цвета карты зашиты внутрь SVG —
   // CSS до них не достаёт, поэтому подложка подменяется файлом.
   var THEME_KEY = "okoyom-theme";
 
+  /* Спутниковый слой.
+
+     Снимок Sentinel-2 собран по той же рамке и в той же проекции, что и схема
+     (см. make_satellite.py), поэтому просто подменяет картинку — метки, зоны
+     и подписи остаются на своих местах, пересчитывать нечего.
+
+     Слой намеренно НЕ основной. Снимок показывает сегодняшние Соловки:
+     посёлок, дороги, причалы. Экспозиция про 1923–1939 годы, и если сделать
+     его подложкой по умолчанию, посетитель решит, что так было и тогда.
+     Кнопка превращает это в осознанное сравнение: «а как это выглядит сейчас».
+
+     Второе: схема сделана так, чтобы уступать меткам. Снимок — тёмный лес,
+     тёмная вода и много текстуры, метки на нём читаются хуже. Ещё одна
+     причина держать его вторым, а не первым. */
+  var satOn = false;
+
+  function baseSrc() {
+    if (satOn) return "assets/map-satellite.jpg";
+    return D.settings && D.settings.theme === "light"
+      ? "assets/map-base-light.svg" : "assets/map-base.svg";
+  }
+
+  function setSat(on) {
+    satOn = !!on;
+    document.body.classList.toggle("is-sat", satOn);
+    var b = $("#sat-toggle");
+    if (b) {
+      b.setAttribute("aria-pressed", String(satOn));
+      b.textContent = satOn ? "Схема" : "Спутник";
+      b.title = satOn ? "Вернуться к схеме" : "Показать снимок из космоса";
+    }
+    // Лицензия снимка требует указания источника. Заодно оговариваем год:
+    // посетитель должен понимать, что смотрит на сегодняшние Соловки.
+    var note = document.querySelector(".map__note");
+    if (note) note.innerHTML = satOn ? T("satNote") : T("mapNote");
+    var want = baseSrc();
+    if (baseImg.getAttribute("src") !== want) baseImg.src = want;
+  }
+
   function applyTheme(name, remember) {
     D.settings = D.settings || {};
     D.settings.theme = name;
     document.documentElement.setAttribute("data-theme", name);
-    var want = name === "light" ? "assets/map-base-light.svg" : "assets/map-base.svg";
+    var want = baseSrc();
     if (baseImg.getAttribute("src") !== want) baseImg.src = want;
     // Запоминаем в браузере: иначе выбор слетал бы при каждом обновлении страницы,
     // пока сотрудник не выгрузит файлы. settings.csv остаётся умолчанием
@@ -356,29 +895,72 @@
   // потому что рамка покрашена в тот же цвет.
   // Закрывать кадр целиком тоже нельзя: на вертикальном экране обрезало бы
   // Кемь, а это 24 человека.
-  function layout() {
+  /* keep = true — пересчитать размеры, но НЕ трогать масштаб и сдвиг.
+
+     Нужно потому, что событие load у подложки прилетает не только при первом
+     показе: оно же срабатывает при переключении на спутниковый слой и когда
+     картинка догрузилась после того, как человек уже что-то нажал. Лист при
+     этом тот же самый — та же рамка, та же пропорция, — и сбрасывать вид
+     незачем: приблизил человек Анзер, включил спутник, и его выбросило
+     обратно на весь архипелаг.
+
+     Это же съедало сдвиг карты из-под панели: догружалась подложка и
+     возвращала всё на место. */
+  var laidOut = false;
+
+  function layout(keep) {
     var fw = frame.clientWidth, fh = frame.clientHeight;
     var iw = baseImg.naturalWidth || 1, ih = baseImg.naturalHeight || 1;
     fitW = fw;
     fitH = fw * ih / iw;
     lastK = -1;      // размер карты изменился — группы пересобрать заново
-    resetZoom();     // и заново подобрать вид под область с метками
+    if (keep === true && laidOut) apply();
+    else resetZoom();     // первый показ: подобрать вид под область с метками
+    laidOut = true;
   }
 
   // Зум — это ширина и высота, а не transform. SVG и текст перерисовываются
   // на новом размере и остаются чёткими на любом масштабе.
+  /* Панель карточки лежит поверх правой части карты. Пока она открыта,
+     разрешаем сдвинуть карту левее обычного предела — иначе метку у правого
+     края просто нечем вытащить из-под панели: ограничитель не пускает. */
+  function panelW() {
+    var p = $("#panel");
+    if (!p || p.hidden) return 0;
+    var w = p.getBoundingClientRect().width;
+    return w > frame.clientWidth * 0.8 ? 0 : w;    // узкий экран: панель почти во весь лист
+  }
+
+  /* Включает плавность на один переход. Класс снимается по таймеру: держать
+     его постоянно нельзя — перетаскивание карты станет вязким. */
+  var animTimer = null;
+  function animate() {
+    inner.classList.add("is-anim");
+    inner.offsetHeight;                     // заставляем пересчитать стиль до правки
+    clearTimeout(animTimer);
+    animTimer = setTimeout(function () {
+      inner.classList.remove("is-anim");
+      settlePoints();                       // переход кончился — можно пересобирать
+    }, 520);
+  }
+
   function apply() {
     var fw = frame.clientWidth, fh = frame.clientHeight;
     var w = fitW * k, h = fitH * k;
     var mx = Math.max(0, (w - fw) / 2), my = Math.max(0, (h - fh) / 2);
-    tx = clamp(tx, -mx, mx);
+    tx = clamp(tx, -mx - panelW(), mx);
     ty = clamp(ty, -my, my);
     inner.style.width = w + "px";
     inner.style.height = h + "px";
     inner.style.left = ((fw - w) / 2 + tx) + "px";
     inner.style.top = ((fh - h) / 2 + ty) + "px";
-    if (k !== lastK) { lastK = k; buildPoints(); }   // группы пересобираются от масштаба
-    else relabel();                                   // при сдвиге хватает подписей
+    /* Масштаб сменился — группы, возможно, устарели. Возможно: пересборка
+       произойдёт не сейчас, а когда карта остановится (см. schedulePoints),
+       и только если состав меток от неё действительно поменяется. */
+    if (k !== lastK) {
+      lastK = k;
+      schedulePoints();
+    } else relabel();                                 // при сдвиге хватает подписей
   }
 
   // Подписи налезают друг на друга там, где точки стоят кучно.
@@ -386,7 +968,7 @@
   // у мест с большим числом людей. При зуме точки расходятся,
   // места освобождается больше, и подписи возвращаются сами.
   function relabel() {
-    var els = [].slice.call(inner.querySelectorAll(".pt"));
+    var els = [].slice.call(inner.querySelectorAll(".pt:not(.pt--ghost)"));
     if (!els.length || !inner.clientWidth) return;
     els.sort(function (a, b) {
       return byId[b.dataset.place].count - byId[a.dataset.place].count;
@@ -425,6 +1007,35 @@
   }
 
   // Точка под курсором остаётся на месте.
+  /* Ставит точку в середину той полосы карты, которая осталась видимой
+     слева от панели. Масштаб не трогаем: сбрасывать его при каждом открытии
+     карточки — значит терять место, куда человек смотрел. */
+  function focusPoint(xPct, yPct) {
+    var fw = frame.clientWidth, fh = frame.clientHeight;
+    var pw = panelW();
+    if (!pw) return;
+    animate();
+    var w = fitW * k, h = fitH * k;
+    tx = (fw - pw) / 2 - (fw - w) / 2 - xPct / 100 * w;
+    ty = fh / 2 - (fh - h) / 2 - yPct / 100 * h;
+    apply();
+  }
+
+  /* Во сколько раз надо приблизить, чтобы точки группы разошлись.
+     0 — развести нельзя: координаты совпадают (Кремль и Никольский лазарет
+     стоят в одной точке, и это правда, а не ошибка данных). */
+  function spreadZoom(g) {
+    var need = 1;
+    for (var i = 0; i < g.length; i++) {
+      for (var j = i + 1; j < g.length; j++) {
+        var d = Math.hypot(g[i].px - g[j].px, g[i].py - g[j].py);
+        if (d < 0.5) return 0;
+        need = Math.max(need, (g[i].r + g[j].r + 6) / d);
+      }
+    }
+    return need;
+  }
+
   function zoomAt(cx, cy, factor) {
     var k2 = clamp(k * factor, K_MIN, K_MAX);
     if (k2 === k) return;
@@ -473,28 +1084,41 @@
 
   function zoomCenter(f) {
     var r = frame.getBoundingClientRect();
+    animate();
     zoomAt(r.left + r.width / 2, r.top + r.height / 2, f);
   }
 
+  $("#sat-toggle").onclick = function () { setSat(!satOn); };
+
   $("#z-in").onclick = function () { zoomCenter(1.5); };
   $("#z-out").onclick = function () { zoomCenter(1 / 1.5); };
-  $("#z-reset").onclick = resetZoom;
+  $("#z-reset").onclick = function () { animate(); resetZoom(); };
 
+  /* Колесо мыши даёт щелчки, а трекпад — сплошной поток мелких событий:
+     десятки в секунду. Пересобирать группы на каждое — то же мельтешение,
+     что и при щипке. Поэтому пока колесо крутится, карта считается движущейся,
+     и пересборка ждёт паузы в 140 мс после последнего события. */
+  var wheelTimer = null;
   frame.addEventListener("wheel", function (e) {
     e.preventDefault();
+    wheelOn = true;
+    clearTimeout(wheelTimer);
+    wheelTimer = setTimeout(function () { wheelOn = false; settlePoints(); }, 140);
     zoomAt(e.clientX, e.clientY, e.deltaY < 0 ? 1.12 : 1 / 1.12);
   }, { passive: false });
 
   // Панорама и щипок. Один палец — тащим, два — масштабируем.
-  var ptrs = {}, panFrom = null, pinchFrom = null;
+  var ptrs = {}, panFrom = null, pinchFrom = null, dragMoved = false;
   function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
 
   frame.addEventListener("pointerdown", function (e) {
     if (editing && e.target.closest(".pt")) return;   // в разметке метку тащим отдельно
     ptrs[e.pointerId] = { x: e.clientX, y: e.clientY };
+    gestureOn = true;
     var ids = Object.keys(ptrs);
     if (ids.length === 1) {
       panFrom = { x: e.clientX, y: e.clientY, tx: tx, ty: ty };
+      dragMoved = false;
       frame.classList.add("is-drag");
     } else if (ids.length === 2) {
       panFrom = null;
@@ -513,6 +1137,9 @@
                            fitH * k > frame.clientHeight + 1)) {
       tx = panFrom.tx + (e.clientX - panFrom.x);
       ty = panFrom.ty + (e.clientY - panFrom.y);
+      // Порог в 4 пикселя: палец на сенсоре всегда чуть съезжает,
+      // и без него любое нажатие считалось бы перетаскиванием.
+      if (Math.hypot(e.clientX - panFrom.x, e.clientY - panFrom.y) > 4) dragMoved = true;
       apply();
     }
   });
@@ -520,13 +1147,38 @@
   function endPtr(e) {
     delete ptrs[e.pointerId];
     if (Object.keys(ptrs).length < 2) pinchFrom = null;
-    if (!Object.keys(ptrs).length) { panFrom = null; frame.classList.remove("is-drag"); }
+    if (!Object.keys(ptrs).length) {
+      panFrom = null;
+      frame.classList.remove("is-drag");
+      gestureOn = false;
+      settlePoints();                       // пальцы убрали — карта встала
+    }
   }
   frame.addEventListener("pointerup", endPtr);
   frame.addEventListener("pointercancel", endPtr);
+  /* И то же самое на окне. Палец можно увести за край экрана, а мышь —
+     отпустить над панелью карточки: тогда pointerup до карты не дойдёт,
+     указатель останется числиться нажатым, и карта будет считаться
+     движущейся вечно — метки замрут собранными по старому масштабу.
+     Дубль вреда не делает: удалять уже удалённое нечего. */
+  window.addEventListener("pointerup", endPtr);
+  window.addEventListener("pointercancel", endPtr);
+
+  /* Нажатие по пустому месту карты закрывает карточку.
+
+     По метке — открывает другую, не требуя сперва закрыть эту: так ведут
+     себя все карты, и это единственный способ сравнить два места подряд.
+     Нажатия по меткам сюда не доходят — их разбирает обработчик #map-points,
+     а кнопки зума и переключатель слоя отсеиваются вместе с ними. */
+  frame.addEventListener("click", function (e) {
+    if (editing || dragMoved) return;
+    if (e.target.closest("button, a")) return;
+    if (!$("#panel").hidden) closePanel();
+  });
 
   window.addEventListener("resize", layout);
-  baseImg.addEventListener("load", layout);
+  // Первая загрузка подбирает вид, все последующие его сохраняют
+  baseImg.addEventListener("load", function () { layout(true); });
 
   // Размер кружка растёт с числом людей, но упирается в потолок.
   // Без потолка Кремль с его 83 именами превращается в кляксу
@@ -588,13 +1240,100 @@
     return groups;
   }
 
-  function buildPoints() {
+  var lastSig = null;                    // разметка слоя меток на прошлой сборке
+
+  /* Кто где живёт: место -> координаты метки, которая его показывает.
+     У группы это координаты её головы, и все места группы показывают
+     на неё же — именно поэтому переезд считается по местам, а не по меткам. */
+  function homes(host) {
+    var out = {};
+    [].slice.call(host.children).forEach(function (el) {
+      if (!el.dataset || !el.dataset.ids) return;
+      var xy = [+el.dataset.x, +el.dataset.y];
+      el.dataset.ids.split(" ").forEach(function (id) { out[id] = xy; });
+    });
+    return out;
+  }
+
+  function shift(dx, dy) {
+    // Центровка метки на своей точке сделана тем же transform. Потерять её
+    // нельзя ни на кадр — иначе метка прыгнет на пол-кружка. См. style.css.
+    return "translate(-50%,-50%) translate(" + dx.toFixed(1) + "px," + dy.toFixed(1) + "px)";
+  }
+
+  /* Показать переезд между двумя разбиениями на группы.
+
+     Распад: метка, которую раньше показывала группа, выезжает из её кружка
+     на своё место. Слияние: метка, которую группа поглотила, уезжает
+     в кружок группы и там гаснет — для этого старый узел возвращается
+     в слой призраком и удаляется по таймеру.
+
+     Считается всё в процентах от нынешнего размера слоя, и это верно:
+     во время жеста слой не пересобирался, поэтому старые метки к этому
+     моменту стоят на своих процентах уже нового, конечного размера. */
+  var morphTimer = null;
+
+  function morph(host, was, gone) {
+    var w = host.clientWidth || inner.clientWidth;
+    var h = host.clientHeight || inner.clientHeight;
+    if (!w || !h) return false;
+    var now = homes(host);
+    var moved = [], ghosts = [];
+
+    [].slice.call(host.children).forEach(function (el) {
+      var from = was[el.dataset.place];
+      if (!from) { el.classList.add("pt--fade"); return; }   // такого места на карте не было
+      var dx = (from[0] - +el.dataset.x) / 100 * w;
+      var dy = (from[1] - +el.dataset.y) / 100 * h;
+      if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;      // никуда не переезжала
+      el.style.transform = shift(dx, dy);                    // ставим В ПРЕЖНЕЕ место
+      moved.push(el);
+    });
+
+    gone.forEach(function (el) {
+      if (!el.dataset || !el.dataset.place) return;
+      var to = now[el.dataset.place];
+      if (!to) return;                                       // места на карте больше нет
+      var dx = (to[0] - +el.dataset.x) / 100 * w;
+      var dy = (to[1] - +el.dataset.y) / 100 * h;
+      if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;      // осталась на месте
+      el.className += " pt--ghost";
+      host.appendChild(el);
+      ghosts.push([el, dx, dy]);
+    });
+
+    if (!moved.length && !ghosts.length) return false;
+    host.offsetHeight;                                       // один пересчёт на всех
+    moved.forEach(function (el) {
+      el.classList.add("pt--move");
+      el.style.transform = "";                               // едет на своё место
+    });
+    ghosts.forEach(function (g) {
+      g[0].classList.add("is-out");
+      g[0].style.transform = shift(g[1], g[2]);              // едет в кружок группы
+    });
+
+    clearTimeout(morphTimer);
+    morphTimer = setTimeout(function () {
+      moved.forEach(function (el) { el.classList.remove("pt--move"); });
+      [].slice.call(host.querySelectorAll(".pt--ghost")).forEach(function (el) {
+        if (el.parentNode) el.parentNode.removeChild(el);
+      });
+      relabel();                             // подписи считаем по конечным местам
+    }, 420);
+    return true;
+  }
+
+  /* fade = true — состав меток мог смениться на глазах у человека
+     (доехал зум), и смену стоит показать проявлением. При первой отрисовке
+     и при перестроении данных проявлять нечего. */
+  function buildPoints(fade) {
     // В режиме разметки группировка мешает: метки надо таскать поштучно
     var groups = editing ? mapped().map(function (p) {
       return [{ p: p, px: 0, py: 0, r: 0 }];
     }) : cluster();
 
-    $("#map-points").innerHTML = groups.map(function (g) {
+    var html = groups.map(function (g) {
       var head = g[0].p;
       var n = 0;
       for (var i = 0; i < g.length; i++) n += g[i].p.count;
@@ -604,22 +1343,79 @@
       var ty = typeOf(head);
       var col = ty && ty.color ? ";background:" + ty.color : "";
       var badge = ty && ty.icon && g.length === 1 ? iconSvg(ty.icon, "pt__ic") : "";
+      var spread = g.length > 1 ? spreadZoom(g) : 0;
       return '<button class="pt' + (n ? "" : " pt--empty") + (g.length > 1 ? " pt--group" : "") + '"' +
         ' data-place="' + head.id + '" data-ids="' + ids + '"' +
+        ' data-spread="' + spread.toFixed(3) + '" data-x="' + head.x + '" data-y="' + head.y + '"' +
         ' style="left:' + head.x + '%;top:' + head.y + '%;z-index:' + (10 + Math.min(n, 99)) + '">' +
         '<span class="pt__dot" style="width:' + size + 'px;height:' + size + 'px' + col + '">' +
         n + badge + '</span>' +
         '<span class="pt__label">' + esc(label) + '</span></button>';
     }).join("");
 
+    /* Разметка совпала с прошлой — значит и группы те же, и трогать слой
+       нечем. Это главный тормоз против скачков: перезапись innerHTML
+       выбрасывает старые кнопки и строит новые, браузер заново считает
+       их положение, и метка моргает и дёргается, хотя на карте
+       не изменилось ровным счётом ничего.
+
+       Сверяем именно разметку, а не список групп: тогда правка данных
+       в служебном режиме (имя, число, цвет типа) тоже доходит до карты. */
+    if (html === lastSig) { relabel(); return; }
+    lastSig = html;
+
+    var host = $("#map-points");
+    /* Где какое место показывалось ДО пересборки и какие метки за это
+       отвечали. Нужно, чтобы показать переезд: точка не исчезает на месте
+       и не появляется из ниоткуда, а въезжает в группу или выезжает из неё. */
+    var was = (fade && !motionOff()) ? homes(host) : null;
+    var gone = was ? [].slice.call(host.children) : null;
+
+    host.innerHTML = html;
+    // Пока метки переезжают, подписи считать бессмысленно: их расставят
+    // по местам, которых уже не будет. Это делает morph, когда переезд кончится.
+    var riding = was ? morph(host, was, gone) : false;
+
     $("#map-points").onclick = function (e) {
       var b = e.target.closest("[data-place]");
       if (!b || editing) return;
       var ids = b.dataset.ids.split(" ");
+
+      /* Нажатие по группе сначала пробует её РАСКРЫТЬ, а не показать список.
+         Точки слиплись потому, что на этом масштабе им тесно; приблизим —
+         и они разойдутся сами. Это привычнее любого списка: человек видит,
+         где именно эти места, а не читает их названия.
+
+         Список остаётся запасным выходом на два случая: координаты совпадают
+         (Кремль и Никольский лазарет — одна точка) или нужного приближения
+         не хватает до предела в 24×. */
+      if (ids.length > 1) {
+        /* Раскрываем группу И показываем сводку. Одного раскрытия мало:
+           точки разошлись, но человек не знает, что это за места и какая
+           из них какая. Одного списка тоже мало: он не отвечает на вопрос
+           «где это». Вместе они и отвечают.
+
+           Порядок важен: сперва зум (он пересобирает метки), потом карточка,
+           потом сдвиг — панель уже открыта, и есть от чего считать полосу. */
+        var need = parseFloat(b.dataset.spread || "0");
+        var x = parseFloat(b.dataset.x), y = parseFloat(b.dataset.y);
+        groupSpread = need > 1 && k * need <= K_MAX;
+        if (groupSpread) {
+          var r = b.getBoundingClientRect();
+          animate();
+          zoomAt(r.left + r.width / 2, r.top + r.height / 2, need);
+        }
+        cardReset();
+        showCard("group", ids);
+        focusPoint(x, y);
+        return;
+      }
+
       cardReset();
-      if (ids.length > 1) showCard("group", ids); else showCard("place", ids[0]);
+      showCard("place", ids[0]);
+      focusPoint(parseFloat(b.dataset.x), parseFloat(b.dataset.y));
     };
-    relabel();
+    if (!riding) relabel();
   }
 
   // Дублирует метки карты списком: на вертикальном экране это основной способ
@@ -669,14 +1465,32 @@
   }
 
   // Карточка группы: перечень слипшихся мест с числами
+  /* Русское согласование числительных. В шаблоне словаря стояло «%1 места»
+     наотрез, и на экране получалось «5 места, 112 имён». Для экспозиции,
+     где речь идёт о людях, такая небрежность заметна. */
+  function plural(n, one, few, many) {
+    var a = Math.abs(n) % 100, b = a % 10;
+    if (a > 10 && a < 20) return many;
+    if (b === 1) return one;
+    if (b > 1 && b < 5) return few;
+    return many;
+  }
+
+  // Раскрылся ли кластер перед показом карточки. От этого зависит подсказка:
+  // «точки разошлись, выбирайте на карте» против «развести нельзя, вот список».
+  var groupSpread = false;
+
   function showGroup(ids) {
     var list = ids.map(function (id) { return byId[id]; });
     var total = 0;
     for (var i = 0; i < list.length; i++) total += list[i].count;
     openPanel(
       '<p class="card__over">' + esc(T("groupOver")) + '</p>' +
-      '<h2 class="card__name">' + esc(Tf("groupTitle", list.length, total)) + '</h2>' +
-      '<p class="card__rank">' + esc(T("groupHint")) + '</p>' +
+      '<h2 class="card__name">' + esc(lang === "en"
+        ? Tf("groupTitle", list.length, total)
+        : list.length + " " + plural(list.length, "место", "места", "мест") + ", " +
+          total + " " + plural(total, "имя", "имени", "имён")) + '</h2>' +
+      '<p class="card__rank">' + esc(T(groupSpread ? "groupHintZoom" : "groupHint")) + '</p>' +
       '<ul class="list card__list">' + list.map(function (p) {
         return '<li><button class="row" data-place="' + p.id + '">' +
           '<span class="row__name">' + esc(p.name) + '</span>' +
@@ -689,7 +1503,6 @@
   function renderMap() {
     lastK = -1;
     buildPoints();
-    $("#btn-unplaced").querySelector(".unplaced__n").textContent = D.meta.unplaced;
     renderLegend();
     renderPlaceStrip();
     renderZones();
@@ -702,14 +1515,28 @@
      считаться из широты и долготы. Включение: Ctrl+E или #edit в адресе. */
 
   var editing = false, dragPt = null, editMode = "places", dirty = false;
+  // Взведена ли кнопка «+ Метка». Зонам такой флаг уже был — это drawing.
+  // Третье состояние — удаление вершин; со взводом добавления несовместимо.
+  var adding = false, erasing = false;
 
-  // Правки живут в открытой вкладке, пока не нажали «Сохранить всё».
+  // Правки живут в открытой вкладке, пока не нажали «Сохранить».
   // Закрыть её случайно — потерять всю работу, поэтому предупреждаем.
   function markDirty() {
     if (dirty) return;
     dirty = true;
-    var w = $("#dt-where");
-    if (w) w.textContent = "Есть несохранённые правки";
+    syncDirty();
+  }
+
+  /* Признак несохранённого нужен в двух местах сразу. Метки и зоны двигают
+     на вкладке «Карта», таблицы правят на вкладке «Данные», а забыть
+     сохранить можно из любой. Раньше и признак, и кнопка сохранения жили
+     только в «Данных» — с карты не было видно ни того, ни другого. */
+  function syncDirty() {
+    if (dirty) setWhere("dirty");
+    var d = $("#edit-dirty");
+    if (d) d.textContent = dirty ? "есть несохранённые правки" : "";
+    var b = $("#edit-save");
+    if (b) b.classList.toggle("is-dirty", dirty);
   }
   window.addEventListener("beforeunload", function (e) {
     if (!dirty) return;
@@ -727,14 +1554,89 @@
     document.querySelectorAll("[data-mode]").forEach(function (b) {
       b.setAttribute("aria-pressed", String(b.dataset.mode === m));
     });
-    if (m !== "zones" && drawing) {
-      drawing = null;
-      document.body.classList.remove("is-draw");
-    }
-    $("#edit-t").innerHTML = m === "places"
-      ? "Правка меток. Перетаскивайте метки по карте, нажатие по пустому месту заводит новую. Зоны сейчас не трогаются."
-      : "Правка зон. Перетаскивайте зону или её вершины; обводка включается в панели. Метки сейчас не трогаются.";
+    // Взведённую кнопку гасим при уходе из её режима: иначе она доживёт
+    // до другого слоя и начнёт плодить объекты там, где их не ждали.
+    if (m !== "places") adding = false;
+    if (m !== "zones") { drawing = null; erasing = false; }
+    syncArm();
     renderZones();
+  }
+
+  /* Добавление и перемещение разведены намеренно.
+     Тащить курсором можно всегда — это основное действие режима.
+     А создать новую метку или новую вершину — только при взведённой кнопке.
+     Сотрудник правит координаты часами, и случайное нажатие по пустому
+     месту не должно молча заводить объект, который потом ищи и удаляй. */
+  function armText() {
+    var z = D.zones.filter(function (x) { return x.id === edZone; })[0];
+    if (editMode === "places") {
+      return adding
+        ? "<b>Добавление меток включено.</b> Каждое нажатие по карте ставит новую метку — её сразу можно перетащить. Выключите кнопку, когда закончите."
+        : "Правка меток: перетаскивайте их курсором. Чтобы завести новую — включите «+ Метка». Зоны сейчас не трогаются.";
+    }
+    if (drawing) {
+      var few = z && z.points.length < 3;
+      return "<b>Добавление вершин включено.</b> Каждое нажатие по карте ставит вершину" +
+        (few ? "; контур появится с третьей" : ", готовые тянутся курсором") +
+        ". Выключите кнопку, когда закончите.";
+    }
+    if (erasing) {
+      return "<b>Удаление вершин включено.</b> Нажимайте по вершинам — они исчезают. Меньше трёх не даст: у многоугольника пропадёт площадь.";
+    }
+    if (!z) return "Правка зон: выберите зону нажатием по карте или в «Данные → Зоны», либо заведите новую кнопкой «+ Зона». Метки сейчас не трогаются.";
+    if (z.shape !== "poly") return "Правка зон: перетаскивайте пятно курсором, размеры — в «Данные → Зоны». Метки сейчас не трогаются.";
+    return "Правка зон: перетаскивайте вершины курсором. Добавить — «+ Вершина», удалить — «− Вершина». Метки сейчас не трогаются.";
+  }
+
+  // Единственное место, где кнопки, курсор и подсказка приводятся в согласие
+  // с состоянием. Разложить это по обработчикам — гарантированно разъедется.
+  function syncArm() {
+    if (drawing && drawing !== edZone) drawing = null;   // выбрали другую зону
+    var z = D.zones.filter(function (x) { return x.id === edZone; })[0];
+    var poly = !!(z && z.shape === "poly");              // вершины есть только у контура
+    // Треугольник — предел. Дальше у многоугольника пропадает площадь,
+    // поэтому кнопка удаления гаснет, а взвод с неё снимается сам:
+    // иначе он остался бы висеть на кнопке, по которой уже не нажать.
+    if (!poly || z.points.length <= 3) erasing = false;
+    var a = $("#edit-add"), v = $("#edit-vx"), x = $("#edit-vxdel");
+    if (a) a.setAttribute("aria-pressed", String(adding));
+    if (v) {
+      v.setAttribute("aria-pressed", String(!!drawing));
+      v.disabled = !poly;
+    }
+    if (x) {
+      x.setAttribute("aria-pressed", String(erasing));
+      x.disabled = !poly || z.points.length <= 3;
+    }
+    document.body.classList.toggle("is-add", adding && editMode === "places");
+    document.body.classList.toggle("is-draw", !!drawing && editMode === "zones");
+    document.body.classList.toggle("is-erase", erasing && editMode === "zones");
+    $("#edit-t").innerHTML = armText();
+  }
+
+  function setErasing(on) {
+    if (on && editMode !== "zones") setMode("zones");
+    if (on) drawing = null;
+    erasing = !!on;
+    syncArm();
+    renderZones();
+    renderZoneForm();
+  }
+
+  function setAdding(on) {
+    if (on && editMode !== "places") setMode("places");
+    adding = !!on;
+    syncArm();
+  }
+
+  function setDrawing(id) {
+    if (id && editMode !== "zones") setMode("zones");
+    if (id) erasing = false;                             // ставить и убирать разом нельзя
+    drawing = id || null;
+    if (drawing) showView("map");                        // обводить можно только на карте
+    syncArm();
+    renderZones();
+    renderZoneForm();
   }
   document.addEventListener("click", function (e) {
     var b = e.target.closest("[data-mode]");
@@ -782,7 +1684,7 @@
     $("#edit").hidden = !(on && $("#view-map") && !$("#view-map").hidden);
     document.querySelector(".tab--staff").hidden = !on;
     document.body.classList.toggle("is-edit", on);
-    if (!on) { drawing = null; document.body.classList.remove("is-draw"); }
+    if (!on) { drawing = null; adding = false; syncArm(); }
     if (on) { setMode(editMode); renderStaff(); }
     else if (!$("#view-data").hidden) showView("map");
     var pts = inner.querySelectorAll(".pt");
@@ -790,40 +1692,65 @@
     if (on) editOut();
   }
 
-  /* Вход в служебный режим — тремя способами, и это не роскошь:
-     в зале у киоска может не быть клавиатуры вообще.
-       1. долгое нажатие на заголовок слева вверху (2 секунды) — работает на сенсоре;
-       2. Cmd+E или Ctrl+E — на маке Ctrl+E перехватывает система, поэтому оба;
-       3. адрес index.html#edit — когда под рукой клавиатура и адресная строка. */
+  /* Вход в служебный режим — только адресом `index.html#edit`.
 
-  document.addEventListener("keydown", function (e) {
-    if ((e.metaKey || e.ctrlKey) && (e.key === "e" || e.key === "E")) {
-      e.preventDefault();
-      setEdit(!editing);
-    }
-  });
-  if (location.hash === "#edit") setTimeout(function () { setEdit(true); }, 0);
+     Раньше было три пути: долгое нажатие на заголовок, Cmd+E и адрес.
+     Первые два убраны намеренно.
 
-  (function longPress() {
-    var el = document.querySelector(".top__title"), timer = null;
-    function start() {
-      clearTimeout(timer);
-      el.classList.add("is-hold");
-      timer = setTimeout(function () {
-        el.classList.remove("is-hold");
-        setEdit(!editing);
-      }, 2000);
-    }
-    function stop() {
-      clearTimeout(timer);
-      el.classList.remove("is-hold");
-    }
-    el.addEventListener("pointerdown", start);
-    el.addEventListener("pointerup", stop);
-    el.addEventListener("pointerleave", stop);
-    el.addEventListener("pointercancel", stop);
-  })();
+     Долгое нажатие — прямая опасность в зале: посетитель держит палец
+     на заголовке две секунды и оказывается в панели правки данных.
+     Заметить это некому, а испортить он может всё.
 
+     Cmd+E не опасен, но и не нужен: на киоске нет клавиатуры, а на машине
+     сотрудника адрес с `#edit` открывается один раз и держится при
+     перезагрузке. Два способа делать одно и то же — лишнее знание
+     для человека, которому это объяснять раз в год.
+
+     Слушаем и hashchange: дописать `#edit` к уже открытой странице
+     перезагрузки не вызывает, и без этого ничего бы не произошло. */
+
+  function checkHash() {
+    if (location.hash === "#edit") setEdit(true);
+  }
+  window.addEventListener("hashchange", checkHash);
+  setTimeout(checkHash, 0);
+
+  /* Поле координат по умолчанию свёрнуто: в развёрнутом виде панель закрывала
+     нижнюю четверть карты. Выбор запоминается — как тема и язык. */
+  function setCoords(on) {
+    $("#edit").classList.toggle("is-min", !on);
+    $("#edit-coords").setAttribute("aria-pressed", String(!!on));
+    try { localStorage.setItem("okoyom.coords", on ? "1" : "0"); } catch (e) {}
+  }
+  setCoords((function () {
+    try { return localStorage.getItem("okoyom.coords") === "1"; } catch (e) { return false; }
+  })());
+  $("#edit-coords").onclick = function () {
+    setCoords($("#edit").classList.contains("is-min"));
+  };
+
+  $("#edit-add").onclick = function () { setAdding(!adding); };
+  $("#edit-vx").onclick = function () {
+    if (!edZone) return;
+    setDrawing(drawing ? null : edZone);
+  };
+  $("#edit-vxdel").onclick = function () { setErasing(!erasing); };
+  // Новая зона прямо с карты: сразу контуром и сразу готовая принимать вершины.
+  // Кнопка в «Данные → Зоны» заводит пятно — там это быстрая схематичная
+  // разметка, а здесь человек уже стоит над картой и собирается обводить.
+  $("#edit-zadd").onclick = function () {
+    if (editMode !== "zones") setMode("zones");
+    snapshot();
+    var n = 1;
+    while (D.zones.filter(function (z) { return z.id === "Z" + n; }).length) n++;
+    var t = typesOf("zone")[0];
+    var z = { id: "Z" + n, type: t ? t.type : "", label: "Новая зона", shape: "poly",
+              x: 50, y: 50, rx: 8, ry: 6, points: [], geo: "", note: "" };
+    D.zones.push(z);
+    edZone = z.id;
+    renderZoneList();
+    setDrawing(z.id);
+  };
   $("#edit-off").onclick = function () { setEdit(false); };
   $("#edit-undo").onclick = undo;
   $("#edit-copy").onclick = function () {
@@ -864,6 +1791,7 @@
     var hit = zoneHit;
     zoneHit = false;
     if (!editing || editMode !== "places") return;
+    if (!adding) return;                       // без взведённой кнопки — ничего
     if (hit) return;
     if (e.target.closest(".pt")) return;
     addPlace(e.clientX, e.clientY);
@@ -886,7 +1814,9 @@
   // и это выглядело как поломка.
   function haystack(p) {
     if (p._h) return p._h;
-    p._h = norm([p.name, p.surname, p.rank, p.years, p.source,
+    // Латинская форма кладётся в тот же стог: посетитель наберёт «Abalymov»
+    // в английском режиме и должен найти Абалымова.
+    p._h = norm([p.name, p.surname, tr(p.name + " " + p.surname), p.rank, p.years, p.source,
                  p.places.map(function (id) { return byId[id] ? byId[id].name : ""; }).join(" ")
                 ].join(" "));
     return p._h;
@@ -916,13 +1846,23 @@
     renderRegistry();
   };
 
+  /* Перезапуск анимации у элемента, содержимое которого только что заменили.
+     Снять класс, заставить пересчитать стиль, повесить обратно — иначе
+     браузер не считает это новым запуском и ничего не проигрывает. */
+  function replay(el, cls) {
+    if (!el) return;
+    el.classList.remove(cls);
+    el.offsetHeight;
+    el.classList.add(cls);
+  }
+
   function renderRegistry() {
     var q = norm($("#q").value.trim());
     var rank = $("#f-rank").value;
     var place = $("#f-place").value;
 
     var rows = D.persons.filter(function (p) {
-      if (rank && p.rank !== rank) return false;
+      if (rank && baseRank(p.rank) !== rank) return false;
       if (place === "__none" && p.places.length) return false;
       if (place && place !== "__none" && p.places.indexOf(place) < 0) return false;
       if (q && haystack(p).indexOf(q) < 0) return false;
@@ -932,6 +1872,7 @@
 
     $("#list").innerHTML = rows.map(personRowHtml).join("") ||
       '<li class="card__v--none">' + esc(T("nothing")) + '</li>';
+    replay($("#list"), "is-in");
     $("#found").textContent = yearNow
       ? rows.length + " " + T("inYear") + " " + yearNow
       : rows.length + " " + T("of") + " " + D.meta.total;
@@ -1319,8 +2260,8 @@
     // текст в нём деформируется, а кружки вершин стали бы эллипсами.
     var html = D.zones.filter(function (z) { return z.label; }).map(function (z) {
       var c = zoneCenter(z);
-      return '<span class="zlab" style="left:' + c.x + '%;top:' + (c.y + c.ry) + '%">' +
-        esc(z.label) + "</span>";
+      return '<span class="zlab" data-zlab="' + z.id + '" style="left:' + c.x +
+        "%;top:" + (c.y + c.ry) + '%">' + esc(z.label) + "</span>";
     }).join("");
 
     var sel = D.zones.filter(function (z) { return z.id === edZone; })[0];
@@ -1335,10 +2276,31 @@
 
   /* ---- работа с геометрией на карте ---- */
 
-  var dragZone = null, dragVx = -1, drawing = null;
+  var dragZone = null, dragVx = -1, dragDot = null, drawing = null;
   // Нажатие по зоне или вершине всплывает дальше и попадает в обработчик,
   // который заводит новое место. Помечаем такие нажатия и пропускаем их.
   var zoneHit = false;
+
+  /* Во время перетаскивания нельзя звать renderZones(): она пересобирает
+     слои целиком и уничтожает элемент, который держит захват указателя.
+     Поэтому тащим точечно, а полную перерисовку делаем на отпускании. */
+  function movedDom(z) {
+    var poly = $("#zones").querySelector('[data-zone="' + z.id + '"]');
+    if (poly) {
+      if (z.shape === "poly") {
+        poly.setAttribute("points", z.points.map(function (q) { return q[0] + "," + q[1]; }).join(" "));
+      } else {
+        poly.setAttribute("cx", z.x);
+        poly.setAttribute("cy", z.y);
+      }
+    }
+    var lab = $("#zlabels").querySelector('[data-zlab="' + z.id + '"]');
+    if (lab) {
+      var c = zoneCenter(z);
+      lab.style.left = c.x + "%";
+      lab.style.top = (c.y + c.ry) + "%";
+    }
+  }
 
   function mapPct(e) {
     var r = inner.getBoundingClientRect();
@@ -1353,8 +2315,24 @@
     if (!editing || editMode !== "zones" || !d) return;
     e.preventDefault(); e.stopPropagation();
     zoneHit = true;
+    if (erasing) {
+      var ez = D.zones.filter(function (x) { return x.id === edZone; })[0];
+      // Кнопка в этом случае недоступна, но проверку дублируем: между её
+      // отрисовкой и нажатием состояние могло измениться.
+      if (!ez || ez.points.length <= 3) return;
+      snapshot();
+      ez.points.splice(+d.dataset.vx, 1);
+      ez.geo = "";                              // геометрию правили руками
+      renderZones(); renderZoneList(); renderZoneForm();
+      return;
+    }
     snapshot();
     dragVx = +d.dataset.vx;
+    dragDot = d;
+    // Без захвата движение мыши уходит слою зон — а он соседняя ветка дерева,
+    // и обработчик подписей его не увидит. Вершина отклеится от курсора,
+    // едва он сойдёт с кружка в тринадцать пикселей.
+    try { d.setPointerCapture(e.pointerId); } catch (err) {}
   });
   $("#zlabels").addEventListener("pointermove", function (e) {
     if (dragVx < 0) return;
@@ -1363,9 +2341,14 @@
     markDirty();
     z.points[dragVx] = [p.x, p.y];
     z.geo = "";                                 // геометрию правили руками
-    renderZones();
+    if (dragDot) { dragDot.style.left = p.x + "%"; dragDot.style.top = p.y + "%"; }
+    movedDom(z);
   });
-  $("#zlabels").addEventListener("pointerup", function () { dragVx = -1; });
+  $("#zlabels").addEventListener("pointerup", function () {
+    if (dragVx < 0) return;
+    dragVx = -1; dragDot = null;
+    renderZones(); renderZoneForm();
+  });
 
   // обводка: каждое нажатие добавляет вершину
   $("#zones").addEventListener("pointerdown", function (e) {
@@ -1389,8 +2372,14 @@
     snapshot();
     var zz = D.zones.filter(function (x) { return x.id === el.dataset.zone; })[0];
     edZone = zz ? zz.id : null;
-    if (zz && zz.shape !== "poly") dragZone = zz;   // пятно тащим целиком
+    // Перерисовать надо до захвата: перерисовка заменяет элемент, и захват,
+    // взятый на старом, пропал бы в ту же миллисекунду.
     renderZones(); renderZoneList(); renderZoneForm();
+    if (zz && zz.shape !== "poly") {              // пятно тащим целиком
+      dragZone = zz;
+      var fresh = $("#zones").querySelector('[data-zone="' + zz.id + '"]');
+      if (fresh) { try { fresh.setPointerCapture(e.pointerId); } catch (err) {} }
+    }
   });
   $("#zones").addEventListener("pointermove", function (e) {
     if (!dragZone) return;
@@ -1398,9 +2387,13 @@
     if (!p) return;
     markDirty();
     dragZone.x = p.x; dragZone.y = p.y;
+    movedDom(dragZone);
+  });
+  $("#zones").addEventListener("pointerup", function () {
+    if (!dragZone) return;
+    dragZone = null;
     renderZones(); renderZoneForm();
   });
-  $("#zones").addEventListener("pointerup", function () { dragZone = null; });
 
   function renderZoneList() {
     var rows = D.zones.map(function (z) {
@@ -1423,6 +2416,7 @@
   };
 
   function renderZoneForm() {
+    syncArm();                                 // выбор зоны меняет доступность «+ Вершина»
     var z = D.zones.filter(function (x) { return x.id === edZone; })[0];
     if (!z) {
       $("#zn-form").innerHTML = '<p class="ed__empty">Выберите зону слева или добавьте новую.</p>';
@@ -1436,10 +2430,10 @@
     var geom = poly
       ? fld("вершины", '<span class="fld__v">' + z.points.length + " шт." +
             (z.geo ? " · заданы координатами" : "") + "</span>",
-            "нажимайте по карте, чтобы добавлять; тащите точки, чтобы двигать") +
+            "добавляются кнопкой ниже или «+ Вершина» на карте; тащатся курсором") +
         '<div class="fld"><span class="fld__k"></span><div class="dt__acts">' +
         '<button class="edit__btn" data-zdraw="' + z.id + '">' +
-        (drawing === z.id ? "Закончить обводку" : "Обводить по карте") + "</button>" +
+        (drawing === z.id ? "Закончить добавление" : "Добавлять вершины") + "</button>" +
         '<button class="edit__btn" data-zundo="' + z.id + '">Убрать точку</button></div></div>'
       : fld("ширина, %", '<input data-k="rx" type="number" step="0.5" value="' + z.rx + '">') +
         fld("высота, %", '<input data-k="ry" type="number" step="0.5" value="' + z.ry + '">');
@@ -1478,11 +2472,7 @@
     $("#zn-form").onclick = function (e) {
       var t = e.target;
       if (t.dataset.zdraw) {
-        drawing = (drawing === z.id) ? null : z.id;
-        document.body.classList.toggle("is-draw", !!drawing);
-        if (drawing) setMode("zones");
-        if (drawing) showView("map");     // обводить можно только на карте
-        renderZoneForm(); renderZones();
+        setDrawing(drawing === z.id ? null : z.id);
         return;
       }
       if (t.dataset.zundo) {
@@ -1620,8 +2610,6 @@
     return lines.join("\n");
   }
 
-  $("#dt-save").onclick = function () { download("places.csv", placesCsv()); };
-  $("#dt-savep").onclick = function () { download("persons.csv", personsCsv()); };
   $("#dt-report").onclick = function () {
     var lines = ["id,имя,сан,места,есть источник,есть место"];
     D.persons.forEach(function (p) {
@@ -1653,6 +2641,13 @@
     hist.push(snapState());
     if (hist.length > UNDO_MAX) hist.shift();
     refreshUndo();
+    /* «Можно отменить» и «не сохранено» — это одно и то же событие, поэтому
+       признак ставится здесь, а не в каждом обработчике по отдельности.
+       Раньше он стоял россыпью, и addPlace() его просто забыли: сотрудник мог
+       наставить меток, закрыть вкладку и не получить ни одного предупреждения.
+       Изредка признак встанет зря — нажали на метку и отпустили, не сдвинув.
+       Лишний вопрос при закрытии дешевле потерянной работы. */
+    markDirty();
   }
 
   function refreshUndo() {
@@ -1754,12 +2749,40 @@
   var dirHandle = null;
   var CAN_WRITE = typeof window.showDirectoryPicker === "function";
 
+  /* Ограничение по времени здесь не перестраховка, а обязательное.
+
+     На file:// IndexedDB не работает и — что хуже — не сообщает об этом:
+     indexedDB.open() не бросает исключение и не присылает ни onsuccess,
+     ни onerror. Запрос просто повисает навсегда. Проверено в Chrome.
+
+     А сохранение начинается с чтения запомненной папки. Без ограничения
+     первое же «Сохранить» вешало всю запись: кнопка оставалась в «Сохраняю…»
+     и не происходило ничего — ни файлов, ни ошибки. Нашлось тестом
+     app/data/test_save.py.
+
+     Последствие, которое надо знать: по file:// папка между сеансами
+     не запоминается, её указывают один раз за открытие страницы.
+     В пределах сеанса дескриптор живёт в dirHandle и больше не спрашивается. */
+
+  var IDB_MS = 1500;
+  var idbBroken = false;
+
   function idbOpen() {
     return new Promise(function (res, rej) {
-      var r = indexedDB.open("okoyom", 1);
+      var over = false;
+      var t = setTimeout(function () {
+        over = true; idbBroken = true;
+        rej(new Error("IndexedDB не отвечает"));
+      }, IDB_MS);
+      var r;
+      try { r = indexedDB.open("okoyom", 1); }
+      catch (e) { clearTimeout(t); idbBroken = true; return rej(e); }
       r.onupgradeneeded = function () { r.result.createObjectStore("h"); };
-      r.onsuccess = function () { res(r.result); };
-      r.onerror = function () { rej(r.error); };
+      r.onsuccess = function () { if (over) return; clearTimeout(t); res(r.result); };
+      r.onerror = function () {
+        if (over) return;
+        clearTimeout(t); idbBroken = true; rej(r.error);
+      };
     });
   }
   function idbGet(k) {
@@ -1810,6 +2833,91 @@
     }, function () { return null; });      // пользователь закрыл выбор
   }
 
+  /* История сохранений.
+
+     Запись затирает CSV на месте, и до этого откатиться было нечем: «Отменить»
+     живёт только в открытой странице и пропадает при обновлении. На острове,
+     где неделя ручного ввода и нет интернета, одна неверная запись стоила бы
+     всей работы.
+
+     Поэтому перед каждой записью прежние файлы уходят в
+     app/data/history/<дата_время>/. Копируется то, что лежит на диске, а не то,
+     что в памяти: так самый первый снимок сохраняет исходное состояние.
+
+     Папка history/ закрыта в .gitignore — там копии persons.csv с именами
+     из неопубликованной таблицы музея. Правила выше заданы точными путями
+     и на подпапки не действуют, поэтому для history/ строка отдельная. */
+
+  var HISTORY_KEEP = 30;
+
+  function stamp() {
+    var d = new Date(), p = function (n) { return (n < 10 ? "0" : "") + n; };
+    return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) +
+           "_" + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  }
+
+  /* Метка времени идёт с точностью до секунды, и два сохранения подряд
+     попадали в одну папку — второе молча затирало первое. Хуже того:
+     возврат сразу после сохранения уничтожал ровно ту версию, к которой
+     возвращались, потому что сначала клал туда нынешнее состояние.
+     Поэтому занятое имя не переиспользуется, а получает суффикс. */
+  function freshDir(hist, base) {
+    function attempt(name, n) {
+      if (n > 50) return hist.getDirectoryHandle(name, { create: true });
+      return hist.getDirectoryHandle(name).then(
+        function () { return attempt(base + "-" + (n + 2), n + 1); },   // занято
+        function () { return hist.getDirectoryHandle(name, { create: true }); }
+      );
+    }
+    return attempt(base, 0);
+  }
+
+  function archiveCurrent(h) {
+    var names = Object.keys(files()), name = stamp();
+    return h.getDirectoryHandle("history", { create: true }).then(function (hist) {
+      return freshDir(hist, name).then(function (dst) {
+        name = dst.name || name;
+        return names.reduce(function (chain, fn) {
+          return chain.then(function () {
+            // Файла может не быть — это не повод рушить сохранение
+            return h.getFileHandle(fn)
+              .then(function (fh) { return fh.getFile(); })
+              .then(function (f) { return f.text(); })
+              .then(function (text) {
+                return dst.getFileHandle(fn, { create: true })
+                  .then(function (nf) { return nf.createWritable(); })
+                  .then(function (w) {
+                    return w.write(new Blob([text])).then(function () { return w.close(); });
+                  });
+              })
+              .catch(function () {});
+          });
+        }, Promise.resolve());
+      }).then(function () { return pruneHistory(hist); }).then(function () { return name; });
+    }).catch(function () { return null; });   // не вышло сложить историю — всё равно сохраняем
+  }
+
+  // Тридцати версий хватает на всю экспедицию, а папка не растёт бесконечно.
+  function pruneHistory(hist) {
+    var dirs = [], it = hist.values();
+    function step() {
+      return it.next().then(function (r) {
+        if (r.done) return;
+        if (r.value.kind === "directory") dirs.push(r.value.name);
+        return step();
+      });
+    }
+    return step().then(function () {
+      dirs.sort();                                   // имена — метки времени
+      return dirs.slice(0, Math.max(0, dirs.length - HISTORY_KEEP))
+        .reduce(function (chain, n) {
+          return chain.then(function () {
+            return hist.removeEntry(n, { recursive: true }).catch(function () {});
+          });
+        }, Promise.resolve());
+    }).catch(function () {});
+  }
+
   function writeAll(h) {
     var f = files(), names = Object.keys(f);
     return names.reduce(function (chain, name) {
@@ -1831,30 +2939,142 @@
       }, i++ * 400);
     });
     dirty = false;
+    syncDirty();
     alert("Скачано шесть файлов.\n\nПоложите их все в папку app/data вместо старых " +
-          "и обновите страницу.\n\nЧтобы сохранять сразу в папку, откройте приложение " +
-          "в Chrome — там браузер умеет писать в файлы.");
+          "и обновите страницу. Старые перед заменой отложите в сторону: при таком " +
+          "способе история версий не ведётся и вернуться будет некуда.\n\n" +
+          "Чтобы сохранять сразу в папку — и с историей — откройте приложение " +
+          "в Chrome. Safari и Firefox писать в файлы не умеют.");
   }
 
-  function saveAll() {
-    recount();
-    if (!checkBeforeSave()) return;
-    if (!CAN_WRITE) return downloadAll();
-    var btn = $("#dt-apply"), was = btn.textContent;
-    btn.textContent = "Сохраняю…";
-    (dirHandle ? Promise.resolve(dirHandle) : idbGet("dataDir"))
+  // Папку спрашивают в двух местах: при сохранении и при возврате версии.
+  function withDir() {
+    return (dirHandle ? Promise.resolve(dirHandle) : idbGet("dataDir"))
       .then(function (h) {
         if (!h) return pickDir();
         return allow(h).then(function (okp) { return okp ? (dirHandle = h) : pickDir(); });
-      })
+      });
+  }
+
+  /* Возврат к прошлой версии.
+
+     История писалась с самого начала, но вернуться из неё можно было только
+     копированием файлов в Finder. Для разработчика это нормально, для
+     сотрудника музея после нашего отъезда — нет.
+
+     Возврат сам делает снимок нынешнего состояния перед подменой, поэтому
+     отменить возврат тоже можно: он попадает в тот же список. */
+
+  function listHistory(h) {
+    return h.getDirectoryHandle("history").then(function (hist) {
+      var names = [], it = hist.values();
+      return (function step() {
+        return it.next().then(function (r) {
+          if (r.done) return names;
+          if (r.value.kind === "directory") names.push(r.value.name);
+          return step();
+        });
+      })().then(function (n) { return n.sort().reverse(); });   // новые сверху
+    }, function () { return []; });                             // папки ещё нет
+  }
+
+  function prettyStamp(n) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})_(\d{2})(\d{2})(\d{2})(-\d+)?$/.exec(n);
+    if (!m) return n;
+    return m[3] + "." + m[2] + "." + m[1] + ", " + m[4] + ":" + m[5] +
+           (m[7] ? " (" + m[7].slice(1) + ")" : "");
+  }
+
+  function restoreVersion(h, name) {
+    return archiveCurrent(h)                       // нынешнее — тоже в историю
+      .then(function () { return h.getDirectoryHandle("history"); })
+      .then(function (hist) { return hist.getDirectoryHandle(name); })
+      .then(function (src) {
+        return Object.keys(files()).reduce(function (chain, n) {
+          return chain.then(function () {
+            return src.getFileHandle(n)
+              .then(function (fh) { return fh.getFile(); })
+              .then(function (f) { return f.text(); })
+              .then(function (t) {
+                return h.getFileHandle(n, { create: true })
+                  .then(function (fh) { return fh.createWritable(); })
+                  .then(function (w) {
+                    return w.write(new Blob([t])).then(function () { return w.close(); });
+                  });
+              })
+              .catch(function () {});              // файла в снимке нет — пропускаем
+          });
+        }, Promise.resolve());
+      });
+  }
+
+  // Список версий приходит либо от сервера, либо из выбранной папки —
+  // дальше рисуется одинаково, поэтому источник спрятан здесь.
+  function historyNames() {
+    if (srv) {
+      return fetch("api/history").then(function (r) { return r.json(); })
+        .then(function (j) { return j.versions || []; });
+    }
+    return withDir().then(function (h) { return h ? listHistory(h) : null; });
+  }
+
+  function showHistory() {
+    if (!srv && !CAN_WRITE) {
+      alert("История версий ведётся только при сохранении в папку.\n\n" +
+            "Откройте приложение в Chrome — или запустите app/data/server.py " +
+            "и работайте по адресу 127.0.0.1:8765, тогда история будет " +
+            "в любом браузере.");
+      return;
+    }
+    historyNames().then(function (names) {
+      if (names === null) return;              // папку так и не выбрали
+      return (function () {
+        var head = '<p class="card__over">Данные</p><h2 class="card__name">Прошлые версии</h2>';
+        if (!names.length) {
+          openPanel(head + '<p class="card__v card__v--none">Пока ни одной. ' +
+            'Снимок делается сам при каждом сохранении.</p>');
+          return;
+        }
+        openPanel(head +
+          '<p class="fld__hint">Снимок делается перед каждым сохранением, хранятся ' +
+          'последние тридцать. Возврат сначала сохранит нынешнее состояние отдельным ' +
+          'снимком, так что отменить возврат тоже можно.</p><div>' +
+          names.map(function (n) {
+            return '<div class="hist__r"><span><b>' + esc(prettyStamp(n)) + '</b><br>' +
+              '<small>history/' + esc(n) + '</small></span>' +
+              '<button class="edit__btn" data-restore="' + esc(n) + '">Вернуть</button></div>';
+          }).join("") + "</div>");
+      })();
+    });
+  }
+
+  $("#dt-hist").onclick = showHistory;
+
+  function saveAll(btn) {
+    recount();
+    if (!checkBeforeSave()) return;
+    btn = btn || $("#dt-apply");
+    if (srv) return saveViaServer(btn);
+    if (!CAN_WRITE) return downloadAll();
+    var was = btn.textContent;
+    btn.textContent = "Сохраняю…";
+    withDir()
       .then(function (h) {
         if (!h) { btn.textContent = was; return null; }
-        return writeAll(h).then(function (n) {
-          btn.textContent = was;
-          dirty = false;
-          $("#dt-where").textContent = "Сохранено в выбранную папку";
-          alert("Сохранено, файлов: " + n + ".\n\nОбновите страницу, чтобы увидеть " +
-                "результат так, как его увидит посетитель.");
+        return archiveCurrent(h).then(function (kept) {
+          return writeAll(h).then(function (n) {
+            btn.textContent = was;
+            dirty = false;
+            syncDirty();
+            setWhere("saved");
+            alert("Сохранено, файлов: " + n + ".\n\n" +
+                  (kept ? "Прежняя версия отложена в app/data/history/" + kept +
+                          "\nЕсли что-то пойдёт не так, файлы оттуда можно вернуть " +
+                          "на место в Finder.\n\n"
+                        : "") +
+                  "Обновите страницу, чтобы увидеть результат так, " +
+                  "как его увидит посетитель.");
+          });
         });
       })
       .catch(function (err) {
@@ -1865,33 +3085,134 @@
       });
   }
 
-  $("#dt-apply").onclick = saveAll;
-  $("#dt-dir").onclick = function () {
-    if (!CAN_WRITE) { alert("Этот браузер не умеет писать в папку. Файлы будут скачиваться."); return; }
-    pickDir().then(function (h) {
-      $("#dt-where").textContent = h ? "Сохраняется в выбранную папку" : "Папка не выбрана";
-    });
-  };
+  $("#dt-apply").onclick = function () { saveAll($("#dt-apply")); };
+  // Та же самая операция, просто дотянуться до неё можно с карты,
+  // не уходя на вкладку «Данные» и не теряя место, которое правишь.
+  $("#edit-save").onclick = function () { saveAll($("#edit-save")); };
+  /* Про папку сотруднику знать почти не нужно: «Сохранить» спросит её сам
+     в первый раз и запомнит. Поэтому отдельной кнопки в ряду больше нет —
+     сменить папку можно из справки, это делают раз в жизни.
+     В строке состояния теперь только то, что важно прямо сейчас:
+     есть ли несохранённое. */
+  function setWhere(state) {
+    var w = $("#dt-where");
+    if (!w) return;
+    if (state === "dirty") w.textContent = "есть несохранённые правки";
+    else if (state === "saved") w.textContent = "сохранено";
+    else if (!CAN_WRITE) w.textContent = "этот браузер сохраняет через «Загрузки»";
+    else w.textContent = "";
+  }
 
-  if (CAN_WRITE) {
-    idbGet("dataDir").then(function (h) {
-      if (h) $("#dt-where").textContent = "Папка запомнена — сохранение в один клик";
+  function askDir() {
+    if (!CAN_WRITE) {
+      alert("Этот браузер не умеет писать прямо в папку.\n\n" +
+            "Сохранение будет скачивать файлы, их придётся класть в app/data вручную.\n\n" +
+            "Чтобы сохранять в один клик, откройте приложение в Chrome.");
+      return;
+    }
+    pickDir().then(function (h) {
+      alert(h ? "Папка выбрана. Дальше сохранение в один клик." : "Папка не выбрана.");
     });
-  } else {
-    $("#dt-where").textContent = "Браузер не умеет писать в папку: файлы будут скачиваться";
+  }
+
+  setWhere("");
+
+  /* Сохранить можно тремя способами, в порядке предпочтения:
+
+       1. локальный сервер `app/data/server.py` — работает в ЛЮБОМ браузере;
+       2. File System Access API — без сервера, но только Chrome и Edge;
+       3. скачивание шести файлов — последний рубеж, с ручной раскладкой
+          и без истории версий.
+
+     Первый способ появился потому, что второго нет в Safari и Firefox,
+     а третий теряет историю. Киоск в зале при этом по-прежнему открывается
+     двойным щелчком по index.html — сервер нужен только тому, кто правит. */
+  var srv = false;
+  var srvReady = (location.protocol.indexOf("http") === 0)
+    ? fetch("api/ping").then(function (r) { return r.json(); })
+        .then(function (j) { srv = !!(j && j.okoyom); })
+        .catch(function () { srv = false; })
+    : Promise.resolve();
+
+  srvReady.then(function () {
+    var w = $("#dt-warn");
+    if (!w) return;
+    if (srv || CAN_WRITE) { w.hidden = true; return; }
+    // Ни сервера, ни записи в папку — узнать об этом надо ДО работы, а не после
+    w.innerHTML =
+      "<b>Этот браузер не умеет сохранять прямо в папку.</b> " +
+      "Сохранение будет скачивать шесть файлов, раскладывать их в " +
+      "<code>app/data</code> придётся вручную, и история версий вестись не будет.<br>" +
+      "Два выхода: открыть приложение в <b>Chrome</b> — или запустить " +
+      "<code>app/data/server.py</code> и работать по адресу " +
+      "<code>127.0.0.1:8765</code>. Со сервером сохранение работает в любом браузере.";
+    w.hidden = false;
+  });
+
+  function saveViaServer(btn) {
+    var was = btn.textContent;
+    btn.textContent = "Сохраняю…";
+    fetch("api/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ files: files() })
+    }).then(function (r) { return r.json(); }).then(function (j) {
+      btn.textContent = was;
+      if (j.error) throw new Error(j.error);
+      dirty = false;
+      syncDirty();
+      setWhere("saved");
+      alert("Сохранено, файлов: " + j.n + "." +
+        (j.kept ? "\n\nПрежняя версия отложена в app/data/history/" + j.kept +
+                  "\nЕсли что-то пойдёт не так — «Прошлые версии»." : "") +
+        "\n\nОбновите страницу, чтобы увидеть результат так, " +
+        "как его увидит посетитель.");
+    }).catch(function (e) {
+      btn.textContent = was;
+      alert("Сервер не принял сохранение: " + e.message);
+    });
   }
 
   $("#dt-help").onclick = function () {
-    alert("Панель музея\n\n" +
-      "ОБЗОР — что в данных не заполнено. Нажмите на строку, чтобы увидеть, кого это касается.\n\n" +
-      "ПЕРСОНАЛИИ — найдите человека в списке слева и правьте справа. Места отмечаются галочками.\n\n" +
-      "МЕСТА — описание, тип, вложенность, фотография. Положение метки двигается на самой карте.\n\n" +
-      "ЗОНЫ РАБОТ — где какие работы велись. Добавьте зону и перетащите её на карте.\n\n" +
-      "ОФОРМЛЕНИЕ — тема (светлая или тёмная) и вид меток: цвет и значок по типу места.\n\n" +
-      "Фотографию можно просто выбрать файлом, она уменьшится сама.\n\n" +
-      "СОХРАНЕНИЕ. Нажмите «Сохранить всё». В первый раз браузер попросит выбрать " +
-      "папку app/data внутри папки приложения — выберите её и разрешите запись. " +
-      "Дальше всё сохраняется одной кнопкой, папка запоминается.");
+    openPanel(
+      '<p class="card__over">Служебный режим</p>' +
+      '<h2 class="card__name">Справка</h2>' +
+
+      '<h3 class="dt__h">Как работать</h3>' +
+      '<ol class="steps steps--panel">' +
+        '<li><b>Правьте.</b> Тексты, фотографии и привязки — здесь, во вкладке «Данные». ' +
+        'Положение меток и очертания зон — на вкладке «Карта».</li>' +
+        '<li><b>Нажимайте «Сохранить».</b> Кнопка есть и здесь, и внизу карты — это одно и то же ' +
+        'действие. Пока написано «есть несохранённые правки», работа существует только ' +
+        'в открытой странице.</li>' +
+        '<li><b>Обновите страницу</b> (Cmd+R или Ctrl+R), чтобы увидеть результат так, ' +
+        'как его увидит посетитель.</li>' +
+      '</ol>' +
+
+      '<h3 class="dt__h">Что где правится</h3>' +
+      '<table class="help"><tbody>' +
+        '<tr><td>Имя, сан, годы, источник, фотография, места пребывания</td><td>Данные → Персоналии</td></tr>' +
+        '<tr><td>Описание места, тип, вложенность, фотография</td><td>Данные → Места</td></tr>' +
+        '<tr><td>Подпись зоны, вид работ, форма</td><td>Данные → Зоны работ</td></tr>' +
+        '<tr><td>Тема и вид меток</td><td>Данные → Оформление</td></tr>' +
+        '<tr><td><b>Где стоит метка на карте</b></td><td>Карта → «Метки мест», перетащить</td></tr>' +
+        '<tr><td><b>Очертания зоны</b></td><td>Карта → «Зоны работ», перетащить вершины</td></tr>' +
+      '</tbody></table>' +
+
+      '<h3 class="dt__h">Если что-то пошло не так</h3>' +
+      '<p class="fld__hint"><b>Отменить последнее действие</b> — кнопка «Отменить» внизу карты ' +
+      'или Cmd+Z. Хранится тридцать шагов, но только пока страница открыта.</p>' +
+      '<p class="fld__hint"><b>Вернуть то, что было раньше</b> — кнопка «Прошлые версии». ' +
+      'Приложение само делает снимок перед каждым сохранением, хранятся последние тридцать.</p>' +
+
+      '<h3 class="dt__h">Куда сохраняется</h3>' +
+      '<p class="fld__hint">В папку <code>app/data</code> внутри папки приложения. В первый раз ' +
+      'браузер спросит эту папку и запомнит — больше спрашивать не будет. Ничего копировать ' +
+      'и никуда вставлять не нужно.</p>' +
+      '<p class="fld__hint">Менять папку почти никогда не требуется, но если нужно — ' +
+      '<button class="edit__btn" id="help-dir">выбрать другую папку</button></p>');
+    var hb = $("#help-dir");
+    if (hb) hb.onclick = askDir;
   };
 
   function renderStaff() { showSub(subNow); }
@@ -1900,8 +3221,13 @@
 
   var idleTimer, nameTimer, idleShown = true;
 
+  var idleTimerOut = null;
+
   function goIdle() {
-    $("#idle").hidden = false;
+    var el = $("#idle");
+    clearTimeout(idleTimerOut);
+    el.classList.remove("is-out");
+    el.hidden = false;
     idleShown = true;
     closePanel();
     setEdit(false);
@@ -1915,7 +3241,18 @@
     renderRegistry();
   }
   function wake() {
-    if (idleShown) { $("#idle").hidden = true; idleShown = false; }
+    if (idleShown) {
+      // Уходит с затуханием: экран включается каждые полторы минуты,
+      // и весь день рывок был бы заметнее самого экрана.
+      var el = $("#idle");
+      el.classList.add("is-out");
+      clearTimeout(idleTimerOut);
+      idleTimerOut = setTimeout(function () {
+        el.hidden = true;
+        el.classList.remove("is-out");
+      }, 350);
+      idleShown = false;
+    }
     clearTimeout(idleTimer);
     idleTimer = setTimeout(goIdle, IDLE_MS);
   }
@@ -1943,8 +3280,8 @@
       if (!idleShown) return;
       var p = pick();
       var next = layers[cur ^ 1];
-      next.innerHTML = esc((p.name + " " + p.surname).trim()) +
-        "<span>" + esc(p.rank.split("\n")[0]) + "</span>";
+      next.innerHTML = esc(personName(p)) +
+        "<span>" + esc(personRank(p).split("\n")[0]) + "</span>";
       layers[cur].classList.remove("is-on");
       next.classList.add("is-on");
       cur ^= 1;
@@ -1952,6 +3289,109 @@
 
     show();
     nameTimer = setInterval(show, 5000);
+  }
+
+  /* ---------------- экранная клавиатура ---------------- */
+
+  /* Зачем. На сенсорном киоске физической клавиатуры нет, а системная
+     всплывает не во всякой сборке: на Windows обычно да, на Linux часто нет.
+     Без неё поиск по 434 фамилиям становится недоступен вовсе.
+
+     Когда показывать. По умолчанию — только там, где есть сенсорный ввод.
+     На рабочем компьютере сотрудника она была бы помехой. Решение
+     переопределяется в settings.csv ключом `keyboard`: авто | всегда | никогда.
+
+     Раскладка ЙЦУКЕН: набирают русские фамилии. Латиница не нужна —
+     английский режим сейчас скрыт, а имена в нём транслитерируются. */
+
+  var KB_ROWS = [
+    "йцукенгшщзхъ",
+    "фывапролджэ",
+    "ячсмитьбю"
+  ];
+
+  function kbWanted() {
+    var mode = ((D.settings || {}).keyboard || "авто").toLowerCase();
+    if (mode === "всегда") return true;
+    if (mode === "никогда") return false;
+    return (navigator.maxTouchPoints || 0) > 0;
+  }
+
+  function kbBuild() {
+    var html = KB_ROWS.map(function (row) {
+      return '<div class="kb__r">' + row.split("").map(function (ch) {
+        return '<button class="kb__k" data-ch="' + ch + '">' + ch + "</button>";
+      }).join("") + "</div>";
+    }).join("");
+    html += '<div class="kb__r">' +
+      '<button class="kb__k kb__k--wide" data-ch=" ">пробел</button>' +
+      '<button class="kb__k" data-act="back" title="Стереть букву">&#9003;</button>' +
+      '<button class="kb__k kb__k--txt" data-act="clear">Очистить</button>' +
+      '<button class="kb__k kb__k--txt kb__k--act" data-act="done">Готово</button>' +
+      "</div>";
+    $("#kb-rows").innerHTML = html;
+  }
+
+  var kbTimer = null;
+
+  function kbShow() {
+    var kb = $("#kb");
+    clearTimeout(kbTimer);
+    kb.classList.remove("is-out");
+    kb.hidden = false;
+    var c = $("#kb-call");
+    if (c) c.setAttribute("aria-pressed", "true");
+  }
+
+  function kbHide() {
+    var kb = $("#kb");
+    if (kb.hidden || kb.classList.contains("is-out")) return;
+    kb.classList.add("is-out");
+    clearTimeout(kbTimer);
+    kbTimer = setTimeout(function () {
+      kb.hidden = true;
+      kb.classList.remove("is-out");
+    }, 180);
+    var c = $("#kb-call");
+    if (c) c.setAttribute("aria-pressed", "false");
+  }
+
+  /* Клавиатура собирается всегда: кнопка вызова должна работать и там,
+     где сенсора нет — например, когда сотрудник проверяет киоск с мышью,
+     или когда `авто` угадало неверно. Автоматически по касанию поля она
+     открывается только там, где сенсор есть. */
+  if (((D.settings || {}).keyboard || "авто").toLowerCase() !== "никогда") {
+    kbBuild();
+    $("#kb-call").hidden = false;
+    $("#kb-call").innerHTML = iconSvg("keyboard", "");
+    $("#kb-call").onclick = function () {
+      if ($("#kb").hidden) { kbShow(); $("#q").focus(); } else kbHide();
+    };
+    if (kbWanted()) $("#q").addEventListener("focus", kbShow);
+
+    $("#kb").onclick = function (e) {
+      var b = e.target.closest("button");
+      if (!b) return;
+      var q = $("#q");
+      if (b.dataset.act === "done") { kbHide(); return; }
+      if (b.dataset.act === "clear") q.value = "";
+      else if (b.dataset.act === "back") q.value = q.value.slice(0, -1);
+      else q.value += b.dataset.ch;
+      // input, а не change: реестр перерисовывается на каждый знак
+      q.dispatchEvent(new Event("input", { bubbles: true }));
+      q.focus();
+    };
+
+    // Ушли с поиска — клавиатура не нужна. Нажатия по самой клавиатуре
+    // сюда не попадают: обработчик стоит на документе, а она его гасит.
+    document.addEventListener("pointerdown", function (e) {
+      if (e.target.closest("#kb") || e.target.closest("#q") ||
+          e.target.closest("#kb-call")) return;
+      kbHide();
+    });
+    document.querySelectorAll(".tab").forEach(function (t) {
+      t.addEventListener("click", kbHide);
+    });
   }
 
   /* ---------------- киоск ---------------- */
@@ -1964,8 +3404,19 @@
   $("#idle-total").textContent = D.meta.total;
 
   var ranks = {};
-  D.persons.forEach(function (p) { if (p.rank) ranks[p.rank] = 1; });
-  fillSelect($("#f-rank"), Object.keys(ranks).sort());
+  D.persons.forEach(function (p) {
+    var b = baseRank(p.rank);
+    if (b) ranks[b] = (ranks[b] || 0) + 1;
+  });
+  $("#f-rank").innerHTML += Object.keys(ranks)
+    .sort(function (a, b) {
+      var ia = RANK_ORDER.indexOf(a), ib = RANK_ORDER.indexOf(b);
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+    })
+    .map(function (r) {
+      return '<option value="' + esc(r) + '">' +
+        esc(r[0].toUpperCase() + r.slice(1)) + " · " + ranks[r] + "</option>";
+    }).join("");
   $("#f-place").innerHTML += '<option value="__none">' + esc(T("noPlace")) + '</option>';
   fillSelect($("#f-place"), []);
   D.places.forEach(function (p) {
