@@ -73,9 +73,9 @@ SHEET_TO_PLACE = {
 # не совпадающие с именами листов, и с опечатками («Филомоново»).
 #
 # Числа нужны не для красоты: расхождение с тем, что реально расписано
-# по фамилиям, показывает, где список неполон. После правки 26.08.2026
-# восемь мест сошлись точь-в-точь, а четыре разошлись — и ровно там сидят
-# люди, которых нет в «ВСЕ алф», и неразличимые однофамильцы.
+# по фамилиям, показывает, где список неполон. На 29.08.2026 девять мест
+# из тринадцати сходятся точь-в-точь, четыре разошлись на 11 человек —
+# и ровно там сидят люди, которых нет в «ВСЕ алф», и неразличимые однофамильцы.
 COUNT_TO_PLACE = {
     u"1-ое отделение": "L01", u"секирная": "L02", u"кемь": "L03",
     u"анзер": "L04", u"савватьево": "L05", u"филимонова тоня": "L07",
@@ -385,6 +385,22 @@ def read_places():
     return places, fields
 
 
+def known_places():
+    """Идентификаторы мест, которые есть в places.csv.
+
+    Нужны, чтобы импорт не привязал человека к месту, которого больше нет.
+    Так уже могло случиться: 29.08.2026 из places.csv удалили три места
+    без единого человека — Никольский лазарет, Голгофу и Троицкий скит, —
+    а SHEET_TO_PLACE по-прежнему сопоставляет лист «Ник.лазарет» с L09.
+    Пока по этому листу никто не опознаётся, и ссылок не возникло, но
+    молчаливая ссылка в никуда — это ровно та ошибка, которую замечают
+    в зале, а не при импорте.
+    """
+    path = os.path.join(HERE, "places.csv")
+    with io.open(path, encoding="utf-8") as f:
+        return {r["id"] for r in csv.DictReader(f) if r.get("id")}
+
+
 def read_persons(xlsx):
     wb = openpyxl.load_workbook(xlsx, data_only=True)
     ws = wb[u"ВСЕ алф"]
@@ -437,9 +453,14 @@ def read_persons(xlsx):
                 by_surname[f].append(p)
 
     unmatched = []
+    known = known_places()
+    skipped = sorted({(s, p) for s, p in SHEET_TO_PLACE.items()
+                      if p not in known and s in wb.sheetnames})
     for sheet, place_id in SHEET_TO_PLACE.items():
         if sheet not in wb.sheetnames:
             continue
+        if place_id not in known:
+            continue          # место удалено из places.csv — привязывать не к чему
         group = ""                                    # текущий заголовок группы
         for row in wb[sheet].iter_rows(values_only=True):
             cells = [norm(c) for c in row]
@@ -547,7 +568,7 @@ def read_persons(xlsx):
                 if f:
                     by_surname[f].append(p)
             unmatched.append((sheet, " | ".join(c for c in cells if c)[:100]))
-    return apply_confirmed(persons), unmatched
+    return apply_confirmed(persons), unmatched, skipped
 
 
 # name_en и rank_en — путь переопределения машинной транслитерации.
@@ -716,7 +737,9 @@ def main():
             shutil.copy(os.path.join(HERE, "persons.csv"),
                         os.path.join(HERE, "persons.csv.bak"))
             print(u"Прежний persons.csv сохранён как persons.csv.bak")
-        persons, unmatched = read_persons(xlsx)
+        persons, unmatched, skipped = read_persons(xlsx)
+        for sheet, pid in skipped:
+            print(u"Лист «%s» пропущен: места %s нет в places.csv" % (sheet, pid))
         write_persons(persons)
         wbc = openpyxl.load_workbook(xlsx, data_only=True)
         changed = write_counts(read_counts(wbc))
