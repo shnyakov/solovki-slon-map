@@ -122,11 +122,13 @@ READ_ME = """СОЛОВКИ. ИСПЫТАНИЕ ВЕРЫ. ВЕК ХХ
 
 Подробности — в файле «Инструкция для музея.md».
 
-О ДАННЫХ
+О ДАННЫХ И ПРАВАХ
 
-В приложении — рабочие материалы Соловецкого музея-заповедника,
-имена репрессированных священнослужителей. Это не публичная публикация:
-архив передаётся коллегам, в открытый доступ не выкладывается.
+В приложении — материалы Соловецкого музея-заповедника: имена
+репрессированных священнослужителей и фотографии из фондов.
+Код приложения — под лицензией MIT (файл LICENSE), на содержимое
+она не распространяется: сведения и снимки принадлежат музею
+и правообладателям, перечисленным в app/data/photo-credits.csv.
 
 Собрано {stamp}
 """
@@ -176,6 +178,12 @@ def main():
     if os.path.exists(doc):
         shutil.copy2(doc, os.path.join(dst_root, "Инструкция для музея.md"))
 
+    # Лицензия на код. На содержимое она не распространяется — об этом сказано
+    # и в README, и в «ЧИТАТЬ ПЕРВЫМ.txt».
+    lic = os.path.join(ROOT, "LICENSE")
+    if os.path.exists(lic):
+        shutil.copy2(lic, os.path.join(dst_root, "LICENSE"))
+
     zip_path = os.path.join(OUT, NAME + ".zip")
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
         for base, dirs, files in os.walk(dst_root):
@@ -187,12 +195,13 @@ def main():
                 z.write(full, os.path.join(NAME, os.path.relpath(full, dst_root)))
 
     size = os.path.getsize(zip_path) / 1024.0 / 1024.0
-    folder = sum(os.path.getsize(os.path.join(b, f))
-                 for b, _, fs in os.walk(dst_root) for f in fs) / 1024.0 / 1024.0
+    files = [os.path.join(b, f) for b, _, fs in os.walk(dst_root) for f in fs]
+    folder = sum(os.path.getsize(f) for f in files) / 1024.0 / 1024.0
+    root = sorted(x for x in os.listdir(dst_root) if x != "app")
     print("Папка:  %s" % dst_root)
     print("Архив:  %s" % zip_path)
-    print("Файлов: %d, папка %.1f МБ, архив %.1f МБ" % (n + 3, folder, size))
-    print("В корне: %s, ЧИТАТЬ ПЕРВЫМ.txt, Инструкция для музея.md, app/" % LAUNCHER)
+    print("Файлов: %d, папка %.1f МБ, архив %.1f МБ" % (len(files), folder, size))
+    print("В корне: %s, app/" % ", ".join(root))
 
 
 main()
