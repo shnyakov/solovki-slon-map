@@ -2,155 +2,47 @@
 // Руками не править — правьте Excel и пересоберите.
 window.DATA = {
  "credits": {
+  "L01": {
+   "author": "Соловецкий музей-заповедник",
+   "date": "",
+   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
+   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
+  },
+  "L01-10": {
+   "author": "Соловецкий музей-заповедник",
+   "date": "",
+   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
+   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
+  },
+  "L01-11": {
+   "author": "Соловецкий музей-заповедник",
+   "date": "",
+   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
+   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
+  },
+  "L01-12": {
+   "author": "Соловецкий музей-заповедник",
+   "date": "",
+   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
+   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
+  },
+  "L01-13": {
+   "author": "Соловецкий музей-заповедник",
+   "date": "",
+   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
+   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
+  },
+  "L01-14": {
+   "author": "Соловецкий музей-заповедник",
+   "date": "",
+   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
+   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
+  },
   "L01-15": {
    "author": "Александр Байдуков",
    "date": "",
    "license": "CC BY-SA 4.0",
    "url": "https://commons.wikimedia.org/wiki/File:Ensemble_of_the_Solovetsky_monastery_in_the_fog.jpg"
-  },
-  "L02-4": {
-   "author": "Visem",
-   "date": "",
-   "license": "CC BY-SA 3.0",
-   "url": "https://commons.wikimedia.org/wiki/File:Sekirnaya_Hill_01.JPG"
-  },
-  "L04-5": {
-   "author": "Visem",
-   "date": "",
-   "license": "CC BY-SA 3.0",
-   "url": "https://commons.wikimedia.org/wiki/File:Anzer_134.JPG"
-  },
-  "L05-3": {
-   "author": "Vitold Muratov",
-   "date": "",
-   "license": "CC BY-SA 3.0",
-   "url": "https://commons.wikimedia.org/wiki/File:In_Savvatievo.St.Sabbatius_scete.jpg"
-  },
-  "L10-2": {
-   "author": "Godot13",
-   "date": "",
-   "license": "CC BY-SA 4.0",
-   "url": "https://commons.wikimedia.org/wiki/File:RUS-2016-Bolshoi_Zayatsky_Island-Church_of_St._Andrew.jpg"
-  },
-  "L11-4": {
-   "author": "Visem",
-   "date": "",
-   "license": "CC BY-SA 4.0",
-   "url": "https://commons.wikimedia.org/wiki/File:Bolshaya_Muksalma_18.JPG"
-  },
-  "P584d32": {
-   "author": "автор неизвестен",
-   "date": "1923",
-   "license": "Public domain",
-   "url": "https://commons.wikimedia.org/wiki/File:Ilarion_(Troickiy).jpg"
-  },
-  "P63091e": {
-   "author": "автор неизвестен",
-   "date": "1919–1921",
-   "license": "Public domain",
-   "url": "https://commons.wikimedia.org/wiki/File:Peter_(Zverev).jpg"
-  },
-  "P16a427": {
-   "author": "автор неизвестен",
-   "date": "",
-   "license": "Public domain",
-   "url": "https://commons.wikimedia.org/wiki/File:%D0%9C%D0%B8%D1%82%D1%80%D0%BE%D0%BF%D0%BE%D0%BB%D0%B8%D1%82_%D0%9A%D0%B8%D1%80%D0%B8%D0%BB%D0%BB_(%D0%A1%D0%BC%D0%B8%D1%80%D0%BD%D0%BE%D0%B2).jpg"
-  },
-  "P766f15": {
-   "author": "архив ПСТГУ",
-   "date": "1920-е",
-   "license": "Public domain",
-   "url": "https://commons.wikimedia.org/wiki/File:%D0%90%D1%80%D1%85%D0%B8%D0%B5%D0%BF%D0%B8%D1%81%D0%BA%D0%BE%D0%BF_%D0%A1%D0%B5%D1%80%D0%B0%D1%84%D0%B8%D0%BC_(%D0%A1%D0%B0%D0%BC%D0%BE%D0%B9%D0%BB%D0%BE%D0%B2%D0%B8%D1%87)._%D0%9F%D0%BE%D1%80%D1%82%D1%80%D0%B5%D1%82.jpg"
-  },
-  "Pca5cce": {
-   "author": "автор неизвестен",
-   "date": "1920",
-   "license": "Public domain",
-   "url": "https://commons.wikimedia.org/wiki/File:Viktor-ostrovidov-bishop.jpg"
-  },
-  "P560b35": {
-   "author": "автор неизвестен",
-   "date": "до 1930",
-   "license": "Public domain",
-   "url": "https://commons.wikimedia.org/wiki/File:Ioann_steblin_kamenskii_2010_001.jpg"
-  },
-  "P77421b": {
-   "author": "автор неизвестен",
-   "date": "1920-е",
-   "license": "Public domain",
-   "url": "https://commons.wikimedia.org/wiki/File:%D0%95%D0%BF%D0%B8%D1%81%D0%BA%D0%BE%D0%BF_%D0%A1%D1%82%D0%B0%D1%80%D0%BE%D0%B4%D1%83%D0%B1%D1%81%D0%BA%D0%B8%D0%B9_%D0%94%D0%B0%D0%BC%D0%B0%D1%81%D0%BA%D0%B8%D0%BD_(%D0%A6%D0%B5%D0%B4%D1%80%D0%B8%D0%BA).jpg"
-  },
-  "P4ef1fc": {
-   "author": "автор неизвестен",
-   "date": "до 1926",
-   "license": "Public domain",
-   "url": "https://commons.wikimedia.org/wiki/File:%D0%90%D1%80%D1%85%D0%B8%D0%BC%D0%B0%D0%BD%D0%B4%D1%80%D0%B8%D1%82_%D0%90%D1%80%D0%BA%D0%B0%D0%B4%D0%B8%D0%B9_(%D0%9E%D1%81%D1%82%D0%B0%D0%BB%D1%8C%D1%81%D0%BA%D0%B8%D0%B9).jpg"
-  },
-  "P63091e-2": {
-   "author": "автор неизвестен",
-   "date": "1900-е",
-   "license": "Public domain",
-   "url": "https://commons.wikimedia.org/wiki/File:%D0%98%D0%B5%D1%80%D0%BE%D0%BC%D0%BE%D0%BD%D0%B0%D1%85_%D0%9F%D0%B5%D1%82%D1%80_(%D0%97%D0%B2%D0%B5%D1%80%D0%B5%D0%B2).jpg"
-  },
-  "L04-2": {
-   "author": "Соловецкий музей-заповедник",
-   "date": "",
-   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
-   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
-  },
-  "L04-3": {
-   "author": "Соловецкий музей-заповедник",
-   "date": "",
-   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
-   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
-  },
-  "L04-4": {
-   "author": "Соловецкий музей-заповедник",
-   "date": "",
-   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
-   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
-  },
-  "L08": {
-   "author": "Соловецкий музей-заповедник",
-   "date": "",
-   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
-   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
-  },
-  "L08-2": {
-   "author": "Соловецкий музей-заповедник",
-   "date": "",
-   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
-   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
-  },
-  "L03": {
-   "author": "Соловецкий музей-заповедник",
-   "date": "",
-   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
-   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
-  },
-  "L03-2": {
-   "author": "Соловецкий музей-заповедник",
-   "date": "",
-   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
-   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
-  },
-  "L03-3": {
-   "author": "Соловецкий музей-заповедник",
-   "date": "",
-   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
-   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
-  },
-  "L19": {
-   "author": "Соловецкий музей-заповедник",
-   "date": "",
-   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
-   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
-  },
-  "L19-2": {
-   "author": "Соловецкий музей-заповедник",
-   "date": "",
-   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
-   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
   },
   "L01-2": {
    "author": "Соловецкий музей-заповедник",
@@ -200,49 +92,7 @@ window.DATA = {
    "license": "выставка «Соловки. Испытание веры. Век ХХ»",
    "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
   },
-  "L01-10": {
-   "author": "Соловецкий музей-заповедник",
-   "date": "",
-   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
-   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
-  },
-  "L01-11": {
-   "author": "Соловецкий музей-заповедник",
-   "date": "",
-   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
-   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
-  },
-  "L01-12": {
-   "author": "Соловецкий музей-заповедник",
-   "date": "",
-   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
-   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
-  },
-  "L01-13": {
-   "author": "Соловецкий музей-заповедник",
-   "date": "",
-   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
-   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
-  },
-  "L01-14": {
-   "author": "Соловецкий музей-заповедник",
-   "date": "",
-   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
-   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
-  },
-  "L11-2": {
-   "author": "Соловецкий музей-заповедник",
-   "date": "",
-   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
-   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
-  },
-  "L11-3": {
-   "author": "Соловецкий музей-заповедник",
-   "date": "",
-   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
-   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
-  },
-  "L05-2": {
+  "L02": {
    "author": "Соловецкий музей-заповедник",
    "date": "",
    "license": "выставка «Соловки. Испытание веры. Век ХХ»",
@@ -259,6 +109,78 @@ window.DATA = {
    "date": "",
    "license": "выставка «Соловки. Испытание веры. Век ХХ»",
    "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
+  },
+  "L02-4": {
+   "author": "Visem",
+   "date": "",
+   "license": "CC BY-SA 3.0",
+   "url": "https://commons.wikimedia.org/wiki/File:Sekirnaya_Hill_01.JPG"
+  },
+  "L03": {
+   "author": "Соловецкий музей-заповедник",
+   "date": "",
+   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
+   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
+  },
+  "L03-2": {
+   "author": "Соловецкий музей-заповедник",
+   "date": "",
+   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
+   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
+  },
+  "L03-3": {
+   "author": "Соловецкий музей-заповедник",
+   "date": "",
+   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
+   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
+  },
+  "L04": {
+   "author": "Соловецкий музей-заповедник",
+   "date": "",
+   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
+   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
+  },
+  "L04-2": {
+   "author": "Соловецкий музей-заповедник",
+   "date": "",
+   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
+   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
+  },
+  "L04-3": {
+   "author": "Соловецкий музей-заповедник",
+   "date": "",
+   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
+   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
+  },
+  "L04-4": {
+   "author": "Соловецкий музей-заповедник",
+   "date": "",
+   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
+   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
+  },
+  "L04-5": {
+   "author": "Visem",
+   "date": "",
+   "license": "CC BY-SA 3.0",
+   "url": "https://commons.wikimedia.org/wiki/File:Anzer_134.JPG"
+  },
+  "L05": {
+   "author": "Соловецкий музей-заповедник",
+   "date": "",
+   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
+   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
+  },
+  "L05-2": {
+   "author": "Соловецкий музей-заповедник",
+   "date": "",
+   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
+   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
+  },
+  "L05-3": {
+   "author": "Vitold Muratov",
+   "date": "",
+   "license": "CC BY-SA 3.0",
+   "url": "https://commons.wikimedia.org/wiki/File:In_Savvatievo.St.Sabbatius_scete.jpg"
   },
   "L07": {
    "author": "Соловецкий музей-заповедник",
@@ -284,11 +206,77 @@ window.DATA = {
    "license": "выставка «Соловки. Испытание веры. Век ХХ»",
    "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
   },
+  "L08": {
+   "author": "Соловецкий музей-заповедник",
+   "date": "",
+   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
+   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
+  },
+  "L08-2": {
+   "author": "Соловецкий музей-заповедник",
+   "date": "",
+   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
+   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
+  },
+  "L10": {
+   "author": "Соловецкий музей-заповедник",
+   "date": "",
+   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
+   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
+  },
+  "L10-2": {
+   "author": "Godot13",
+   "date": "",
+   "license": "CC BY-SA 4.0",
+   "url": "https://commons.wikimedia.org/wiki/File:RUS-2016-Bolshoi_Zayatsky_Island-Church_of_St._Andrew.jpg"
+  },
+  "L11": {
+   "author": "Соловецкий музей-заповедник",
+   "date": "",
+   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
+   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
+  },
+  "L11-2": {
+   "author": "Соловецкий музей-заповедник",
+   "date": "",
+   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
+   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
+  },
+  "L11-3": {
+   "author": "Соловецкий музей-заповедник",
+   "date": "",
+   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
+   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
+  },
+  "L11-4": {
+   "author": "Visem",
+   "date": "",
+   "license": "CC BY-SA 4.0",
+   "url": "https://commons.wikimedia.org/wiki/File:Bolshaya_Muksalma_18.JPG"
+  },
   "L15": {
    "author": "Соловецкий музей-заповедник",
    "date": "",
    "license": "выставка «Соловки. Испытание веры. Век ХХ»",
    "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
+  },
+  "L19": {
+   "author": "Соловецкий музей-заповедник",
+   "date": "",
+   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
+   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
+  },
+  "L19-2": {
+   "author": "Соловецкий музей-заповедник",
+   "date": "",
+   "license": "выставка «Соловки. Испытание веры. Век ХХ»",
+   "url": "https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/"
+  },
+  "P16a427": {
+   "author": "автор неизвестен",
+   "date": "",
+   "license": "Public domain",
+   "url": "https://commons.wikimedia.org/wiki/File:%D0%9C%D0%B8%D1%82%D1%80%D0%BE%D0%BF%D0%BE%D0%BB%D0%B8%D1%82_%D0%9A%D0%B8%D1%80%D0%B8%D0%BB%D0%BB_(%D0%A1%D0%BC%D0%B8%D1%80%D0%BD%D0%BE%D0%B2).jpg"
   },
   "P40e032": {
    "author": "Фонд «Память мучеников и исповедников Русской Православной Церкви»",
@@ -302,11 +290,65 @@ window.DATA = {
    "license": "база «Новомученики и исповедники»",
    "url": "https://fond.ru/poisk/?module=module_person_page&flag=1&person_id=832"
   },
+  "P48e0c8": {
+   "author": "Фонд «Память мучеников и исповедников Русской Православной Церкви»",
+   "date": "",
+   "license": "база «Новомученики и исповедники»",
+   "url": "https://fond.ru/poisk/?module=module_person_page&flag=1&person_id=780"
+  },
+  "P4ef1fc": {
+   "author": "автор неизвестен",
+   "date": "до 1926",
+   "license": "Public domain",
+   "url": "https://commons.wikimedia.org/wiki/File:%D0%90%D1%80%D1%85%D0%B8%D0%BC%D0%B0%D0%BD%D0%B4%D1%80%D0%B8%D1%82_%D0%90%D1%80%D0%BA%D0%B0%D0%B4%D0%B8%D0%B9_(%D0%9E%D1%81%D1%82%D0%B0%D0%BB%D1%8C%D1%81%D0%BA%D0%B8%D0%B9).jpg"
+  },
+  "P560b35": {
+   "author": "автор неизвестен",
+   "date": "до 1930",
+   "license": "Public domain",
+   "url": "https://commons.wikimedia.org/wiki/File:Ioann_steblin_kamenskii_2010_001.jpg"
+  },
+  "P584d32": {
+   "author": "автор неизвестен",
+   "date": "1923",
+   "license": "Public domain",
+   "url": "https://commons.wikimedia.org/wiki/File:Ilarion_(Troickiy).jpg"
+  },
   "P5863c8": {
    "author": "Фонд «Память мучеников и исповедников Русской Православной Церкви»",
    "date": "",
    "license": "база «Новомученики и исповедники»",
    "url": "https://fond.ru/poisk/?module=module_person_page&flag=1&person_id=843"
+  },
+  "P63091e": {
+   "author": "автор неизвестен",
+   "date": "1919–1921",
+   "license": "Public domain",
+   "url": "https://commons.wikimedia.org/wiki/File:Peter_(Zverev).jpg"
+  },
+  "P63091e-2": {
+   "author": "автор неизвестен",
+   "date": "1900-е",
+   "license": "Public domain",
+   "url": "https://commons.wikimedia.org/wiki/File:%D0%98%D0%B5%D1%80%D0%BE%D0%BC%D0%BE%D0%BD%D0%B0%D1%85_%D0%9F%D0%B5%D1%82%D1%80_(%D0%97%D0%B2%D0%B5%D1%80%D0%B5%D0%B2).jpg"
+  },
+  "P766f15": {
+   "author": "архив ПСТГУ",
+   "date": "1920-е",
+   "license": "Public domain",
+   "url": "https://commons.wikimedia.org/wiki/File:%D0%90%D1%80%D1%85%D0%B8%D0%B5%D0%BF%D0%B8%D1%81%D0%BA%D0%BE%D0%BF_%D0%A1%D0%B5%D1%80%D0%B0%D1%84%D0%B8%D0%BC_(%D0%A1%D0%B0%D0%BC%D0%BE%D0%B9%D0%BB%D0%BE%D0%B2%D0%B8%D1%87)._%D0%9F%D0%BE%D1%80%D1%82%D1%80%D0%B5%D1%82.jpg"
+  },
+  "P77421b": {
+   "author": "автор неизвестен",
+   "date": "1920-е",
+   "license": "Public domain",
+   "url": "https://commons.wikimedia.org/wiki/File:%D0%95%D0%BF%D0%B8%D1%81%D0%BA%D0%BE%D0%BF_%D0%A1%D1%82%D0%B0%D1%80%D0%BE%D0%B4%D1%83%D0%B1%D1%81%D0%BA%D0%B8%D0%B9_%D0%94%D0%B0%D0%BC%D0%B0%D1%81%D0%BA%D0%B8%D0%BD_(%D0%A6%D0%B5%D0%B4%D1%80%D0%B8%D0%BA).jpg"
+  },
+  "P8d2ad9": {
+   "author": "Фонд «Память мучеников и исповедников Русской Православной Церкви»",
+   "date": "",
+   "license": "база «Новомученики и исповедники»",
+   "url": "https://fond.ru/poisk/?module=module_person_page&flag=1&person_id=1219"
   },
   "Pa27031": {
    "author": "Фонд «Память мучеников и исповедников Русской Православной Церкви»",
@@ -314,17 +356,11 @@ window.DATA = {
    "license": "база «Новомученики и исповедники»",
    "url": "https://fond.ru/poisk/?module=module_person_page&flag=1&person_id=425"
   },
-  "P48e0c8": {
-   "author": "Фонд «Память мучеников и исповедников Русской Православной Церкви»",
-   "date": "",
-   "license": "база «Новомученики и исповедники»",
-   "url": "https://fond.ru/poisk/?module=module_person_page&flag=1&person_id=780"
-  },
-  "Pe6ce42": {
-   "author": "Фонд «Память мучеников и исповедников Русской Православной Церкви»",
-   "date": "",
-   "license": "база «Новомученики и исповедники»",
-   "url": "https://fond.ru/poisk/?module=module_person_page&flag=1&person_id=95"
+  "Pca5cce": {
+   "author": "автор неизвестен",
+   "date": "1920",
+   "license": "Public domain",
+   "url": "https://commons.wikimedia.org/wiki/File:Viktor-ostrovidov-bishop.jpg"
   },
   "Pd03223": {
    "author": "Фонд «Память мучеников и исповедников Русской Православной Церкви»",
@@ -332,11 +368,11 @@ window.DATA = {
    "license": "база «Новомученики и исповедники»",
    "url": "https://fond.ru/poisk/?module=module_person_page&flag=1&person_id=1028"
   },
-  "P8d2ad9": {
+  "Pe6ce42": {
    "author": "Фонд «Память мучеников и исповедников Русской Православной Церкви»",
    "date": "",
    "license": "база «Новомученики и исповедники»",
-   "url": "https://fond.ru/poisk/?module=module_person_page&flag=1&person_id=1219"
+   "url": "https://fond.ru/poisk/?module=module_person_page&flag=1&person_id=95"
   }
  },
  "gallery": {

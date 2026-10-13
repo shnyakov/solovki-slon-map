@@ -166,7 +166,7 @@ LB = """
     if (lb.hidden) return done(JSON.stringify({err:'полный экран не открылся'}));
     var src0 = m.currentSrc || m.src;
     var cap0 = document.querySelector('#lb-cap').textContent;
-    var seen = [], ghostOp = [], froms = {}, tos = {}, shifts = [];
+    var seen = [], ghostOp = [], froms = {}, tos = {}, shifts = [], capIn = 0;
     var t = setInterval(function(){
       var g = lb.querySelector('.lb__ghost');
       if (g){
@@ -176,6 +176,7 @@ LB = """
       }
       if (m.classList.contains('is-from-r')) froms['r'] = 1;
       if (m.classList.contains('is-from-l')) froms['l'] = 1;
+      if (document.querySelector('#lb-cap').classList.contains('is-in')) capIn = 1;
       var cs = getComputedStyle(m);
       seen.push(+cs.opacity);
       // Матрица вида matrix(1,0,0,1,X,Y): X — тот самый сдвиг
@@ -188,6 +189,7 @@ LB = """
       done(JSON.stringify({
         srcChanged: (m.currentSrc||m.src) !== src0,
         capChanged: document.querySelector('#lb-cap').textContent !== cap0,
+        capIn: capIn, capText: document.querySelector('#lb-cap').textContent.trim().length,
         ghostFrames: ghostOp.length, ghostOp: ghostOp,
         froms: Object.keys(froms), tos: Object.keys(tos),
         opacities: seen, shifts: shifts,
@@ -201,7 +203,13 @@ LB = """
 r = json.loads(ev(ws, LB))
 check("полный экран открылся и снимок сменился",
       r.get("srcChanged"), r.get("err", ""))
-check("подпись сменилась вместе со снимком", r.get("capChanged"))
+# Текст подписи сравнивать нельзя: у соседних снимков музея авторство одно и то же,
+# и подпись законно совпадает. Проверяем, что она перерисована и не пуста.
+check("подпись перерисовывается вместе со снимком",
+      bool(r.get("capIn")) and r.get("capText", 0) > 0,
+      u"проявление: %s, длина подписи: %s%s" % (
+          r.get("capIn"), r.get("capText"),
+          u", текст изменился" if r.get("capChanged") else u", текст тот же — авторство общее"))
 check("прежний кадр остаётся лежать поверх", r.get("ghostFrames", 0) >= 3,
       "кадров с копией: %s" % r.get("ghostFrames"))
 check("копия растворяется постепенно, а не гаснет разом",
