@@ -12,7 +12,7 @@ window.LANG = {
     idleTitle: "Соловки. Испытание веры. Век ХХ",
     idleCount: "имён священнослужителей,<br>прошедших через соловецкие лагеря",
     idleHint: "Коснитесь экрана",
-    mapNote: 'Сведения о персоналиях — Соловецкий музей-заповедник · берег — <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, ODbL · метки ориентировочны',
+    mapNote: 'Сведения о персоналиях и фотографии — <a href="https://www.solovky.ru/">Соловецкий музей-заповедник</a> · берег — <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, ODbL · метки ориентировочны',
     // Лицензия CC BY требует указания источника — показывается, пока включён снимок
     satNote: 'Снимок — <a href="https://s2maps.eu">Sentinel-2 cloudless</a> by EOX IT Services, CC BY 4.0 · данные Copernicus Sentinel · съёмка 2020 года, не времён лагеря',
     search: "Имя, фамилия, сан, место или источник",
@@ -47,7 +47,7 @@ window.LANG = {
     idleTitle: "Solovki. A Trial of Faith. 20th Century",
     idleCount: "names of clergy<br>who passed through the Solovki camps",
     idleHint: "Touch the screen",
-    mapNote: 'Biographical data — Solovetsky Museum Reserve · coastline — <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, ODbL · marker positions approximate',
+    mapNote: 'Biographical data and photographs — <a href="https://www.solovky.ru/en/">Solovetsky Museum Reserve</a> · coastline — <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, ODbL · marker positions approximate',
     satNote: 'Imagery — <a href="https://s2maps.eu">Sentinel-2 cloudless</a> by EOX IT Services, CC BY 4.0 · contains Copernicus Sentinel data · 2020, not the camp period',
     search: "Name, holy orders, place or source",
     anyRank: "Any orders", anyPlace: "Any place",

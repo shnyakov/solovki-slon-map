@@ -1,29 +1,11 @@
 id,author,date,license,url,note
+L01,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходное имя файла при импорте не зафиксировано
+L01-10,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: лагерный лазарет.jpg
+L01-11,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: почта-священники.tif
+L01-12,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: почта.TIF
+L01-13,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: рабочий городок.TIF
+L01-14,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: этап0.tif
 L01-15,Александр Байдуков,,CC BY-SA 4.0,https://commons.wikimedia.org/wiki/File:Ensemble_of_the_Solovetsky_monastery_in_the_fog.jpg,
-L02-4,Visem,,CC BY-SA 3.0,https://commons.wikimedia.org/wiki/File:Sekirnaya_Hill_01.JPG,
-L04-5,Visem,,CC BY-SA 3.0,https://commons.wikimedia.org/wiki/File:Anzer_134.JPG,
-L05-3,Vitold Muratov,,CC BY-SA 3.0,https://commons.wikimedia.org/wiki/File:In_Savvatievo.St.Sabbatius_scete.jpg,
-L10-2,Godot13,,CC BY-SA 4.0,https://commons.wikimedia.org/wiki/File:RUS-2016-Bolshoi_Zayatsky_Island-Church_of_St._Andrew.jpg,
-L11-4,Visem,,CC BY-SA 4.0,https://commons.wikimedia.org/wiki/File:Bolshaya_Muksalma_18.JPG,
-P584d32,автор неизвестен,1923,Public domain,https://commons.wikimedia.org/wiki/File:Ilarion_(Troickiy).jpg,
-P63091e,автор неизвестен,1919–1921,Public domain,https://commons.wikimedia.org/wiki/File:Peter_(Zverev).jpg,
-P16a427,автор неизвестен,,Public domain,https://commons.wikimedia.org/wiki/File:%D0%9C%D0%B8%D1%82%D1%80%D0%BE%D0%BF%D0%BE%D0%BB%D0%B8%D1%82_%D0%9A%D0%B8%D1%80%D0%B8%D0%BB%D0%BB_(%D0%A1%D0%BC%D0%B8%D1%80%D0%BD%D0%BE%D0%B2).jpg,
-P766f15,архив ПСТГУ,1920-е,Public domain,https://commons.wikimedia.org/wiki/File:%D0%90%D1%80%D1%85%D0%B8%D0%B5%D0%BF%D0%B8%D1%81%D0%BA%D0%BE%D0%BF_%D0%A1%D0%B5%D1%80%D0%B0%D1%84%D0%B8%D0%BC_(%D0%A1%D0%B0%D0%BC%D0%BE%D0%B9%D0%BB%D0%BE%D0%B2%D0%B8%D1%87)._%D0%9F%D0%BE%D1%80%D1%82%D1%80%D0%B5%D1%82.jpg,
-Pca5cce,автор неизвестен,1920,Public domain,https://commons.wikimedia.org/wiki/File:Viktor-ostrovidov-bishop.jpg,
-P560b35,автор неизвестен,до 1930,Public domain,https://commons.wikimedia.org/wiki/File:Ioann_steblin_kamenskii_2010_001.jpg,
-P77421b,автор неизвестен,1920-е,Public domain,https://commons.wikimedia.org/wiki/File:%D0%95%D0%BF%D0%B8%D1%81%D0%BA%D0%BE%D0%BF_%D0%A1%D1%82%D0%B0%D1%80%D0%BE%D0%B4%D1%83%D0%B1%D1%81%D0%BA%D0%B8%D0%B9_%D0%94%D0%B0%D0%BC%D0%B0%D1%81%D0%BA%D0%B8%D0%BD_(%D0%A6%D0%B5%D0%B4%D1%80%D0%B8%D0%BA).jpg,
-P4ef1fc,автор неизвестен,до 1926,Public domain,https://commons.wikimedia.org/wiki/File:%D0%90%D1%80%D1%85%D0%B8%D0%BC%D0%B0%D0%BD%D0%B4%D1%80%D0%B8%D1%82_%D0%90%D1%80%D0%BA%D0%B0%D0%B4%D0%B8%D0%B9_(%D0%9E%D1%81%D1%82%D0%B0%D0%BB%D1%8C%D1%81%D0%BA%D0%B8%D0%B9).jpg,
-P63091e-2,автор неизвестен,1900-е,Public domain,https://commons.wikimedia.org/wiki/File:%D0%98%D0%B5%D1%80%D0%BE%D0%BC%D0%BE%D0%BD%D0%B0%D1%85_%D0%9F%D0%B5%D1%82%D1%80_(%D0%97%D0%B2%D0%B5%D1%80%D0%B5%D0%B2).jpg,
-L04-2,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: 4 Голгофо-Распятский скит.jpg
-L04-3,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: голгофа.tif
-L04-4,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: троицкая команд..tif
-L08,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: 12 Варварка.TIF
-L08-2,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: 17 работники лесничества.tif
-L03,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: 3.tif
-L03-2,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: Кемь_ресторан.tif
-L03-3,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: этап3.tif
-L19,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: Untitled-28.tif
-L19-2,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: Untitled-30.tif
 L01-2,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: 2 оборот фотографии.tif
 L01-3,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: 2 план 1 роты.jpg
 L01-4,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: 6 корабли услон.tif
@@ -32,26 +14,50 @@ L01-6,Соловецкий музей-заповедник,,выставка «�
 L01-7,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: 18 железная дорога.tif
 L01-8,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: Untitled-4.tif
 L01-9,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: картаКремля-Зайцев.tif
-L01-10,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: лагерный лазарет.jpg
-L01-11,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: почта-священники.tif
-L01-12,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: почта.TIF
-L01-13,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: рабочий городок.TIF
-L01-14,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: этап0.tif
-L11-2,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: Untitled-36.tif
-L11-3,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: Б.М.-общ.вид.tif
-L05-2,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: савватиево.tif
+L02,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходное имя файла при импорте не зафиксировано
 L02-2,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: DSCF0011.JPG
 L02-3,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: секир-лестн.-19в.tif
+L02-4,Visem,,CC BY-SA 3.0,https://commons.wikimedia.org/wiki/File:Sekirnaya_Hill_01.JPG,
+L03,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: 3.tif
+L03-2,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: Кемь_ресторан.tif
+L03-3,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: этап3.tif
+L04,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходное имя файла при импорте не зафиксировано
+L04-2,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: 4 Голгофо-Распятский скит.jpg
+L04-3,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: голгофа.tif
+L04-4,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: троицкая команд..tif
+L04-5,Visem,,CC BY-SA 3.0,https://commons.wikimedia.org/wiki/File:Anzer_134.JPG,
+L05,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходное имя файла при импорте не зафиксировано
+L05-2,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: савватиево.tif
+L05-3,Vitold Muratov,,CC BY-SA 3.0,https://commons.wikimedia.org/wiki/File:In_Savvatievo.St.Sabbatius_scete.jpg,
 L07,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: 4 Филимоново сетевязальная мастерская.tif
 L07-2,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: 10 архиепископИларион.jpg
 L07-3,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: свящ-филим2.tif
 L07-4,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: филимоново.tif
+L08,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: 12 Варварка.TIF
+L08-2,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: 17 работники лесничества.tif
+L10,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходное имя файла при импорте не зафиксировано
+L10-2,Godot13,,CC BY-SA 4.0,https://commons.wikimedia.org/wiki/File:RUS-2016-Bolshoi_Zayatsky_Island-Church_of_St._Andrew.jpg,
+L11,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходное имя файла при импорте не зафиксировано
+L11-2,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: Untitled-36.tif
+L11-3,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: Б.М.-общ.вид.tif
+L11-4,Visem,,CC BY-SA 4.0,https://commons.wikimedia.org/wiki/File:Bolshaya_Muksalma_18.JPG,
 L15,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: 13 Филиппова пустынь.jpg
+L19,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: Untitled-28.tif
+L19-2,Соловецкий музей-заповедник,,выставка «Соловки. Испытание веры. Век ХХ»,https://www.solovky.ru/exhibitions/postoyannye-vystavki/solovki-ispytanie-very-vek-xx/,исходный файл: Untitled-30.tif
+P16a427,автор неизвестен,,Public domain,https://commons.wikimedia.org/wiki/File:%D0%9C%D0%B8%D1%82%D1%80%D0%BE%D0%BF%D0%BE%D0%BB%D0%B8%D1%82_%D0%9A%D0%B8%D1%80%D0%B8%D0%BB%D0%BB_(%D0%A1%D0%BC%D0%B8%D1%80%D0%BD%D0%BE%D0%B2).jpg,
 P40e032,Фонд «Память мучеников и исповедников Русской Православной Церкви»,,база «Новомученики и исповедники»,https://fond.ru/poisk/?module=module_person_page&flag=1&person_id=91,"Епископ Василий (Зеленцов). Москва, тюрьма ОГПУ. 1930 год"
 P427cf5,Фонд «Память мучеников и исповедников Русской Православной Церкви»,,база «Новомученики и исповедники»,https://fond.ru/poisk/?module=module_person_page&flag=1&person_id=832,Епископ Киренский Евгений (Зернов). 1913 год.
-P5863c8,Фонд «Память мучеников и исповедников Русской Православной Церкви»,,база «Новомученики и исповедники»,https://fond.ru/poisk/?module=module_person_page&flag=1&person_id=843,Священномученик Захария (Лобов)
-Pa27031,Фонд «Память мучеников и исповедников Русской Православной Церкви»,,база «Новомученики и исповедники»,https://fond.ru/poisk/?module=module_person_page&flag=1&person_id=425,"Архиереи Русской Православной Церкви (слева направо): епископы Стефан (Андриашенко), Константин (Дьяков), Павел (Кратиров), Борис (Шипулин), Онуфрий (Гагалюк), Дамаскин (Цедрик) и Антоний (Панкеев). Харьков. 1924 год"
 P48e0c8,Фонд «Память мучеников и исповедников Русской Православной Церкви»,,база «Новомученики и исповедники»,https://fond.ru/poisk/?module=module_person_page&flag=1&person_id=780,Епископ Герман (Ряшенцев)
-Pe6ce42,Фонд «Память мучеников и исповедников Русской Православной Церкви»,,база «Новомученики и исповедники»,https://fond.ru/poisk/?module=module_person_page&flag=1&person_id=95,"Епископ Игнатий (Садковский). Тула, тюрьма ОГПУ. 1929 год"
-Pd03223,Фонд «Память мучеников и исповедников Русской Православной Церкви»,,база «Новомученики и исповедники»,https://fond.ru/poisk/?module=module_person_page&flag=1&person_id=1028,Епископ Афанасий (Сахаров)
+P4ef1fc,автор неизвестен,до 1926,Public domain,https://commons.wikimedia.org/wiki/File:%D0%90%D1%80%D1%85%D0%B8%D0%BC%D0%B0%D0%BD%D0%B4%D1%80%D0%B8%D1%82_%D0%90%D1%80%D0%BA%D0%B0%D0%B4%D0%B8%D0%B9_(%D0%9E%D1%81%D1%82%D0%B0%D0%BB%D1%8C%D1%81%D0%BA%D0%B8%D0%B9).jpg,
+P560b35,автор неизвестен,до 1930,Public domain,https://commons.wikimedia.org/wiki/File:Ioann_steblin_kamenskii_2010_001.jpg,
+P584d32,автор неизвестен,1923,Public domain,https://commons.wikimedia.org/wiki/File:Ilarion_(Troickiy).jpg,
+P5863c8,Фонд «Память мучеников и исповедников Русской Православной Церкви»,,база «Новомученики и исповедники»,https://fond.ru/poisk/?module=module_person_page&flag=1&person_id=843,Священномученик Захария (Лобов)
+P63091e,автор неизвестен,1919–1921,Public domain,https://commons.wikimedia.org/wiki/File:Peter_(Zverev).jpg,
+P63091e-2,автор неизвестен,1900-е,Public domain,https://commons.wikimedia.org/wiki/File:%D0%98%D0%B5%D1%80%D0%BE%D0%BC%D0%BE%D0%BD%D0%B0%D1%85_%D0%9F%D0%B5%D1%82%D1%80_(%D0%97%D0%B2%D0%B5%D1%80%D0%B5%D0%B2).jpg,
+P766f15,архив ПСТГУ,1920-е,Public domain,https://commons.wikimedia.org/wiki/File:%D0%90%D1%80%D1%85%D0%B8%D0%B5%D0%BF%D0%B8%D1%81%D0%BA%D0%BE%D0%BF_%D0%A1%D0%B5%D1%80%D0%B0%D1%84%D0%B8%D0%BC_(%D0%A1%D0%B0%D0%BC%D0%BE%D0%B9%D0%BB%D0%BE%D0%B2%D0%B8%D1%87)._%D0%9F%D0%BE%D1%80%D1%82%D1%80%D0%B5%D1%82.jpg,
+P77421b,автор неизвестен,1920-е,Public domain,https://commons.wikimedia.org/wiki/File:%D0%95%D0%BF%D0%B8%D1%81%D0%BA%D0%BE%D0%BF_%D0%A1%D1%82%D0%B0%D1%80%D0%BE%D0%B4%D1%83%D0%B1%D1%81%D0%BA%D0%B8%D0%B9_%D0%94%D0%B0%D0%BC%D0%B0%D1%81%D0%BA%D0%B8%D0%BD_(%D0%A6%D0%B5%D0%B4%D1%80%D0%B8%D0%BA).jpg,
 P8d2ad9,Фонд «Память мучеников и исповедников Русской Православной Церкви»,,база «Новомученики и исповедники»,https://fond.ru/poisk/?module=module_person_page&flag=1&person_id=1219,Архиепископ Прокопий (Титов)
+Pa27031,Фонд «Память мучеников и исповедников Русской Православной Церкви»,,база «Новомученики и исповедники»,https://fond.ru/poisk/?module=module_person_page&flag=1&person_id=425,"Архиереи Русской Православной Церкви (слева направо): епископы Стефан (Андриашенко), Константин (Дьяков), Павел (Кратиров), Борис (Шипулин), Онуфрий (Гагалюк), Дамаскин (Цедрик) и Антоний (Панкеев). Харьков. 1924 год"
+Pca5cce,автор неизвестен,1920,Public domain,https://commons.wikimedia.org/wiki/File:Viktor-ostrovidov-bishop.jpg,
+Pd03223,Фонд «Память мучеников и исповедников Русской Православной Церкви»,,база «Новомученики и исповедники»,https://fond.ru/poisk/?module=module_person_page&flag=1&person_id=1028,Епископ Афанасий (Сахаров)
+Pe6ce42,Фонд «Память мучеников и исповедников Русской Православной Церкви»,,база «Новомученики и исповедники»,https://fond.ru/poisk/?module=module_person_page&flag=1&person_id=95,"Епископ Игнатий (Садковский). Тула, тюрьма ОГПУ. 1929 год"
