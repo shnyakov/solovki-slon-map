@@ -1709,8 +1709,24 @@
      Слушаем и hashchange: дописать `#edit` к уже открытой странице
      перезагрузки не вызывает, и без этого ничего бы не произошло. */
 
+  /* Правка доступна только там, где есть что править: приложение открыто
+     с диска (`file://`) или со своего компьютера — через `server.py`,
+     который нужен Safari и Firefox.
+
+     На опубликованной в сети копии служебный режим прячется целиком.
+     Испортить данные через него нельзя и так — запись идёт на диск того,
+     кто открыл страницу, а не в репозиторий, — но посетитель, случайно
+     набравший `#edit`, оказывался бы в панели правки музейных данных
+     и решал бы, что правит экспозицию. */
+  function localCopy() {
+    if (location.protocol === "file:") return true;
+    var h = location.hostname;
+    return h === "localhost" || h === "127.0.0.1" || h === "::1" || h === "[::1]" ||
+           /\.localhost$/.test(h);
+  }
+
   function checkHash() {
-    if (location.hash === "#edit") setEdit(true);
+    if (location.hash === "#edit" && localCopy()) setEdit(true);
   }
   window.addEventListener("hashchange", checkHash);
   setTimeout(checkHash, 0);
