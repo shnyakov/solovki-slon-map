@@ -103,6 +103,7 @@
     "схимонах":"Schemamonk", "послушник":"Novice",
     "псаломщик":"Psalm-reader", "псалом":"Psalm-reader",
     "сщмч":"Hieromartyr", "прмч":"Venerable Martyr", "прп":"Venerable", "мч":"Martyr",
+    "священноисп":"Hieroconfessor", "преподобноисп":"Venerable Confessor",
     // Написания, встречающиеся в таблице музея, в том числе с опечатками:
     // «протоирей» стоит в 34 записях, «архепископ» в 15 — переводим как есть,
     // исправлять чужой источник не наше дело.
@@ -167,12 +168,21 @@
     "отец":"священник"
   };
 
-  // Порядок церковной иерархии. Всё, чего здесь нет, уходит в конец.
+  /* Порядок церковной иерархии. Всё, чего здесь нет, уходит в конец.
+     Порядок задан музеем (письмо А. П. Яковлевой, 26.10.2026): архиепископы —
+     епископы — архимандриты — игумены — иеромонахи — протоиереи — иереи —
+     иеродиаконы — диаконы — монахи — миряне. Иеромонах, значит, выше
+     протоиерея: монашествующее духовенство идёт первым. */
   var RANK_ORDER = ["митрополит", "архиепископ", "епископ", "архиерей",
-    "архимандрит", "игумен", "протопресвитер", "протоиерей", "иеромонах",
+    "архимандрит", "игумен", "иеромонах", "протопресвитер", "протоиерей",
     "священник", "протодиакон", "иеродиакон", "иподиакон", "диакон",
     "схимонах", "монах", "монахиня", "монашествующий", "послушник",
     "псаломщик", "регент", "мирянин", "мирянка"];
+
+  /* В списках людей монахи и монахини — одна ступень, миряне и мирянки тоже:
+     у музея внутри неё общий алфавит («Дмитрий Лихачёв, Клавдия Пискановская,
+     Михаил Кречетов»). В фильтре по сану они по-прежнему раздельны. */
+  var RANK_STEP = { "монахиня": "монах", "монашествующий": "монах", "мирянка": "мирянин" };
 
   function baseRank(rank) {
     var words = String(rank || "").split(/[\s.,]+/);
@@ -181,6 +191,22 @@
       if (RANK_BASE[w]) return RANK_BASE[w];
     }
     return "";
+  }
+
+  // Список людей места: по сану, внутри сана по имени, затем по фамилии
+  // («Александр Поспелов, Борис Рукин, Владимир Введенский» — так у музея).
+  function byRank(list) {
+    function step(p) {
+      var b = baseRank(p.rank);
+      var i = RANK_ORDER.indexOf(RANK_STEP[b] || b);
+      return i < 0 ? 99 : i;
+    }
+    function key(s) { return String(s || "").toLowerCase().replace(/ё/g, "е"); }
+    return list.slice().sort(function (a, b) {
+      return step(a) - step(b) ||
+        key(a.name).localeCompare(key(b.name), "ru") ||
+        key(a.surname).localeCompare(key(b.surname), "ru");
+    });
   }
 
   function personName(p) {
@@ -717,7 +743,7 @@
   function showPlace(id) {
     var pl = byId[id];
     if (!pl) return;
-    var people = D.persons.filter(function (p) { return p.places.indexOf(id) >= 0; });
+    var people = byRank(D.persons.filter(function (p) { return p.places.indexOf(id) >= 0; }));
     var kids = D.places.filter(function (p) { return p.parent === id; });
     var kidsHtml = kids.length
       ? '<div class="card__row"><p class="card__k">' + esc(T("cardInside")) + '</p>' +
