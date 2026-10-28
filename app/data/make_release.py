@@ -22,7 +22,9 @@
   · исходники карты (osm-*.json, 5,6 МБ) — из них карта уже собрана;
   · стенды и сборочные скрипты, кроме server.py: он нужен для сохранения
     в Safari и Firefox;
-  · снимки истории, __pycache__, *.bak, .DS_Store.
+  · снимки истории, __pycache__, *.bak, .DS_Store;
+  · to-check-places.csv — неподтверждённые догадки о том, кто где
+    содержался. Из репозитория они исключены по той же причине.
 """
 import io, os, shutil, sys, zipfile
 
@@ -36,7 +38,7 @@ LAUNCHER = "ОТКРЫТЬ КАРТУ.html"
 KEEP_PY = {"server.py"}
 SKIP_DIRS = {"history", "__pycache__"}
 SKIP_EXT = {".bak", ".pyc"}
-SKIP_FILES = {".DS_Store"}
+SKIP_FILES = {".DS_Store", "to-check-places.csv"}
 
 
 def wanted(path):
