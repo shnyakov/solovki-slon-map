@@ -807,6 +807,9 @@ def main():
     print(u"Мест:       %d" % len(places))
     stamp_index()
     print(u"Записано:   data.js, persons.csv (+ метка версии в index.html)")
+    # Копии снимков для сайта: карточка и миниатюры по сети без оригиналов
+    import make_web_photos
+    make_web_photos.run()
     if unmatched:
         print(u"\nНЕ СОПОСТАВЛЕНО со списком «ВСЕ алф» — %d строк, разобрать вручную:" % len(unmatched))
         for sheet, text in unmatched:

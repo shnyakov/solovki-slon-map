@@ -23,6 +23,7 @@
   · стенды и сборочные скрипты, кроме server.py: он нужен для сохранения
     в Safari и Firefox;
   · снимки истории, __pycache__, *.bak, .DS_Store;
+  · assets/web — облегчённые копии снимков, нужны только сайту;
   · to-check-places.csv — неподтверждённые догадки о том, кто где
     содержался. Из репозитория они исключены по той же причине.
 """
@@ -36,7 +37,7 @@ NAME = "Соловки-карта"
 LAUNCHER = "ОТКРЫТЬ КАРТУ.html"
 
 KEEP_PY = {"server.py"}
-SKIP_DIRS = {"history", "__pycache__"}
+SKIP_DIRS = {"history", "__pycache__", "web"}
 SKIP_EXT = {".bak", ".pyc"}
 SKIP_FILES = {".DS_Store", "to-check-places.csv"}
 
