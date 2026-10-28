@@ -432,6 +432,16 @@
      держится обещание из инструкции музею — «положите файл в папку,
      приложение подхватит его само». Такой снимок появится с прежним рывком,
      зато без пересборки. */
+  /* На сайте карточка и лента миниатюр берут облегчённые копии из assets/web
+     (их делает make_web_photos.py): иначе Кремль тянул девять мегабайт ради
+     миниатюр в 56 пикселей. Во весь экран раскрывается оригинал.
+
+     Локально копии не используются вовсе. Музей кладёт и заменяет снимки
+     файлом, без пересборки, и устаревшая копия показала бы не тот снимок.
+     С диска оригиналы и так читаются мгновенно. */
+  var WEB = /^https?:$/.test(location.protocol) &&
+            !/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+
   function knownPhotos(dir, id) {
     var out = [];
     var embedded = (D.photos || {})[id];
@@ -439,11 +449,18 @@
     var known = ((D.gallery || {})[dir] || {})[id] || [];
     for (var i = 0; i < known.length && out.length < PHOTO_MAX; i++) {
       var nm = i ? id + "-" + (i + 1) : id;
-      out.push({ src: "assets/" + dir + "/" + nm + ".jpg", key: nm,
-                 w: known[i][0], h: known[i][1] });
+      var it = { src: "assets/" + dir + "/" + nm + ".jpg", key: nm,
+                 w: known[i][0], h: known[i][1] };
+      if (WEB) {
+        it.card = "assets/web/" + dir + "/" + nm + ".jpg";
+        it.thumb = "assets/web/" + dir + "/" + nm + ".thumb.jpg";
+      }
+      out.push(it);
     }
     return out;
   }
+  function cardSrc(it) { return it.card || it.src; }
+  function thumbSrc(it) { return it.thumb || it.src; }
 
   // Ищет то, чего опись не знает: файлы, положенные без пересборки
   function extraPhotos(dir, id, from, done) {
@@ -506,7 +523,8 @@
     var box = m.parentNode;
     if (!box || !box.classList.contains("card__shot") || !(it.w && it.h) || motionOff()) {
       if (it.w && it.h) m.style.aspectRatio = it.w + "/" + it.h;
-      swapImage(m, it.src);
+      m.setAttribute("data-full", it.src);
+      swapImage(m, cardSrc(it));
       return;
     }
 
@@ -536,9 +554,10 @@
       m.classList.remove("is-swap");                 // новый проступает,
       ghost.classList.add("is-out");                 // старый растворяется
     };
-    m.src = it.src;
+    m.setAttribute("data-full", it.src);
+    m.src = cardSrc(it);
 
-    m.offsetHeight;                                  // принять высоту до перехода
+    m.offsetHeight;                                 // принять высоту до перехода
     m.style.height = to + "px";
 
     shotTimer = setTimeout(function () {
@@ -661,12 +680,13 @@
       var thumbs = list.length > 1
         ? '<div class="card__thumbs">' + list.map(function (it, i) {
             return '<img class="card__thumb' + (i ? "" : " is-on") + '" data-i="' + i +
-                   '" src="' + esc(it.src) + '" alt="">';
+                   '" data-full="' + esc(it.src) + '" src="' + esc(thumbSrc(it)) + '" alt="">';
           }).join("") + "</div>"
         : "";
       var at = Math.min(+(slot.dataset.at || 0), list.length - 1);
       slot.innerHTML = '<div class="card__shot"><img class="card__photo" id="gal-main"' +
-        ratio(list[at]) + ' src="' + esc(list[at].src) + '" alt=""></div>' +
+        ratio(list[at]) + ' data-full="' + esc(list[at].src) + '" src="' +
+        esc(cardSrc(list[at])) + '" alt=""></div>' +
         creditHtml(list[at].key, "p") + thumbs;
       slot.dataset.at = at;
     }
@@ -685,6 +705,12 @@
     }
 
     slot.dataset.at = 0;
+    // Копии для сайта нет (не пересобрали) — берём оригинал. Ошибка загрузки
+    // не всплывает, поэтому слушаем на погружении.
+    slot.addEventListener("error", function (e) {
+      var el = e.target, full = el.getAttribute && el.getAttribute("data-full");
+      if (full && el.getAttribute("src") !== full) el.src = full;
+    }, true);
     render();                                  // сразу, без ожидания
     slot.classList.add("is-in");
 
