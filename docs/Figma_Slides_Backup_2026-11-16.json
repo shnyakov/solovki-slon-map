@@ -1,0 +1,1374 @@
+{
+  "totalSlides": 11,
+  "timestamp": "2026-11-16T15:22:54.582Z",
+  "deck": [
+    {
+      "slideIndex": 1,
+      "id": "0:20",
+      "name": "1",
+      "tree": {
+        "id": "0:20",
+        "name": "1",
+        "type": "SLIDE",
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 1080,
+        "visible": true,
+        "children": [
+          {
+            "id": "0:27",
+            "name": "Frame",
+            "type": "FRAME",
+            "x": 1920,
+            "y": 0,
+            "width": 1920,
+            "height": 1080,
+            "visible": true,
+            "children": [
+              {
+                "id": "2:5",
+                "name": "Subheader",
+                "type": "TEXT",
+                "x": 1820,
+                "y": 866.845703125,
+                "width": 872,
+                "height": 52,
+                "visible": true,
+                "characters": "Кобенко А.В. Корзин А.Ю. Шняков П.Е.",
+                "fontSize": 40,
+                "fontName": {
+                  "family": "NT Somic",
+                  "style": "Regular"
+                },
+                "textAlignHorizontal": "LEFT"
+              },
+              {
+                "id": "93:208",
+                "name": "Subheader",
+                "type": "TEXT",
+                "x": 1820,
+                "y": 273,
+                "width": 1663,
+                "height": 351,
+                "visible": true,
+                "characters": "Интерактивная карта мест заключения священнослужителей  IT-мастерская",
+                "textAlignHorizontal": "LEFT"
+              }
+            ]
+          },
+          {
+            "id": "0:28",
+            "name": "Frame",
+            "type": "FRAME",
+            "x": 100,
+            "y": 672,
+            "width": 68,
+            "height": 171,
+            "visible": true,
+            "children": [
+              {
+                "id": "0:29",
+                "name": "Rectangle",
+                "type": "RECTANGLE",
+                "x": 0,
+                "y": 0,
+                "width": 1615.23486328125,
+                "height": 190.84567260742188,
+                "visible": true
+              },
+              {
+                "id": "0:31",
+                "name": "Frame",
+                "type": "FRAME",
+                "x": 0,
+                "y": 132,
+                "width": 589,
+                "height": 53,
+                "visible": true,
+                "children": [
+                  {
+                    "id": "0:32",
+                    "name": "Rectangle",
+                    "type": "RECTANGLE",
+                    "x": 0,
+                    "y": 0,
+                    "width": 960,
+                    "height": 63.00944900512695,
+                    "visible": true
+                  },
+                  {
+                    "id": "0:33",
+                    "name": "Subheader",
+                    "type": "TEXT",
+                    "x": 0,
+                    "y": -10,
+                    "width": 960,
+                    "height": 63.00944900512695,
+                    "visible": true,
+                    "characters": "Руководитель: Корзина М.И.",
+                    "fontSize": 40,
+                    "fontName": {
+                      "family": "NT Somic",
+                      "style": "Regular"
+                    },
+                    "textAlignHorizontal": "LEFT"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "0:34",
+            "name": "Frame",
+            "type": "FRAME",
+            "x": 629.2173461914062,
+            "y": 18.782676696777344,
+            "width": 625.565185546875,
+            "height": 141.77212524414062,
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "slideIndex": 2,
+      "id": "80:51",
+      "name": "2",
+      "tree": {
+        "id": "80:51",
+        "name": "2",
+        "type": "SLIDE",
+        "x": 2160,
+        "y": 0,
+        "width": 1920,
+        "height": 1080,
+        "visible": true,
+        "children": [
+          {
+            "id": "80:55",
+            "name": "Frame",
+            "type": "FRAME",
+            "x": 111,
+            "y": 72,
+            "width": 985.7070922851562,
+            "height": 158.1999969482422,
+            "visible": true,
+            "children": [
+              {
+                "id": "80:56",
+                "name": "Rectangle",
+                "type": "RECTANGLE",
+                "x": 0,
+                "y": 0,
+                "width": 985.7070922851562,
+                "height": 158.1999969482422,
+                "visible": true
+              }
+            ]
+          },
+          {
+            "id": "80:57",
+            "name": "тайтл",
+            "type": "TEXT",
+            "x": 111,
+            "y": 129,
+            "width": 1413,
+            "height": 158,
+            "visible": true,
+            "characters": "Актуальность",
+            "fontSize": 64,
+            "fontName": {
+              "family": "IF Kica GlyphFixed",
+              "style": "Bold"
+            },
+            "textAlignHorizontal": "LEFT"
+          },
+          {
+            "id": "80:67",
+            "name": "Slide number",
+            "type": "TEXT",
+            "x": 1852,
+            "y": 1010,
+            "width": 17,
+            "height": 22,
+            "visible": true,
+            "characters": "2",
+            "fontSize": 18,
+            "fontName": {
+              "family": "IF Kica GlyphFixed",
+              "style": "Regular"
+            },
+            "textAlignHorizontal": "CENTER"
+          },
+          {
+            "id": "80:69",
+            "name": "Body",
+            "type": "TEXT",
+            "x": 179,
+            "y": 328,
+            "width": 1562,
+            "height": 504,
+            "visible": true,
+            "characters": "Историческая — архивные данные собраны в единую визуальную систему, показывая масштаб репрессий против духовенства\nОбщественная — карта становится инструментом памяти, фиксируя имена и места трагедий\nМетодологическая — проект демонстрирует возможности цифровых технологий в гуманитарных исследованиях на примере церковной истории XX века",
+            "fontSize": 45,
+            "fontName": {
+              "family": "NT Somic",
+              "style": "Regular"
+            },
+            "textAlignHorizontal": "LEFT"
+          }
+        ]
+      }
+    },
+    {
+      "slideIndex": 3,
+      "id": "3:77",
+      "name": "3",
+      "tree": {
+        "id": "3:77",
+        "name": "3",
+        "type": "SLIDE",
+        "x": 4320,
+        "y": 0,
+        "width": 1920,
+        "height": 1080,
+        "visible": true,
+        "children": [
+          {
+            "id": "3:78",
+            "name": "Frame",
+            "type": "FRAME",
+            "x": 0,
+            "y": 0,
+            "width": 1920,
+            "height": 1080,
+            "visible": true
+          },
+          {
+            "id": "3:79",
+            "name": "Rectangle",
+            "type": "RECTANGLE",
+            "x": 56.34787368774414,
+            "y": 51.65212631225586,
+            "width": 1821.9130859375,
+            "height": 970.434814453125,
+            "visible": true
+          },
+          {
+            "id": "3:83",
+            "name": "Frame",
+            "type": "FRAME",
+            "x": 101,
+            "y": 128,
+            "width": 985.7070922851562,
+            "height": 158.1999969482422,
+            "visible": true,
+            "children": [
+              {
+                "id": "3:84",
+                "name": "Rectangle",
+                "type": "RECTANGLE",
+                "x": 0,
+                "y": 0,
+                "width": 985.7070922851562,
+                "height": 158.1999969482422,
+                "visible": true
+              },
+              {
+                "id": "3:85",
+                "name": "тайтл",
+                "type": "TEXT",
+                "x": 0,
+                "y": 0,
+                "width": 985.7070922851562,
+                "height": 158.1999969482422,
+                "visible": true,
+                "characters": "Цель",
+                "fontSize": 64,
+                "fontName": {
+                  "family": "IF Kica GlyphFixed",
+                  "style": "Bold"
+                },
+                "textAlignHorizontal": "LEFT"
+              }
+            ]
+          },
+          {
+            "id": "87:193",
+            "name": "Body",
+            "type": "TEXT",
+            "x": 94,
+            "y": 238,
+            "width": 993,
+            "height": 354,
+            "visible": true,
+            "characters": "Предоставить экспозиции «Соловки. Испытание веры. Век ХХ» интерактивную карту мест заключения и работ священнослужителей Соловецкого лагеря и тюрьмы (1923–1930) с возможностью модификаций",
+            "fontSize": 45,
+            "fontName": {
+              "family": "NT Somic",
+              "style": "Regular"
+            },
+            "textAlignHorizontal": "LEFT"
+          },
+          {
+            "id": "83:97",
+            "name": "Slide number",
+            "type": "TEXT",
+            "x": 1852,
+            "y": 1010,
+            "width": 17,
+            "height": 22,
+            "visible": true,
+            "characters": "3",
+            "fontSize": 18,
+            "fontName": {
+              "family": "IF Kica GlyphFixed",
+              "style": "Regular"
+            },
+            "textAlignHorizontal": "CENTER"
+          },
+          {
+            "id": "107:5",
+            "name": "MAP_170x170_Q_тень-01 1",
+            "type": "RECTANGLE",
+            "x": 1040,
+            "y": 116,
+            "width": 812,
+            "height": 812,
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "slideIndex": 4,
+      "id": "4:89",
+      "name": "4",
+      "tree": {
+        "id": "4:89",
+        "name": "4",
+        "type": "SLIDE",
+        "x": 6480,
+        "y": 0,
+        "width": 1920,
+        "height": 1080,
+        "visible": true,
+        "children": [
+          {
+            "id": "60:104",
+            "name": "Group 1",
+            "type": "GROUP",
+            "x": 296,
+            "y": 183,
+            "width": 1328,
+            "height": 488,
+            "visible": true,
+            "children": [
+              {
+                "id": "54:114",
+                "name": "IMG_6405 1",
+                "type": "RECTANGLE",
+                "x": 296,
+                "y": 183,
+                "width": 652,
+                "height": 488,
+                "visible": true
+              },
+              {
+                "id": "54:116",
+                "name": "IMG_6405 2",
+                "type": "RECTANGLE",
+                "x": 972,
+                "y": 183,
+                "width": 652,
+                "height": 488,
+                "visible": true
+              }
+            ]
+          },
+          {
+            "id": "4:91",
+            "name": "Frame",
+            "type": "FRAME",
+            "x": 64,
+            "y": 104,
+            "width": 985.7070922851562,
+            "height": 158.1999969482422,
+            "visible": true,
+            "children": [
+              {
+                "id": "4:92",
+                "name": "Rectangle",
+                "type": "RECTANGLE",
+                "x": 0,
+                "y": 0,
+                "width": 985.7070922851562,
+                "height": 158.1999969482422,
+                "visible": true
+              },
+              {
+                "id": "4:93",
+                "name": "тайтл",
+                "type": "TEXT",
+                "x": -0.146484375,
+                "y": 0.370391845703125,
+                "width": 355,
+                "height": 158,
+                "visible": true,
+                "characters": "Задачи",
+                "fontSize": 64,
+                "fontName": {
+                  "family": "IF Kica GlyphFixed",
+                  "style": "Bold"
+                },
+                "textAlignHorizontal": "LEFT"
+              }
+            ]
+          },
+          {
+            "id": "4:111",
+            "name": "Decorative",
+            "type": "FRAME",
+            "x": 64,
+            "y": 748,
+            "width": 61,
+            "height": 61,
+            "visible": true,
+            "children": [
+              {
+                "id": "4:112",
+                "name": "Subheader",
+                "type": "TEXT",
+                "x": 9,
+                "y": 4.5,
+                "width": 43,
+                "height": 52,
+                "visible": true,
+                "characters": "01",
+                "fontSize": 40,
+                "fontName": {
+                  "family": "NT Somic",
+                  "style": "Regular"
+                },
+                "textAlignHorizontal": "LEFT"
+              }
+            ]
+          },
+          {
+            "id": "4:113",
+            "name": "Body",
+            "type": "TEXT",
+            "x": 64,
+            "y": 836,
+            "width": 565,
+            "height": 132,
+            "visible": true,
+            "characters": "изучить программные средства",
+            "fontSize": 50,
+            "fontName": {
+              "family": "NT Somic",
+              "style": "Regular"
+            },
+            "textAlignHorizontal": "LEFT"
+          },
+          {
+            "id": "4:114",
+            "name": "Decorative",
+            "type": "FRAME",
+            "x": 677,
+            "y": 748,
+            "width": 61,
+            "height": 61,
+            "visible": true,
+            "children": [
+              {
+                "id": "4:115",
+                "name": "Subheader",
+                "type": "TEXT",
+                "x": 6,
+                "y": 4.5,
+                "width": 49,
+                "height": 52,
+                "visible": true,
+                "characters": "02",
+                "fontSize": 40,
+                "fontName": {
+                  "family": "NT Somic",
+                  "style": "Regular"
+                },
+                "textAlignHorizontal": "LEFT"
+              }
+            ]
+          },
+          {
+            "id": "4:116",
+            "name": "Body",
+            "type": "TEXT",
+            "x": 677,
+            "y": 836,
+            "width": 565,
+            "height": 198,
+            "visible": true,
+            "characters": "собрать материалы о Соловецком лагере и тюрьме",
+            "fontSize": 50,
+            "fontName": {
+              "family": "NT Somic",
+              "style": "Regular"
+            },
+            "textAlignHorizontal": "LEFT"
+          },
+          {
+            "id": "4:117",
+            "name": "Decorative",
+            "type": "FRAME",
+            "x": 1291,
+            "y": 748,
+            "width": 61,
+            "height": 61,
+            "visible": true,
+            "children": [
+              {
+                "id": "4:118",
+                "name": "Subheader",
+                "type": "TEXT",
+                "x": 5.5,
+                "y": 4.5,
+                "width": 50,
+                "height": 52,
+                "visible": true,
+                "characters": "03",
+                "fontSize": 40,
+                "fontName": {
+                  "family": "NT Somic",
+                  "style": "Regular"
+                },
+                "textAlignHorizontal": "LEFT"
+              }
+            ]
+          },
+          {
+            "id": "4:119",
+            "name": "Body",
+            "type": "TEXT",
+            "x": 1291,
+            "y": 836,
+            "width": 565,
+            "height": 66,
+            "visible": true,
+            "characters": "реализовать прототип",
+            "fontSize": 50,
+            "fontName": {
+              "family": "NT Somic",
+              "style": "Regular"
+            },
+            "textAlignHorizontal": "LEFT"
+          },
+          {
+            "id": "83:99",
+            "name": "Slide number",
+            "type": "TEXT",
+            "x": 1852,
+            "y": 1010,
+            "width": 16,
+            "height": 22,
+            "visible": true,
+            "characters": "4",
+            "fontSize": 18,
+            "fontName": {
+              "family": "IF Kica GlyphFixed",
+              "style": "Regular"
+            },
+            "textAlignHorizontal": "CENTER"
+          }
+        ]
+      }
+    },
+    {
+      "slideIndex": 5,
+      "id": "60:125",
+      "name": "5",
+      "tree": {
+        "id": "60:125",
+        "name": "5",
+        "type": "SLIDE",
+        "x": 8640,
+        "y": 0,
+        "width": 1920,
+        "height": 1080,
+        "visible": true,
+        "children": [
+          {
+            "id": "73:9",
+            "name": "IMG_5847 1",
+            "type": "RECTANGLE",
+            "x": 973,
+            "y": 266,
+            "width": 910,
+            "height": 683,
+            "visible": true
+          },
+          {
+            "id": "73:3",
+            "name": "IMG_5599 1",
+            "type": "RECTANGLE",
+            "x": 37,
+            "y": 264,
+            "width": 912,
+            "height": 685,
+            "visible": true
+          },
+          {
+            "id": "87:195",
+            "name": "Frame",
+            "type": "FRAME",
+            "x": 101,
+            "y": 128,
+            "width": 433,
+            "height": 76,
+            "visible": true,
+            "children": [
+              {
+                "id": "87:196",
+                "name": "Rectangle",
+                "type": "RECTANGLE",
+                "x": 0,
+                "y": 0,
+                "width": 985.7070922851562,
+                "height": 158.1999969482422,
+                "visible": true
+              },
+              {
+                "id": "87:197",
+                "name": "Брифинг",
+                "type": "TEXT",
+                "x": 0,
+                "y": 0,
+                "width": 433,
+                "height": 187,
+                "visible": true,
+                "characters": "Брифинг",
+                "fontSize": 64,
+                "fontName": {
+                  "family": "IF Kica GlyphFixed",
+                  "style": "Bold"
+                },
+                "textAlignHorizontal": "LEFT"
+              }
+            ]
+          },
+          {
+            "id": "83:105",
+            "name": "Slide number",
+            "type": "TEXT",
+            "x": 1853,
+            "y": 1010,
+            "width": 15,
+            "height": 22,
+            "visible": true,
+            "characters": "7",
+            "fontSize": 18,
+            "fontName": {
+              "family": "IF Kica GlyphFixed",
+              "style": "Regular"
+            },
+            "textAlignHorizontal": "CENTER"
+          }
+        ]
+      }
+    },
+    {
+      "slideIndex": 6,
+      "id": "60:105",
+      "name": "6",
+      "tree": {
+        "id": "60:105",
+        "name": "6",
+        "type": "SLIDE",
+        "x": 10800,
+        "y": 0,
+        "width": 1920,
+        "height": 1080,
+        "visible": true,
+        "children": [
+          {
+            "id": "60:106",
+            "name": "Frame",
+            "type": "FRAME",
+            "x": 1053.991455078125,
+            "y": 204.42315673828125,
+            "width": 154.672119140625,
+            "height": 63.00944900512695,
+            "visible": true,
+            "children": [
+              {
+                "id": "60:107",
+                "name": "Rectangle",
+                "type": "RECTANGLE",
+                "x": 0,
+                "y": 0,
+                "width": 154.672119140625,
+                "height": 63.00944900512695,
+                "visible": true
+              }
+            ]
+          },
+          {
+            "id": "60:110",
+            "name": "Frame",
+            "type": "FRAME",
+            "x": 49,
+            "y": 128,
+            "width": 985.7070922851562,
+            "height": 158.1999969482422,
+            "visible": true,
+            "children": [
+              {
+                "id": "60:111",
+                "name": "Rectangle",
+                "type": "RECTANGLE",
+                "x": 0,
+                "y": 0,
+                "width": 985.7070922851562,
+                "height": 158.1999969482422,
+                "visible": true
+              },
+              {
+                "id": "60:112",
+                "name": "Экспозиция “Соловецкие лагеря и тюрьма 1920-1939”",
+                "type": "TEXT",
+                "x": 0,
+                "y": 0,
+                "width": 1733,
+                "height": 158,
+                "visible": true,
+                "characters": "Экспозиция “Соловецкие лагеря и тюрьма 1920-1939”",
+                "fontSize": 64,
+                "fontName": {
+                  "family": "IF Kica GlyphFixed",
+                  "style": "Bold"
+                },
+                "textAlignHorizontal": "LEFT"
+              }
+            ]
+          },
+          {
+            "id": "60:121",
+            "name": "IMG_5655 1",
+            "type": "RECTANGLE",
+            "x": 196,
+            "y": 312,
+            "width": 931,
+            "height": 698,
+            "visible": true
+          },
+          {
+            "id": "60:123",
+            "name": "image 6",
+            "type": "RECTANGLE",
+            "x": 1157,
+            "y": 309,
+            "width": 524,
+            "height": 698,
+            "visible": true
+          },
+          {
+            "id": "89:72",
+            "name": "Slide number",
+            "type": "TEXT",
+            "x": 1852,
+            "y": 1010,
+            "width": 16,
+            "height": 22,
+            "visible": true,
+            "characters": "5",
+            "fontSize": 18,
+            "fontName": {
+              "family": "IF Kica GlyphFixed",
+              "style": "Regular"
+            },
+            "textAlignHorizontal": "CENTER"
+          }
+        ]
+      }
+    },
+    {
+      "slideIndex": 7,
+      "id": "73:11",
+      "name": "7",
+      "tree": {
+        "id": "73:11",
+        "name": "7",
+        "type": "SLIDE",
+        "x": 12960,
+        "y": 0,
+        "width": 1920,
+        "height": 1080,
+        "visible": true,
+        "children": [
+          {
+            "id": "73:12",
+            "name": "Frame",
+            "type": "FRAME",
+            "x": 1053.991455078125,
+            "y": 204.42315673828125,
+            "width": 154.672119140625,
+            "height": 63.00944900512695,
+            "visible": true,
+            "children": [
+              {
+                "id": "73:13",
+                "name": "Rectangle",
+                "type": "RECTANGLE",
+                "x": 0,
+                "y": 0,
+                "width": 154.672119140625,
+                "height": 63.00944900512695,
+                "visible": true
+              }
+            ]
+          },
+          {
+            "id": "73:14",
+            "name": "Frame",
+            "type": "FRAME",
+            "x": 74,
+            "y": 128,
+            "width": 985.7070922851562,
+            "height": 158.1999969482422,
+            "visible": true,
+            "children": [
+              {
+                "id": "73:15",
+                "name": "Rectangle",
+                "type": "RECTANGLE",
+                "x": 0,
+                "y": 0,
+                "width": 985.7070922851562,
+                "height": 158.1999969482422,
+                "visible": true
+              },
+              {
+                "id": "73:16",
+                "name": "Знакомство с местами",
+                "type": "TEXT",
+                "x": 0,
+                "y": 0,
+                "width": 1412,
+                "height": 158,
+                "visible": true,
+                "characters": "Знакомство с местами",
+                "fontSize": 64,
+                "fontName": {
+                  "family": "IF Kica GlyphFixed",
+                  "style": "Bold"
+                },
+                "textAlignHorizontal": "LEFT"
+              }
+            ]
+          },
+          {
+            "id": "73:26",
+            "name": "IMG_6823 1",
+            "type": "RECTANGLE",
+            "x": 74,
+            "y": 250,
+            "width": 568,
+            "height": 758,
+            "visible": true
+          },
+          {
+            "id": "74:30",
+            "name": "IMG_6227",
+            "type": "RECTANGLE",
+            "x": 677,
+            "y": 250,
+            "width": 568,
+            "height": 758,
+            "visible": true
+          },
+          {
+            "id": "74:31",
+            "name": "IMG_7711",
+            "type": "RECTANGLE",
+            "x": 1278,
+            "y": 250,
+            "width": 568,
+            "height": 758,
+            "visible": true
+          },
+          {
+            "id": "83:103",
+            "name": "Slide number",
+            "type": "TEXT",
+            "x": 1852,
+            "y": 1010,
+            "width": 16,
+            "height": 22,
+            "visible": true,
+            "characters": "6",
+            "fontSize": 18,
+            "fontName": {
+              "family": "IF Kica GlyphFixed",
+              "style": "Regular"
+            },
+            "textAlignHorizontal": "CENTER"
+          }
+        ]
+      }
+    },
+    {
+      "slideIndex": 8,
+      "id": "6:122",
+      "name": "8",
+      "tree": {
+        "id": "6:122",
+        "name": "8",
+        "type": "SLIDE",
+        "x": 15120,
+        "y": 0,
+        "width": 1920,
+        "height": 1080,
+        "visible": true,
+        "children": [
+          {
+            "id": "6:151",
+            "name": "Body",
+            "type": "TEXT",
+            "x": 96,
+            "y": 225,
+            "width": 864,
+            "height": 767,
+            "visible": true,
+            "characters": "400 персоналий, 174 из них привязаны \nк 13 местам (44%)\n\nПоиск по имени, сану, месту и источнику \n\n66 персоналий с прямыми архивными ссылками на фонды и дела\n\n62 фотографии мест и портретов\r \n\n226 человек без установленного места — во вкладке «Все имена»",
+            "fontSize": 45,
+            "textAlignHorizontal": "LEFT"
+          },
+          {
+            "id": "6:152",
+            "name": "Macbook Air M2 Silver Flatten",
+            "type": "FRAME",
+            "x": 894,
+            "y": 128,
+            "width": 1359.76953125,
+            "height": 824,
+            "visible": true,
+            "children": [
+              {
+                "id": "6:154",
+                "name": "Screen **Insert Designs here**",
+                "type": "VECTOR",
+                "x": 138.18087768554688,
+                "y": 27.97521209716797,
+                "width": 1085.102783203125,
+                "height": 705.31689453125,
+                "visible": true
+              },
+              {
+                "id": "6:158",
+                "name": "image 2",
+                "type": "RECTANGLE",
+                "x": 138,
+                "y": 28,
+                "width": 1123,
+                "height": 705,
+                "visible": true
+              },
+              {
+                "id": "6:153",
+                "name": "Macbook Air M2 Silver 1",
+                "type": "RECTANGLE",
+                "x": -0.00010874860890908167,
+                "y": 0,
+                "width": 1359.76953125,
+                "height": 824,
+                "visible": true
+              }
+            ]
+          },
+          {
+            "id": "72:189",
+            "name": "Frame",
+            "type": "FRAME",
+            "x": 101,
+            "y": 128,
+            "width": 684,
+            "height": 100,
+            "visible": true,
+            "children": [
+              {
+                "id": "72:190",
+                "name": "Rectangle",
+                "type": "RECTANGLE",
+                "x": 0,
+                "y": 0,
+                "width": 985.7070922851562,
+                "height": 158.1999969482422,
+                "visible": true
+              },
+              {
+                "id": "72:191",
+                "name": "тайтл",
+                "type": "TEXT",
+                "x": 0,
+                "y": 0,
+                "width": 985.7070922851562,
+                "height": 158.1999969482422,
+                "visible": true,
+                "characters": "Результаты\n",
+                "fontSize": 64,
+                "fontName": {
+                  "family": "IF Kica GlyphFixed",
+                  "style": "Bold"
+                },
+                "textAlignHorizontal": "LEFT"
+              }
+            ]
+          },
+          {
+            "id": "83:107",
+            "name": "Slide number",
+            "type": "TEXT",
+            "x": 1852,
+            "y": 1010,
+            "width": 16,
+            "height": 22,
+            "visible": true,
+            "characters": "8",
+            "fontSize": 18,
+            "fontName": {
+              "family": "IF Kica GlyphFixed",
+              "style": "Regular"
+            },
+            "textAlignHorizontal": "CENTER"
+          }
+        ]
+      }
+    },
+    {
+      "slideIndex": 9,
+      "id": "0:23",
+      "name": "9",
+      "tree": {
+        "id": "0:23",
+        "name": "9",
+        "type": "SLIDE",
+        "x": 17280,
+        "y": 0,
+        "width": 1920,
+        "height": 1080,
+        "visible": true,
+        "children": [
+          {
+            "id": "0:53",
+            "name": "Rectangle",
+            "type": "RECTANGLE",
+            "x": 964,
+            "y": 36.228660583496094,
+            "width": 913.8807983398438,
+            "height": 1009.5308837890625,
+            "visible": true
+          },
+          {
+            "id": "0:54",
+            "name": "Frame",
+            "type": "FRAME",
+            "x": 49,
+            "y": 128,
+            "width": 985.7070922851562,
+            "height": 158.1999969482422,
+            "visible": true,
+            "children": [
+              {
+                "id": "0:55",
+                "name": "Rectangle",
+                "type": "RECTANGLE",
+                "x": 0,
+                "y": 0,
+                "width": 985.7070922851562,
+                "height": 158.1999969482422,
+                "visible": true
+              },
+              {
+                "id": "0:56",
+                "name": "Развитие проекта",
+                "type": "TEXT",
+                "x": 0,
+                "y": 0,
+                "width": 985.7070922851562,
+                "height": 158.1999969482422,
+                "visible": true,
+                "characters": "Развитие проекта",
+                "fontSize": 64,
+                "fontName": {
+                  "family": "IF Kica GlyphFixed",
+                  "style": "Bold"
+                },
+                "textAlignHorizontal": "LEFT"
+              }
+            ]
+          },
+          {
+            "id": "11:175",
+            "name": "image 3",
+            "type": "RECTANGLE",
+            "x": 995,
+            "y": 120,
+            "width": 860,
+            "height": 874,
+            "visible": true
+          },
+          {
+            "id": "83:109",
+            "name": "Slide number",
+            "type": "TEXT",
+            "x": 1852,
+            "y": 1010,
+            "width": 16,
+            "height": 22,
+            "visible": true,
+            "characters": "9",
+            "fontSize": 18,
+            "fontName": {
+              "family": "IF Kica GlyphFixed",
+              "style": "Regular"
+            },
+            "textAlignHorizontal": "CENTER"
+          },
+          {
+            "id": "93:206",
+            "name": "Body",
+            "type": "TEXT",
+            "x": 49,
+            "y": 332,
+            "width": 864,
+            "height": 531,
+            "visible": true,
+            "characters": "Онлайн-версия развернута: карта опубликована в сети в октябре (GitHub Pages)\nВерификация: выверен список Кремля, санов и раздел «Все имена»\nНаучный задел: подготовлена статья по специальности 2.3.1 для журнала ВАК К1",
+            "fontSize": 45,
+            "fontName": {
+              "family": "NT Somic",
+              "style": "Regular"
+            },
+            "textAlignHorizontal": "LEFT"
+          }
+        ]
+      }
+    },
+    {
+      "slideIndex": 10,
+      "id": "0:25",
+      "name": "10",
+      "tree": {
+        "id": "0:25",
+        "name": "10",
+        "type": "SLIDE",
+        "x": 19440,
+        "y": 0,
+        "width": 1920,
+        "height": 1080,
+        "visible": true,
+        "children": [
+          {
+            "id": "0:78",
+            "name": "Frame",
+            "type": "FRAME",
+            "x": 49,
+            "y": 143,
+            "width": 402,
+            "height": 138,
+            "visible": true,
+            "children": [
+              {
+                "id": "0:79",
+                "name": "Rectangle",
+                "type": "RECTANGLE",
+                "x": 0,
+                "y": 0,
+                "width": 327.4464416503906,
+                "height": 63.00944900512695,
+                "visible": true
+              }
+            ]
+          },
+          {
+            "id": "0:81",
+            "name": "Frame",
+            "type": "FRAME",
+            "x": 1065.916015625,
+            "y": 479.9903869628906,
+            "width": 327.4464416503906,
+            "height": 63.00944900512695,
+            "visible": true,
+            "children": [
+              {
+                "id": "0:82",
+                "name": "Rectangle",
+                "type": "RECTANGLE",
+                "x": 0,
+                "y": 0,
+                "width": 327.4464416503906,
+                "height": 63.00944900512695,
+                "visible": true
+              }
+            ]
+          },
+          {
+            "id": "0:87",
+            "name": "Frame",
+            "type": "FRAME",
+            "x": 49,
+            "y": 353,
+            "width": 985.7070922851562,
+            "height": 158.1999969482422,
+            "visible": true,
+            "children": [
+              {
+                "id": "0:88",
+                "name": "Rectangle",
+                "type": "RECTANGLE",
+                "x": 0,
+                "y": 0,
+                "width": 985.7070922851562,
+                "height": 158.1999969482422,
+                "visible": true
+              },
+              {
+                "id": "0:89",
+                "name": "Проверьте йнструмент вжйвую shnyakov.github.io/solovki-slon-map",
+                "type": "TEXT",
+                "x": 0,
+                "y": -39,
+                "width": 985.7070922851562,
+                "height": 158.1999969482422,
+                "visible": true,
+                "characters": "Проверьте йнструмент вжйвую\n\nshnyakov.github.io/solovki-slon-map",
+                "fontSize": 64,
+                "fontName": {
+                  "family": "IF Kica",
+                  "style": "Bold"
+                },
+                "textAlignHorizontal": "LEFT"
+              }
+            ]
+          },
+          {
+            "id": "83:111",
+            "name": "Slide number",
+            "type": "TEXT",
+            "x": 1848,
+            "y": 1010,
+            "width": 24,
+            "height": 22,
+            "visible": true,
+            "characters": "10",
+            "fontSize": 18,
+            "fontName": {
+              "family": "IF Kica GlyphFixed",
+              "style": "Regular"
+            },
+            "textAlignHorizontal": "CENTER"
+          },
+          {
+            "id": "151:3",
+            "name": "qr_map 1",
+            "type": "RECTANGLE",
+            "x": 1066,
+            "y": 128,
+            "width": 824,
+            "height": 824,
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "slideIndex": 11,
+      "id": "0:26",
+      "name": "11",
+      "tree": {
+        "id": "0:26",
+        "name": "11",
+        "type": "SLIDE",
+        "x": 21600,
+        "y": 0,
+        "width": 1920,
+        "height": 1080,
+        "visible": true,
+        "children": [
+          {
+            "id": "0:93",
+            "name": "Frame",
+            "type": "FRAME",
+            "x": 0,
+            "y": 0,
+            "width": 1920,
+            "height": 1080,
+            "visible": true
+          },
+          {
+            "id": "0:94",
+            "name": "Rectangle",
+            "type": "RECTANGLE",
+            "x": 56.34787368774414,
+            "y": 51.65212631225586,
+            "width": 1821.9130859375,
+            "height": 970.434814453125,
+            "visible": true
+          },
+          {
+            "id": "38:186",
+            "name": "тайтл",
+            "type": "TEXT",
+            "x": 151,
+            "y": 128,
+            "width": 1617,
+            "height": 576,
+            "visible": true,
+            "characters": "Отдельная благодарность\n\nЯковлевой Анне Петровне\nТюкиной Светлане Львовне\nКоманде Центра молодых исследователей «Полюс»\nВсем мастерам за мастер-классы",
+            "textAlignHorizontal": "CENTER"
+          },
+          {
+            "id": "0:95",
+            "name": "Frame",
+            "type": "FRAME",
+            "x": 114,
+            "y": 128,
+            "width": 1663,
+            "height": 63,
+            "visible": true,
+            "children": [
+              {
+                "id": "0:96",
+                "name": "Rectangle",
+                "type": "RECTANGLE",
+                "x": 0,
+                "y": 0,
+                "width": 327.4464416503906,
+                "height": 63.00944900512695,
+                "visible": true
+              }
+            ]
+          },
+          {
+            "id": "83:113",
+            "name": "Slide number",
+            "type": "TEXT",
+            "x": 1852,
+            "y": 1010,
+            "width": 16,
+            "height": 22,
+            "visible": true,
+            "characters": "11",
+            "fontSize": 18,
+            "fontName": {
+              "family": "IF Kica GlyphFixed",
+              "style": "Regular"
+            },
+            "textAlignHorizontal": "CENTER"
+          }
+        ]
+      }
+    }
+  ]
+}
