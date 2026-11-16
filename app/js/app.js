@@ -103,7 +103,7 @@
     "схимонах":"Schemamonk", "послушник":"Novice",
     "псаломщик":"Psalm-reader", "псалом":"Psalm-reader",
     "сщмч":"Hieromartyr", "прмч":"Venerable Martyr", "прп":"Venerable", "мч":"Martyr",
-    "священноисп":"Hieroconfessor", "преподобноисп":"Venerable Confessor",
+    "сщисп":"Hieroconfessor", "священноисп":"Hieroconfessor", "преподобноисп":"Venerable Confessor",
     // Написания, встречающиеся в таблице музея, в том числе с опечатками:
     // «протоирей» стоит в 34 записях, «архепископ» в 15 — переводим как есть,
     // исправлять чужой источник не наше дело.

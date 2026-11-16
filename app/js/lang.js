@@ -8,7 +8,7 @@ window.LANG = {
   ru: {
     tabMap: "Карта", tabList: "Все имена", tabGloss: "Словарь",
     title: "Соловки. Испытание веры. Век ХХ",
-    idleOver: "Соловецкий лагерь особого назначения · 1923–1933",
+    idleOver: "Соловецкий лагерь особого назначения · 1923–1930",
     idleTitle: "Соловки. Испытание веры. Век ХХ",
     idleCount: "имён священнослужителей,<br>прошедших через соловецкие лагеря",
     idleHint: "Коснитесь экрана",
@@ -43,7 +43,7 @@ window.LANG = {
   en: {
     tabMap: "Map", tabList: "All names", tabGloss: "Glossary",
     title: "Solovki. A Trial of Faith. 20th Century",
-    idleOver: "Solovki Camp of Special Designation · 1923–1933",
+    idleOver: "Solovki Camp of Special Designation · 1923–1930",
     idleTitle: "Solovki. A Trial of Faith. 20th Century",
     idleCount: "names of clergy<br>who passed through the Solovki camps",
     idleHint: "Touch the screen",
